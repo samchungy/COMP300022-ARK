@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "/Users/austinmason/Desktop/IT_project/project/IT-Project/ARK/De/app/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media.xml",
+        "source": "/Users/austinmason/.android/build-cache/802db5081d5b09443df6109df85a1545c96e26c2/output/res/layout-v11/notification_template_big_media.xml"
+    },
+    {
+        "merged": "/Users/austinmason/Desktop/IT_project/project/IT-Project/ARK/De/app/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_narrow.xml",
+        "source": "/Users/austinmason/.android/build-cache/802db5081d5b09443df6109df85a1545c96e26c2/output/res/layout-v11/notification_template_big_media_narrow.xml"
+    },
+    {
+        "merged": "/Users/austinmason/Desktop/IT_project/project/IT-Project/ARK/De/app/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_custom.xml",
+        "source": "/Users/austinmason/.android/build-cache/802db5081d5b09443df6109df85a1545c96e26c2/output/res/layout-v11/notification_template_big_media_custom.xml"
+    },
+    {
+        "merged": "/Users/austinmason/Desktop/IT_project/project/IT-Project/ARK/De/app/build/intermediates/res/merged/debug/layout-v11/notification_template_big_media_narrow_custom.xml",
+        "source": "/Users/austinmason/.android/build-cache/802db5081d5b09443df6109df85a1545c96e26c2/output/res/layout-v11/notification_template_big_media_narrow_custom.xml"
+    },
+    {
+        "merged": "/Users/austinmason/Desktop/IT_project/project/IT-Project/ARK/De/app/build/intermediates/res/merged/debug/layout-v11/notification_media_cancel_action.xml",
+        "source": "/Users/austinmason/.android/build-cache/802db5081d5b09443df6109df85a1545c96e26c2/output/res/layout-v11/notification_media_cancel_action.xml"
+    },
+    {
+        "merged": "/Users/austinmason/Desktop/IT_project/project/IT-Project/ARK/De/app/build/intermediates/res/merged/debug/layout-v11/notification_media_action.xml",
+        "source": "/Users/austinmason/.android/build-cache/802db5081d5b09443df6109df85a1545c96e26c2/output/res/layout-v11/notification_media_action.xml"
+    }
+]

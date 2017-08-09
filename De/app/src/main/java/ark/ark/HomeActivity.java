@@ -15,6 +15,7 @@ import layout.ChatFragment;
 import layout.HomeFragment;
 import layout.MapFragment;
 
+// the main activity
 public class HomeActivity extends AppCompatActivity {
 
 
