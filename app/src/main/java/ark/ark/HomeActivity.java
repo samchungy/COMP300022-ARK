@@ -2,6 +2,7 @@ package ark.ark;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -40,6 +41,8 @@ public class HomeActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_map:
                     switchTo("Map");
+                    Intent myIntent = new Intent(HomeActivity.this, MapNavDrawer.class);
+                    startActivity(myIntent);
                     return true;
                 case R.id.navigation_profile:
                     switchTo("Profile");
