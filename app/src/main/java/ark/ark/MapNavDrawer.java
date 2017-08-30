@@ -113,9 +113,9 @@ public class MapNavDrawer extends AppCompatActivity
 
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_settings) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_help) {
 
         }
 
@@ -133,8 +133,6 @@ public class MapNavDrawer extends AppCompatActivity
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.setOnMyLocationButtonClickListener(this);
         enableMyLocation();
-        uiSettings.setZoomControlsEnabled(true);
-        uiSettings.setCompassEnabled(true);
     }
 
     /**
