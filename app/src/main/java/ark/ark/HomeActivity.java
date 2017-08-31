@@ -1,20 +1,20 @@
 package ark.ark;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.support.v4.app.Fragment;
+import android.widget.Toast;
+
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import layout.ChatFragment;
+import layout.Chat.ChatFragment;
 import layout.HomeFragment;
 import layout.MapFragment;
+
 
 // the main activity
 public class HomeActivity extends AppCompatActivity {
@@ -24,7 +24,6 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment frag_chat = new ChatFragment();
     private Fragment frag_map = new MapFragment();
     private Fragment frag_profile = new ProfileFragment();
-
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -95,11 +94,16 @@ public class HomeActivity extends AppCompatActivity {
             default:
                 targetFrag = frag_home;
         }
-        getSupportFragmentManager().beginTransaction().replace(R.id.frag_container, targetFrag).commit();
 
+        getSupportFragmentManager().beginTransaction().replace(R.id.frag_container, targetFrag).commit();
     }
 
 
 
+    public void showToast(String message) {
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(getApplicationContext(), message, duration);
+        toast.show();
+    }
 
 }
