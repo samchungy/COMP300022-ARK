@@ -1,6 +1,5 @@
 package ark.ark;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +10,7 @@ import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
 import butterknife.ButterKnife;
-import layout.Chat.ChatFragment;
+import ark.ark.Chat.ChatFragment;
 import layout.HomeFragment;
 import layout.MapFragment;
 

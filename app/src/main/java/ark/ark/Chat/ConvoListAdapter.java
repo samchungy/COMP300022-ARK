@@ -1,6 +1,5 @@
-package layout.Chat;
+package ark.ark.Chat;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -92,7 +88,7 @@ public class ConvoListAdapter extends BaseAdapter {
         convoList.add(new convo("Rachel", "great!", date));
         convoList.add(new convo("Josh", "OMG", date));
 
-        showToast("Testing data");
+        showToast("Test data");
     }
 
 
