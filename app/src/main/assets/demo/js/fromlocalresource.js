@@ -67,6 +67,7 @@ var World = {
 		if (!World.initiallyLoadedData) {
 			World.requestDataFromLocal(lat, lon);
 			World.initiallyLoadedData = true;
+			World.updateStatusMessage(lat + ' ' + lon)
 		}
 	},
 
