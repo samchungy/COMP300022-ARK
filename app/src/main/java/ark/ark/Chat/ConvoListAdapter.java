@@ -20,7 +20,7 @@ public class ConvoListAdapter extends BaseAdapter {
 
     private Context mContext;
 
-    private class convo {
+    public class convo {
         String userName;
         String firstMessage;
         Date lastUpdated;
@@ -37,7 +37,8 @@ public class ConvoListAdapter extends BaseAdapter {
     private LayoutInflater inflater;
 
     // constructor
-    public ConvoListAdapter(Context context) {
+    public ConvoListAdapter(Context context, ArrayList<convo> convoList) {
+        this.convoList = convoList;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mContext = context;
 

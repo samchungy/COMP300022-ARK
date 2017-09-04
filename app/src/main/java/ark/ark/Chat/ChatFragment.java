@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+
 import ark.ark.R;
 
 /**
@@ -27,6 +29,7 @@ public class ChatFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private ConvoListAdapter convoListAdapter;
 
     private OnFragmentInteractionListener mListener;
 
@@ -119,8 +122,18 @@ public class ChatFragment extends Fragment {
     private void setupListView(View view) {
         // TODO setup list view
         final ListView chatListView = (ListView) view.findViewById(R.id.austin_ChatListView);
-        ConvoListAdapter convoListAdapter = new ConvoListAdapter(getContext());
+
+        ArrayList<ConvoListAdapter.convo> convoList = new ArrayList<>();
+        convoListAdapter = new ConvoListAdapter(getContext(), convoList);
         chatListView.setAdapter(convoListAdapter);
     }
+
+
+    
+    private void reloadAllData() {
+        // TODO: load data from the server
+    }
+
+
 
 }
