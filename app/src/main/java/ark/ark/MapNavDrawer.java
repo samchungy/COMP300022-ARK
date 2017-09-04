@@ -35,7 +35,8 @@ public class MapNavDrawer extends AppCompatActivity
         GoogleMap.OnMyLocationButtonClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback,
         GoogleMap.OnMapClickListener,
-        GoogleMap.OnMapLongClickListener{
+        GoogleMap.OnMapLongClickListener,
+        GoogleMap.OnMarkerClickListener{
 
     private GoogleMap mMap;
     private UiSettings uiSettings;
@@ -77,7 +78,7 @@ public class MapNavDrawer extends AppCompatActivity
         View bottomSheet = findViewById( R.id.bottom_sheet );
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setPeekHeight(300);
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
     }
 
@@ -142,10 +143,10 @@ public class MapNavDrawer extends AppCompatActivity
         mMap = googleMap;
         uiSettings = mMap.getUiSettings();
         uiSettings.setCompassEnabled(true);
-        uiSettings.setZoomControlsEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
+        mMap.setOnMarkerClickListener(this);
         enableMyLocation();
     }
 
@@ -174,7 +175,7 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void onMapClick(LatLng latLng) {
-
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 
     @Override
@@ -184,5 +185,13 @@ public class MapNavDrawer extends AppCompatActivity
         }
         mWaypoint = mMap.addMarker(new MarkerOptions().position(latLng)
                 .title("Ark's Hotspot"));
+
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        return true;
     }
 }
