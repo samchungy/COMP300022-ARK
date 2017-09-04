@@ -7,6 +7,24 @@
     tools:context="ark.ark.ArActivity">
 
 
-    <com.wikitude.architect.ArchitectView android:id="@+id/architectView" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
+    <TextView
+        android:id="@+id/lblCoord"
+        android:layout_width="389dp"
+        android:layout_height="23dp"
+        android:text="TextView"
+        android:visibility="visible"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <com.wikitude.architect.ArchitectView
+        android:id="@+id/architectView"
+        android:layout_width="388dp"
+        android:layout_height="462dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </com.wikitude.architect.ArchitectView>
 
 </android.support.constraint.ConstraintLayout>

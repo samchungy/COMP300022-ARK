@@ -67,8 +67,8 @@ var World = {
 		if (!World.initiallyLoadedData) {
 			World.requestDataFromLocal(lat, lon);
 			World.initiallyLoadedData = true;
-			World.updateStatusMessage(lat + ' ' + lon)
 		}
+		World.updateStatusMessage(lat + ' ' + lon)
 	},
 
 	// fired when user pressed maker in cam
