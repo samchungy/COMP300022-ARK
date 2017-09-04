@@ -25,6 +25,13 @@ public class ArActivity extends AppCompatActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         architectView.onPostCreate();
+        try {
+            this.architectView.load("file:///android_asset/demo/index.html");
+            architectView.setLocation(-37.804922, 144.963580, 100);
+        } catch (Exception e) {
+
+        }
+
     }
 
     @Override
