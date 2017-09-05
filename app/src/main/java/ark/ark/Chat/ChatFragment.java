@@ -129,7 +129,7 @@ public class ChatFragment extends Fragment {
     }
 
 
-    
+
     private void reloadAllData() {
         // TODO: load data from the server
     }
