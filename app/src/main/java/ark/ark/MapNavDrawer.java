@@ -1,6 +1,7 @@
 package ark.ark;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
@@ -18,8 +19,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,6 +35,11 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
 public class MapNavDrawer extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -41,8 +53,10 @@ public class MapNavDrawer extends AppCompatActivity
     private GoogleMap mMap;
     private UiSettings uiSettings;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private Marker mWaypoint = null;
+    private Marker mWaypoint;
     private BottomSheetBehavior mBottomSheetBehavior;
+    protected GeoDataClient mGeoDataClient;
+    protected PlaceDetectionClient mPlaceDetectionClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,15 +64,6 @@ public class MapNavDrawer extends AppCompatActivity
         setContentView(R.layout.activity_map_nav_drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -68,6 +73,15 @@ public class MapNavDrawer extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // FAB
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectPlace();
+            }
+        });
 
         // Map Initiate
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -79,6 +93,12 @@ public class MapNavDrawer extends AppCompatActivity
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setPeekHeight(300);
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        //Google Places Initialise
+        // Construct a GeoDataClient.
+        mGeoDataClient = Places.getGeoDataClient(this, null);
+        // Construct a PlaceDetectionClient.
+        mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
     }
 
@@ -180,18 +200,60 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        if (mWaypoint != null) {
-            mWaypoint.remove();
-        }
-        mWaypoint = mMap.addMarker(new MarkerOptions().position(latLng)
-                .title("Ark's Hotspot"));
 
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         return true;
+    }
+
+    public void selectPlace() {
+        int PLACE_PICKER_REQUEST = 1;
+
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+
+        try {
+            PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+            // Start the Intent by requesting a result, identified by a request code.
+            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+
+        } catch (GooglePlayServicesRepairableException e) {
+            //TODO
+        } catch (GooglePlayServicesNotAvailableException e) {
+            //TODO
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        int PLACE_PICKER_REQUEST = 1;
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(data, this);
+                String toastMsg = String.format("Place: %s", place.getName());
+                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+                setWaypoint(place);
+            }
+        }
+    }
+
+    public void setWaypoint(Place place){
+        TextView locname = (TextView)findViewById(R.id.textViewLocName);
+        TextView locdetails = (TextView)findViewById(R.id.textViewLocDetails);
+
+        if (mWaypoint != null) {
+            mWaypoint.remove();
+            locname.setText("");
+        }
+
+        mWaypoint = mMap.addMarker(new MarkerOptions().position(place.getLatLng())
+                .title("Ark's Hotspot"));
+        locname.setText(place.getName());
+        locdetails.setText(place.getAddress());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 }
