@@ -79,7 +79,7 @@ public class MapNavDrawer extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectPlace();
+                selectPlace(view);
             }
         });
 
@@ -107,7 +107,14 @@ public class MapNavDrawer extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        }
+        else if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED){
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+        else if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED){
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+        else {
             super.onBackPressed();
         }
     }
@@ -195,7 +202,12 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void onMapClick(LatLng latLng) {
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED){
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+        else{
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
     }
 
     @Override
@@ -209,7 +221,7 @@ public class MapNavDrawer extends AppCompatActivity
         return true;
     }
 
-    public void selectPlace() {
+    public void selectPlace(View view) {
         int PLACE_PICKER_REQUEST = 1;
 
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
@@ -232,8 +244,6 @@ public class MapNavDrawer extends AppCompatActivity
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(data, this);
-                String toastMsg = String.format("Place: %s", place.getName());
-                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
                 setWaypoint(place);
             }
         }
@@ -256,4 +266,12 @@ public class MapNavDrawer extends AppCompatActivity
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
+
+    public void deleteWaypoint(View view){
+        if (mWaypoint != null) {
+            mWaypoint.remove();
+        }
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
 }
