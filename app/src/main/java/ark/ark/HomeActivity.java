@@ -44,6 +44,8 @@ public class HomeActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_profile:
                     switchTo("Profile");
+                    Intent myIntent2 = new Intent(HomeActivity.this, ArActivity.class);
+                    startActivity(myIntent2);
                     return true;
             }
             return false;

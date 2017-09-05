@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <script src="architect://architect.js"></script>
+        <script src="https://wikitude.com/libs/architect.js"></script>
+    </head>
+    <body>
+
+    </body>
+
+    <script>
+
+        var loaded = false;
+
+        function locationChanged(lat, lon, alt, acc) {
+            if (!loaded){
+                var marker_image = new AR.ImageResource("assets/tick-icon-2.png");
+                var marker_loc = new AR.GeoLocation(lat+0.05, lon, alt);
+                var marker_drawable = new AR.ImageDrawable(marker_image, 8);
+                var marker_object = new AR.GeoObject(marker_loc, {
+                drawables: {
+                    cam: [marker_drawable]
+                }
+            });
+            }
+
+        }
+
+        // Start logging
+        AR.logger.activateDebugMode();
+
+        AR.context.onLocationChanged = locationChanged;
+    </script>
+
+</html>
