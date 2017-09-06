@@ -20,15 +20,17 @@ public class ConvoListAdapter extends BaseAdapter {
 
     private Context mContext;
 
-    public class convo {
+    public static class convo {
         String userName;
         String firstMessage;
-        Date lastUpdated;
+        String lastUpdated;
+        String conversationId;
 
-        convo(String userName, String firstMessage, Date lastUpdated) {
+        convo(String userName, String firstMessage, String lastUpdated, String conversationId) {
             this.userName = userName;
             this.firstMessage = firstMessage;
             this.lastUpdated = lastUpdated;
+            this.conversationId = conversationId;
         }
 
     }
@@ -41,8 +43,6 @@ public class ConvoListAdapter extends BaseAdapter {
         this.convoList = convoList;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mContext = context;
-
-        populateDummyData();
     }
 
     @Override
@@ -71,7 +71,8 @@ public class ConvoListAdapter extends BaseAdapter {
 
         userName.setText(convoList.get(position).userName);
         firstMessage.setText(convoList.get(position).firstMessage);
-        String time = SimpleDateFormat.getTimeInstance().format(convoList.get(position).lastUpdated);
+
+        String time = convoList.get(position).lastUpdated.substring(11, 19);
         lastUpdated.setText(time);
 
 
@@ -79,18 +80,6 @@ public class ConvoListAdapter extends BaseAdapter {
     }
 
 
-
-
-
-
-    private void populateDummyData() {
-        Date date = new Date();
-        convoList.add(new convo("Austin", "haha", date));
-        convoList.add(new convo("Rachel", "great!", date));
-        convoList.add(new convo("Josh", "OMG", date));
-
-        showToast("Test data");
-    }
 
 
 

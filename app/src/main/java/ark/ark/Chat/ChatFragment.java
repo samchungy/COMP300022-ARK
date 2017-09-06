@@ -3,12 +3,27 @@ package ark.ark.Chat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import ark.ark.R;
 
@@ -30,6 +45,7 @@ public class ChatFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private ConvoListAdapter convoListAdapter;
+    private ArrayList<ConvoListAdapter.convo> convoList;
 
     private OnFragmentInteractionListener mListener;
 
@@ -103,7 +119,6 @@ public class ChatFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
@@ -123,17 +138,72 @@ public class ChatFragment extends Fragment {
         // TODO setup list view
         final ListView chatListView = (ListView) view.findViewById(R.id.austin_ChatListView);
 
-        ArrayList<ConvoListAdapter.convo> convoList = new ArrayList<>();
+        convoList = new ArrayList<>();
         convoListAdapter = new ConvoListAdapter(getContext(), convoList);
         chatListView.setAdapter(convoListAdapter);
+
+        // TODO: reload data
+        reloadAllData();
     }
 
 
 
     private void reloadAllData() {
-        // TODO: load data from the server
+        RequestQueue queue = Volley.newRequestQueue(getContext());
+
+        String server ="52.65.97.117";
+        String userEmail = "user1@user1.com";
+        String requestURL = "http://" + server + "/direct/show?email=" + userEmail;
+
+
+        // Request a string response from the requestURL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // after getting response, try reading the json
+                        try {
+                            JSONObject res = new JSONObject(response);
+                            if (res.getString("success").equals("ok")) {
+                                // iterate thru the direct list to populate the convo list
+                                for (int i=0;i<res.getJSONArray("directs").length();i++) {
+                                    // getting attributes from the json
+                                    String nickname = res.getJSONArray("directs").getJSONObject(i).getString("other_nickname");
+                                    String last_updated = res.getJSONArray("directs").getJSONObject(i).getString("time");
+                                    String conversation_id = res.getJSONArray("directs").getJSONObject(i).getString("conversation_id");
+
+                                    ConvoListAdapter.convo item = new ConvoListAdapter.convo(nickname, "hi", last_updated, conversation_id);
+
+                                    // pushing the new item into the list
+                                    convoList.add(item);
+                                }
+                            } else {
+                                showToast(res.getString("msg"));
+                            }
+                            // after pushing into the list, update
+                            convoListAdapter.notifyDataSetChanged();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // error handling
+                showToast("Sorry, cannot connect to the server.");
+            }
+        });
+
+        queue.add(stringRequest);
     }
 
+
+
+    private void showToast(String message) {
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(getContext(), message, duration);
+        toast.show();
+    }
 
 
 }
