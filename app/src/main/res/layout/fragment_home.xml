@@ -6,10 +6,22 @@
     android:gravity="center">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:id="@+id/textView"
+
+    <Button
+        android:id="@+id/austin_testButtonUser1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="This is home fragment!" />
+        android:layout_weight="1"
+        android:text="user1"
+        android:onClick="austinTest_switchToUser1"
+        />
 
+    <Button
+        android:id="@+id/austin_testButtonUser2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="user2"
+        android:onClick="austinTest_switchToUser2"
+        />
 </LinearLayout>

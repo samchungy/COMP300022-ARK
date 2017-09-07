@@ -7,10 +7,13 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.support.v4.app.Fragment;
+import android.view.View;
 import android.widget.Toast;
 
+import ark.ark.Authentication.ARK_auth;
 import butterknife.ButterKnife;
 import ark.ark.Chat.ChatFragment;
+import butterknife.OnClick;
 import layout.HomeFragment;
 import layout.MapFragment;
 
@@ -107,4 +110,19 @@ public class HomeActivity extends AppCompatActivity {
         toast.show();
     }
 
+
+
+
+    // test switching users
+    public void austinTest_switchToUser1(View v) {
+        ARK_auth.storeUserEmail("user1@user1.com", this);
+        showToast("congrats folk! You switched to user1!");
+        showToast(ARK_auth.fetchUserEmail(this));
+    }
+
+    public void austinTest_switchToUser2(View v) {
+        ARK_auth.storeUserEmail("user2@user2.com", this);
+        showToast("ughhhh! You switched to user2!");
+        showToast(ARK_auth.fetchUserEmail(this));
+    }
 }
