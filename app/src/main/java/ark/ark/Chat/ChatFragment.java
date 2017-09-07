@@ -1,5 +1,6 @@
 package ark.ark.Chat;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -135,14 +137,26 @@ public class ChatFragment extends Fragment {
 
 
     private void setupListView(View view) {
-        // TODO setup list view
         final ListView chatListView = (ListView) view.findViewById(R.id.austin_ChatListView);
 
         convoList = new ArrayList<>();
         convoListAdapter = new ConvoListAdapter(getContext(), convoList);
         chatListView.setAdapter(convoListAdapter);
 
-        // TODO: reload data
+
+        // setting up the listener
+        chatListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            // after clicked
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent mIntent = new Intent(getContext(), ChatLogActivity.class);
+                // passing variables to the new activity
+                mIntent.putExtra("nickname", convoList.get(position).userName);
+                mIntent.putExtra("conversation_id", convoList.get(position).conversationId);
+                // starting up the new activity
+                startActivity(mIntent);
+            }
+        });
+
         reloadAllData();
     }
 
