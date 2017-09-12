@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="C:\Users\Jane\Downloads\ARK-master (2)\ARK-master\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="687870f71a3ac0f1fb9fb25b93948ff4d7d9ec24">
+        <dex dex="C:\Users\Jane\Downloads\ARK-master (2)\ARK-master\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_ccff143dc05c66825a5c170262ef555b8df6709c\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Jane\Downloads\ARK-master (2)\ARK-master\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
+        <dex dex="C:\Users\Jane\Downloads\ARK-master (2)\ARK-master\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run_dac04ad84423d5517d5b932527c781b137772d0a\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\Jane\.android\build-cache\e0bf52611b79e2b4d87402c69cfbd4661da969f6\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="6e39017b5c8ec192bc14a0320f4a99c6c00de1ed">
+        <dex dex="C:\Users\Jane\Downloads\ARK-master (2)\ARK-master\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_f77eec0eec8376267716051e58e2eb2ce5c13087\classes.dex" />
+    </item>
+
+</items>
