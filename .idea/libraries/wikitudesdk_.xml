@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="wikitudesdk-">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.android/build-cache/bf47cd07278b0a880b4b554d70aa2beca078de2f/output/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.android/build-cache/bf47cd07278b0a880b4b554d70aa2beca078de2f/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/e0bf52611b79e2b4d87402c69cfbd4661da969f6/output/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.android/build-cache/e0bf52611b79e2b4d87402c69cfbd4661da969f6/output/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
