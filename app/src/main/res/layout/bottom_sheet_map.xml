@@ -8,7 +8,8 @@
     tools:context=".MapNavDrawer" >
 
     <!-- Your content -->
-    <include layout="@layout/activity_maps" />
+    <include layout="@layout/activity_maps"
+        android:id="@+id/include2" />
 
     <!-- Bottom Sheet -->
 
@@ -48,5 +49,14 @@
         app:layout_anchor="@id/bottom_sheet"
         app:layout_anchorGravity="top|right"
         />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:text="TextView"
+        app:layout_anchor="@+id/include2"
+        app:layout_anchorGravity="top|left" />
 
 </android.support.design.widget.CoordinatorLayout>
