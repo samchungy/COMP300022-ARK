@@ -14,6 +14,7 @@
     <!-- Bottom Sheet -->
 
     <LinearLayout
+        android:clickable="true"
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="250dp"
@@ -23,21 +24,75 @@
         app:behavior_hideable="true"
         app:layout_behavior="@string/bottom_sheet_behavior">
 
-        <TextView
-            android:id="@+id/textViewLocName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:id="@+id/textViewWaypoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/map_waypointtitle"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/textViewLocName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textStyle="italic"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/textViewLocDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="@android:color/black" />
-        <TextView
-            android:id="@+id/textViewLocDetails"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="@android:color/black" />
+            android:gravity="bottom|end"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button2"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_edit_black_24dp"
+                android:onClick="selectPlace"
+                android:text="@string/map_editwaypoint" />
+
+            <Button
+                android:id="@+id/button3"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_delete_black_24dp"
+                android:onClick="deleteWaypoint"
+                android:text="@string/map_removewaypoint" />
+
+            <Button
+                android:id="@+id/button4"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:text="@string/map_sharewaypoint"
+                android:drawableTop="@drawable/ic_menu_share"
+                style="?android:attr/buttonBarButtonStyle"/>
+
+        </LinearLayout>
 
     </LinearLayout>
-
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -48,7 +103,7 @@
         android:tint="@android:color/white"
         app:layout_anchor="@id/bottom_sheet"
         app:layout_anchorGravity="top|right"
-        />
+        tools:ignore="VectorDrawableCompat" />
 
     <TextView
         android:id="@+id/textView2"
