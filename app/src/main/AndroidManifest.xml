@@ -9,7 +9,7 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <!--      AR Permissions -->
+    <!-- AR Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -70,7 +70,8 @@
         <activity
             android:name=".ArActivity"
             android:configChanges="screenSize|orientation" />
-        <activity android:name=".Chat.ChatLogActivity"></activity>
+        <activity android:name=".Chat.ChatLogActivity" />
+        <activity android:name=".Profile.ProfileCreationActivity"></activity>
     </application>
 
 </manifest>
