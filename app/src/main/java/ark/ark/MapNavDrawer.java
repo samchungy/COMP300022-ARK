@@ -22,6 +22,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -41,6 +48,13 @@ import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import ark.ark.Authentication.ARK_auth;
+
+import static ark.ark.Authentication.ARK_auth.fetchUserEmail;
+
 public class MapNavDrawer extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         OnMapReadyCallback,
@@ -54,6 +68,7 @@ public class MapNavDrawer extends AppCompatActivity
     private UiSettings uiSettings;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Marker mWaypoint;
+    private Marker mPerson;
     private BottomSheetBehavior mBottomSheetBehavior;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
@@ -79,7 +94,7 @@ public class MapNavDrawer extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectPlace();
+                selectPlace(view);
             }
         });
 
@@ -100,6 +115,39 @@ public class MapNavDrawer extends AppCompatActivity
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
+        //Initiate RequestQueue
+        // Instantiate the RequestQueue.
+        final TextView mTextView = (TextView) findViewById(R.id.textView2);
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String useremail = ARK_auth.fetchUserEmail(this);
+        mTextView.setText(useremail);
+        String url ="http://52.65.97.117/locations/show?email=" + useremail;
+
+        // Request a json response from the provided URL.
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONObject loc = response.getJSONObject("location");
+                            showPerson(new LatLng(loc.getDouble("lat"),loc.getDouble("lng")),useremail);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // TODO Auto-generated method stub
+
+                    }
+                });
+        // Add the request to the RequestQueue.
+        queue.add(jsObjRequest);
+
     }
 
     @Override
@@ -107,7 +155,14 @@ public class MapNavDrawer extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        }
+        else if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED){
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+        else if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED){
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+        else {
             super.onBackPressed();
         }
     }
@@ -195,7 +250,12 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void onMapClick(LatLng latLng) {
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED){
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+        else{
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
     }
 
     @Override
@@ -209,7 +269,7 @@ public class MapNavDrawer extends AppCompatActivity
         return true;
     }
 
-    public void selectPlace() {
+    public void selectPlace(View view) {
         int PLACE_PICKER_REQUEST = 1;
 
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
@@ -232,8 +292,6 @@ public class MapNavDrawer extends AppCompatActivity
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(data, this);
-                String toastMsg = String.format("Place: %s", place.getName());
-                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
                 setWaypoint(place);
             }
         }
@@ -255,5 +313,24 @@ public class MapNavDrawer extends AppCompatActivity
         mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    }
+
+    public void deleteWaypoint(View view){
+        if (mWaypoint != null) {
+            mWaypoint.remove();
+        }
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+
+    public void showPerson(LatLng lat, String email){
+        mPerson = mMap.addMarker(new MarkerOptions()
+                .position(lat)
+                .title(email));
+    }
+
+    public LatLng getCoords(JSONObject response) throws JSONException {
+        LatLng coord = new LatLng(response.getDouble("lat"), response.getDouble("lng"));
+        return coord;
     }
 }
