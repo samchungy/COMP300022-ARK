@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Profile.ProfileCreationActivity;
 import butterknife.ButterKnife;
 import ark.ark.Chat.ChatFragment;
 import butterknife.OnClick;
@@ -47,7 +48,9 @@ public class HomeActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_profile:
                     switchTo("Profile");
-                    Intent myIntent2 = new Intent(HomeActivity.this, ArActivity.class);
+                    //Intent myIntent2 = new Intent(HomeActivity.this, ArActivity.class);
+                    //startActivity(myIntent2);
+                    Intent myIntent2 = new Intent(HomeActivity.this, ProfileCreationActivity.class);
                     startActivity(myIntent2);
                     return true;
             }
