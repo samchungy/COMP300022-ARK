@@ -1,10 +1,10 @@
 var myJsonData = [{
 	"id": "QB",
-	"longitude": "-37.804735",
-	"latitude": "144.962963",
+	"longitude": "-37.79809",
+	"latitude": "144.962781",
 	"description": "This is the description of POI#1",
 	"altitude": "100.0",
-	"name": "POI#1"
+	"name": "Other User"
 }];
 
 /**
