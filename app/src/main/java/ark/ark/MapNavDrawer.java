@@ -120,8 +120,16 @@ public class MapNavDrawer extends AppCompatActivity
         final TextView mTextView = (TextView) findViewById(R.id.textView2);
         RequestQueue queue = Volley.newRequestQueue(this);
         final String useremail = ARK_auth.fetchUserEmail(this);
+        String otheremail;
+
+        if (useremail == "user1@user1.com"){
+            otheremail = "user2@user2.com";
+        }
+        else{
+            otheremail = "user1@user1.com";
+        }
         mTextView.setText(useremail);
-        String url ="http://52.65.97.117/locations/show?email=" + useremail;
+        String url ="http://52.65.97.117/locations/show?email=" + otheremail;
 
         // Request a json response from the provided URL.
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -131,7 +139,7 @@ public class MapNavDrawer extends AppCompatActivity
                     public void onResponse(JSONObject response) {
                         try {
                             JSONObject loc = response.getJSONObject("location");
-                            showPerson(new LatLng(loc.getDouble("lat"),loc.getDouble("lng")),useremail);
+                            showPerson(new LatLng(loc.getDouble("lat"),loc.getDouble("lng")));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -323,10 +331,10 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
 
-    public void showPerson(LatLng lat, String email){
+    public void showPerson(LatLng lat){
         mPerson = mMap.addMarker(new MarkerOptions()
                 .position(lat)
-                .title(email));
+                .title("User Location"));
     }
 
     public LatLng getCoords(JSONObject response) throws JSONException {
