@@ -341,4 +341,8 @@ public class MapNavDrawer extends AppCompatActivity
         LatLng coord = new LatLng(response.getDouble("lat"), response.getDouble("lng"));
         return coord;
     }
+
+    public void asdasd(){
+        
+    }
 }
