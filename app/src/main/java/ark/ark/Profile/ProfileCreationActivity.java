@@ -16,8 +16,10 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mindrot.jbcrypt.BCrypt;
 
 import ark.ark.R;
+
 
 public class ProfileCreationActivity extends AppCompatActivity {
 
@@ -28,7 +30,6 @@ public class ProfileCreationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_creation);
     }
-
 
     //button test
     public void testButton(View view) {
@@ -45,8 +46,20 @@ public class ProfileCreationActivity extends AppCompatActivity {
         showToast("Your email is " + email.getText().toString());
         */
 
+        String parse = password.getText().toString();
+        String hashed;
+        hashed = BCrypt.hashpw(parse, BCrypt.gensalt(10));
+
         postUserCreation(nickname.getText().toString(), email.getText().toString(),
-               password.getText().toString());
+               hashed);
+
+        /*
+        For verification just use:
+
+        if(BCrypt.checkpw(password user typed, hashed actual password)) {...}
+
+        You can put it in the right place.
+         */
 
 
     }
