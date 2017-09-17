@@ -11,6 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.support.v4.app.Fragment;
 import android.view.View;
+import android.widget.TextView;
+
+import java.util.Observable;
+import java.util.Observer;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.UserLocation.LocationSingleton;
@@ -22,7 +26,7 @@ import layout.MapFragment;
 
 
 // the main activity
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements Observer {
 
 
     private static final int REQUEST_LOCATION = 2;
@@ -79,9 +83,12 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //
 
         //mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -95,7 +102,7 @@ public class HomeActivity extends AppCompatActivity {
         //TODO
 
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
-
+        currentLocation.getInstance().addObserver(this);
 
         // switch to home page after entering the app
         switchTo("Home");
@@ -104,8 +111,17 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @Override
+    public void update(Observable o, Object data) {
+        showToast("Updated");
+        showToast("ObserverUpdate:" +
+                data.toString());
+
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
+        //lblObs.setText("hello");
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -119,6 +135,8 @@ public class HomeActivity extends AppCompatActivity {
             locationInitialise();
             */
         }
+
+        //lblLoc.setText("connected");
 
     }
 
