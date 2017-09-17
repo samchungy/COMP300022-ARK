@@ -21,8 +21,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Location"
-        android:onClick="updateLocationWithButton"/>
+        android:onClick="getLocationDetails"
+        android:text="Location" />
+
+    <Button
+        android:id="@+id/btnAllowServerUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:onClick="allowUpdateLocation"
+        android:text="allow Update" />
+
+    <Button
+        android:id="@+id/btnStopServerUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:onClick="stopUpdateLocation"
+        android:text="Stop Updates" />
 
     <Button
         android:id="@+id/austin_testButtonUser2"

@@ -71,7 +71,12 @@
             android:name=".ArActivity"
             android:configChanges="screenSize|orientation" />
         <activity android:name=".Chat.ChatLogActivity" />
-        <activity android:name=".Profile.ProfileCreationActivity"></activity>
+        <activity android:name=".Profile.ProfileCreationActivity" />
+
+        <service
+            android:name=".UserLocation.LocationUpdateService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

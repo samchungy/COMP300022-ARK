@@ -1,4 +1,4 @@
-package ark.ark.Profile;
+package ark.ark.UserLocation;
 
 import android.location.Location;
 
@@ -9,6 +9,7 @@ import android.location.Location;
 public class LocationSingleton {
     private static final LocationSingleton ourInstance = new LocationSingleton();
     private Location loc;
+    private boolean updateToServer = false;
 
     public static LocationSingleton getInstance() {
         return ourInstance;
@@ -20,6 +21,18 @@ public class LocationSingleton {
 
     public Location getLocation(){
         return loc;
+    }
+
+    public void allowServerUpdates() {
+        updateToServer = true;
+    }
+
+    public void stopServerUpdates() {
+        updateToServer = false;
+    }
+
+    public boolean isAllowingUpdates(){
+        return updateToServer;
     }
 
     private LocationSingleton() {
