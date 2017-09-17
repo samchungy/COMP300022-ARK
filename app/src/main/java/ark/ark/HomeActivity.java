@@ -31,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Profile.LocationSingleton;
 import ark.ark.Profile.ProfileCreationActivity;
 import butterknife.ButterKnife;
 import ark.ark.Chat.ChatFragment;
@@ -49,8 +50,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
-    private Location mCurrentLocation;
     private Integer mUpdateCount = 1;
+    private LocationSingleton currentLocation;
 
 
     private Fragment frag_home = new HomeFragment();
@@ -113,10 +114,10 @@ public class HomeActivity extends AppCompatActivity {
                 showToast("mLocationCallback being run");
                 for (Location location : locationResult.getLocations()) {
                     super.onLocationResult(locationResult);
-                    mCurrentLocation = location;
+                    currentLocation.getInstance().setLocation(location);
                     //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-                    if (mCurrentLocation != null) {
-                        showToast("up(" + mUpdateCount + ") " + mCurrentLocation.getLatitude() + " " + mCurrentLocation.getLongitude());
+                    if (currentLocation.getInstance().getLocation() != null) {
+                        showToast("up(" + mUpdateCount + ") " + currentLocation.getInstance().getLocation().getLatitude() + " " + currentLocation.getInstance().getLocation().getLongitude());
                         mUpdateCount += 1;
                     }
                 }
@@ -220,7 +221,7 @@ public class HomeActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Location location) {
                     if (location != null) {
-                        mCurrentLocation = location;
+                        currentLocation.getInstance().setLocation(location);
                         showToast("we found you! @" + location.getLatitude() + " " +  location.getLongitude());
                     } else {
                         showToast("you don't have location");
@@ -238,15 +239,15 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void updateLocation(View v){
-        if (mCurrentLocation != null) {
+        if (currentLocation.getInstance().getLocation() != null) {
             RequestQueue queue = Volley.newRequestQueue(this);
-
+            Location locationToSend = currentLocation.getInstance().getLocation();
             String server ="52.65.97.117";
 
             String path = "/locations/update?";
             String requestURL = "http://" + server + path +"email="+ ARK_auth.fetchUserEmail(this)
-                    +"&lat="+mCurrentLocation.getLatitude()+
-                    "&lng="+mCurrentLocation.getLongitude();
+                    +"&lat="+locationToSend.getLatitude()+
+                    "&lng="+locationToSend.getLongitude();
             showToast(requestURL);
 
             StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
