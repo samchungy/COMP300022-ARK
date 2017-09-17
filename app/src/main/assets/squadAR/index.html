@@ -30,9 +30,9 @@
 
 
         function setNewPOI(lat, lon) {
-          var marker_image = new AR.ImageResource("assets/icon2.png");
+          var marker_image = new AR.ImageResource("assets/girl.png");
           var marker_loc = new AR.GeoLocation(lat, lon);
-          var marker_drawable = new AR.ImageDrawable(marker_image, 8);
+          var marker_drawable = new AR.ImageDrawable(marker_image, 2);
           var marker_object = new AR.GeoObject(marker_loc, {
             drawables: {
                 cam: [marker_drawable],
