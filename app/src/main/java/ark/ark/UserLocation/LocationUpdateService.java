@@ -57,13 +57,13 @@ public class LocationUpdateService extends Service {
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                ToastUtils.showToast("mLocationCallback being run", getApplicationContext());
+                //ToastUtils.showToast("mLocationCallback being run", getApplicationContext());
                 for (Location location : locationResult.getLocations()) {
                     super.onLocationResult(locationResult);
                     currentLocation.getInstance().setLocation(location);
                     //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
                     if (currentLocation.getInstance().getLocation() != null) {
-                        ToastUtils.showToast("up(" + mUpdateCount + ") " + currentLocation.getInstance().getLocation().getLatitude() + " " + currentLocation.getInstance().getLocation().getLongitude(), getApplicationContext());
+                        //ToastUtils.showToast("up(" + mUpdateCount + ") " + currentLocation.getInstance().getLocation().getLatitude() + " " + currentLocation.getInstance().getLocation().getLongitude(), getApplicationContext());
                         mUpdateCount += 1;
 
                         if(currentLocation.getInstance().isAllowingUpdates() == true) {
@@ -96,9 +96,9 @@ public class LocationUpdateService extends Service {
             public void onSuccess(Location location) {
                 if (location != null) {
                     currentLocation.getInstance().setLocation(location);
-                    ToastUtils.showToast("we found you! @" + location.getLatitude() + " " +  location.getLongitude(), getApplicationContext());
+                    //ToastUtils.showToast("we found you! @" + location.getLatitude() + " " +  location.getLongitude(), getApplicationContext());
                 } else {
-                    ToastUtils.showToast("you don't have location", getApplicationContext());
+                    //ToastUtils.showToast("you don't have location", getApplicationContext());
                 }
             }
         });
@@ -123,7 +123,7 @@ public class LocationUpdateService extends Service {
             String requestURL = "http://" + server + path +"email="+ ARK_auth.fetchUserEmail(this)
                     +"&lat="+locationToSend.getLatitude()+
                     "&lng="+locationToSend.getLongitude();
-            ToastUtils.showToast(requestURL, getApplicationContext());
+            //ToastUtils.showToast(requestURL, getApplicationContext());
 
             StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
                     new Response.Listener<String>() {
@@ -135,7 +135,7 @@ public class LocationUpdateService extends Service {
                                 if (res.getString("success").equals("ok")) {
                                     // iterate through the direct list to populate the convo list
 
-                                    ToastUtils.showToast("Congratulations! Your location is updated!", getApplicationContext());
+                                    //ToastUtils.showToast("Congratulations! Your location is updated!", getApplicationContext());
 
                                 } else {
                                     ToastUtils.showToast(res.getString("msg"), getApplicationContext());

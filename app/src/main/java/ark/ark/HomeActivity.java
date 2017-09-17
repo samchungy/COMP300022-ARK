@@ -26,7 +26,7 @@ import layout.MapFragment;
 
 
 // the main activity
-public class HomeActivity extends AppCompatActivity implements Observer {
+public class HomeActivity extends AppCompatActivity {
 
 
     private static final int REQUEST_LOCATION = 2;
@@ -102,19 +102,11 @@ public class HomeActivity extends AppCompatActivity implements Observer {
         //TODO
 
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
-        currentLocation.getInstance().addObserver(this);
+
 
         // switch to home page after entering the app
         switchTo("Home");
 
-
-    }
-
-    @Override
-    public void update(Observable o, Object data) {
-        showToast("Updated");
-        showToast("ObserverUpdate:" +
-                data.toString());
 
     }
 

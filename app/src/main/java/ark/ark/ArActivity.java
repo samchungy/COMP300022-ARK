@@ -18,27 +18,18 @@ import com.wikitude.architect.ArchitectStartupConfiguration;
 import com.wikitude.architect.ArchitectView;
 
 import java.util.Date;
+import java.util.Observable;
+import java.util.Observer;
 
-public class ArActivity extends AppCompatActivity {
+import ark.ark.UserLocation.LocationSingleton;
+
+public class ArActivity extends AppCompatActivity implements Observer {
 
     // ArchitectView is the view that shows the AR interface
     private ArchitectView architectView;
     private TextView lblCoord;
-
-    // This part is the location provider that allows current location of the user to be tracked
-    //protected GoogleApiClient mGoogleApiClient;                 //google api client needed for loactionservices
-    private FusedLocationProviderClient mFusedLocationClient;   // Fused location services tracks user location
-
-    // Location updater constants
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-
-    private LocationRequest mLocationRequest;
-    private LocationCallback mLocationCallback;
-    private Location mCurrentLocation;
+    private LocationSingleton mCurrentLocation;
     private Integer mUpdateCount = 1;
-    //private String mLastUpdateTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,38 +43,7 @@ public class ArActivity extends AppCompatActivity {
         config.setLicenseKey(getString(R.string.licensekey));
         this.architectView.onCreate( config );
 
-        // Set up location provider to track current user's location
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                for (Location location : locationResult.getLocations()) {
-                    super.onLocationResult(locationResult);
-                    mCurrentLocation = locationResult.getLastLocation();
-                    //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-                    if (mCurrentLocation != null) {
-                        architectView.setLocation(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), mCurrentLocation.getAltitude());
-                        lblCoord.setText("up(" + mUpdateCount + ") " + mCurrentLocation.getLatitude() + " " + mCurrentLocation.getLongitude());
-                        mUpdateCount += 1;
-                    }
-                }
-            };
-        };
-
-        mLocationRequest = new LocationRequest();
-
-        // Sets the desired interval for active location updates. This interval is
-        // inexact. You may not receive updates at all if no location sources are available, or
-        // you may receive them slower than requested. You may also receive updates faster than
-        // requested if other applications are requesting location at a faster interval.
-        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
-
-        // Sets the fastest rate for active location updates. This interval is exact, and your
-        // application will never receive updates faster than this value.
-        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
-
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mCurrentLocation.getInstance().addObserver(this);
 
     }
 
@@ -100,7 +60,24 @@ public class ArActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void update(Observable o, Object data) {
 
+        Location location = (Location)data;
+
+
+        if (location != null) {
+            architectView.setLocation(location.getLatitude(), location.getLongitude(), location.getAltitude());
+            lblCoord.setText("up(" + mUpdateCount+ ")"
+                    + location.getLatitude() + " "
+                    + location.getLongitude());
+            mUpdateCount += 1;
+        }
+
+    }
+
+
+    /*
     @Override
     @SuppressWarnings("MissingPermission")
     protected void onStart() {
@@ -122,6 +99,7 @@ public class ArActivity extends AppCompatActivity {
         }
 
     }
+    */
 
     @Override
     protected void onStop() {
@@ -133,7 +111,6 @@ public class ArActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         architectView.onResume();
-        startLocationUpdates();
     }
 
     @Override
@@ -148,12 +125,16 @@ public class ArActivity extends AppCompatActivity {
         architectView.onPause();
     }
 
+    /*
     @SuppressWarnings("MissingPermission")
     private void startLocationUpdates() {
         mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                 mLocationCallback,
-                null /* Looper */);
+                null);
     }
+    */
 
-
+    public void showToast(String message) {
+        ToastUtils.showToast(message, this);
+    }
 }
