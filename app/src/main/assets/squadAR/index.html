@@ -11,19 +11,55 @@
 
         var loaded = false;
 
+        /*
+        AR.radar.background = new AR.ImageResource("assets/radarImg.png");
+        AR.radar.positionX = 0.1;
+      	AR.radar.positionY = 0.1;
+      	AR.radar.width = 0.4;
+        AR.radar.centerX = 0.5;
+      	AR.radar.centerY = 0.5;
+      	AR.radar.radius = 0.4;
+        AR.radar.northIndicator.image = new AR.ImageResource("assets/north_arrow.png");
+        AR.radar.northIndicator.radius = 0.4;
+        AR.radar.onClick = function(){ AR.logger.info(‘radar was clicked’);};
+	      AR.radar.enabled = true;
+
+        var radarCircle = new AR.Circle(0.05, {style: {fillColor: '#83ff7b'}});
+        */
+
+
+
+        function setNewPOI(lat, lon) {
+          var marker_image = new AR.ImageResource("assets/icon2.png");
+          var marker_loc = new AR.GeoLocation(lat, lon);
+          var marker_drawable = new AR.ImageDrawable(marker_image, 8);
+          var marker_object = new AR.GeoObject(marker_loc, {
+            drawables: {
+                cam: [marker_drawable]
+            }
+          });
+        }
+
         function locationChanged(lat, lon, alt, acc) {
             if (!loaded){
+
+                /*
                 var marker_image = new AR.ImageResource("assets/tick-icon-2.png");
-                var marker_loc = new AR.GeoLocation(lat+0.05, lon, alt);
+                var marker_loc = new AR.GeoLocation(-37.798390, 144.959381, alt);
                 var marker_drawable = new AR.ImageDrawable(marker_image, 8);
                 var marker_object = new AR.GeoObject(marker_loc, {
-                drawables: {
-                    cam: [marker_drawable]
-                }
-            });
-            }
+                  drawables: {
+                      cam: [marker_drawable]
+                  }
+                });
 
+                setNewPOI(38, -144);
+                */
+                loaded = true;
+            }
         }
+
+
 
         // Start logging
         AR.logger.activateDebugMode();

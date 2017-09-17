@@ -52,7 +52,8 @@ public class ArActivity extends AppCompatActivity implements Observer {
         super.onPostCreate(savedInstanceState);
         architectView.onPostCreate();
         try {
-            this.architectView.load("file:///android_asset/demo/index.html");
+            this.architectView.load("file:///android_asset/squadAR/index.html");
+            //this.architectView.callJavascript("loadPoi();");
 
         } catch (Exception e) {
 
@@ -74,32 +75,10 @@ public class ArActivity extends AppCompatActivity implements Observer {
             mUpdateCount += 1;
         }
 
-    }
 
-
-    /*
-    @Override
-    @SuppressWarnings("MissingPermission")
-    protected void onStart() {
-        super.onStart();
-        try {
-            mFusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-                                architectView.setLocation(location.getLatitude(), location.getLongitude(), location.getAltitude());
-                                lblCoord.setText("init " + location.getLatitude() + " " + location.getLongitude());
-                            }
-                        }
-                    });
-        } catch (Exception e) {
-
-        }
+        architectView.callJavascript("setNewPOI(-37.798390, 144.959381);");
 
     }
-    */
 
     @Override
     protected void onStop() {
