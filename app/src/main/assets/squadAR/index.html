@@ -4,14 +4,14 @@
         <script src="https://wikitude.com/libs/architect.js"></script>
     </head>
     <body>
+      <div style="position:absolute;top:10px;left:10px;width:250px;height:250px;" id="radarContainer"></div>
 
     </body>
 
     <script>
 
         var loaded = false;
-
-        /*
+        AR.radar.container = document.getElementById("radarContainer");
         AR.radar.background = new AR.ImageResource("assets/radarImg.png");
         AR.radar.positionX = 0.1;
       	AR.radar.positionY = 0.1;
@@ -21,11 +21,11 @@
       	AR.radar.radius = 0.4;
         AR.radar.northIndicator.image = new AR.ImageResource("assets/north_arrow.png");
         AR.radar.northIndicator.radius = 0.4;
-        AR.radar.onClick = function(){ AR.logger.info(‘radar was clicked’);};
+        //AR.radar.onClick = function(){ AR.logger.info(‘radar was clicked’);};
 	      AR.radar.enabled = true;
 
         var radarCircle = new AR.Circle(0.05, {style: {fillColor: '#83ff7b'}});
-        */
+
 
 
 
@@ -35,7 +35,8 @@
           var marker_drawable = new AR.ImageDrawable(marker_image, 8);
           var marker_object = new AR.GeoObject(marker_loc, {
             drawables: {
-                cam: [marker_drawable]
+                cam: [marker_drawable],
+                radar: radarCircle
             }
           });
         }

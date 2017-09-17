@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <script src="architect://architect.js"></script>
+        <script src="https://wikitude.com/libs/architect.js"></script>
+        <script src="wikitude/ade.js"></script>
+    </head>
+    <body>
+      <div style="position:absolute;top:10px;left:10px;width:500px;height:500px;" id="radarContainer"></div>
+    </body>
+
+    <script>
+        document.write('asdf')
+        //AR.logger.activateDebugMode();
+        AR.radar.container = document.getElementById("radarContainer");
+        AR.radar.background = new AR.ImageResource("assets/radarImg.png");
+        AR.radar.positionX = 0.1;
+      	AR.radar.positionY = 0.1;
+      	AR.radar.width = 0.4;
+        AR.radar.centerX = 0.5;
+      	AR.radar.centerY = 0.5;
+      	AR.radar.radius = 0.4;
+        AR.radar.northIndicator.image = new AR.ImageResource("assets/north_arrow.png");
+        AR.radar.northIndicator.radius = 0.4;
+	      AR.radar.enabled = true;
+        var geoObject = new AR.GeoObject(geoLocation, {drawables: {cam: markerDrawable, radar: radarCircle}});
+
+    </script>
+
+</html>

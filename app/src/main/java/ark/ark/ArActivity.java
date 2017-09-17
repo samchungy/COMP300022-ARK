@@ -54,6 +54,10 @@ public class ArActivity extends AppCompatActivity implements Observer {
         try {
             this.architectView.load("file:///android_asset/squadAR/index.html");
             //this.architectView.callJavascript("loadPoi();");
+            if (mCurrentLocation.getInstance().getLocation() != null) {
+                Location location = mCurrentLocation.getInstance().getLocation();
+                architectView.setLocation(location.getLatitude(), location.getLongitude(), location.getAltitude());
+            }
 
         } catch (Exception e) {
 
