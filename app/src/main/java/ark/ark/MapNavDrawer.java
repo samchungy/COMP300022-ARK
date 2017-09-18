@@ -39,6 +39,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -67,14 +68,17 @@ public class MapNavDrawer extends AppCompatActivity
     private GoogleMap mMap;
     private UiSettings uiSettings;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private Marker mWaypoint;
-    private Marker mPerson;
+    Marker mWaypoint;
+    Marker mPerson;
+    String waypointloc;
+    private LatLng undobk;
     private BottomSheetBehavior mBottomSheetBehavior;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mWaypoint = null;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_nav_drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -83,20 +87,11 @@ public class MapNavDrawer extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        // FAB
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectPlace(view);
-            }
-        });
 
         // Map Initiate
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -108,6 +103,42 @@ public class MapNavDrawer extends AppCompatActivity
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mBottomSheetBehavior.setPeekHeight(300);
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        bottomSheet.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                View bottomSheet = findViewById( R.id.bottom_sheet );
+                mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+                if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED){
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+                else{
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            }
+        });
+
+//        TODO mBottomSheetBehavior.setBottomSheetCallback(){
+//
+//        };
+
+        // FAB
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                View bottomSheet = findViewById( R.id.bottom_sheet );
+                mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+                if (mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED){
+                    return;
+                }
+                else if(mWaypoint != null){
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+                else{
+                    selectPlace(view);
+                }
+            }
+        });
 
         //Google Places Initialise
         // Construct a GeoDataClient.
@@ -120,7 +151,7 @@ public class MapNavDrawer extends AppCompatActivity
         final TextView mTextView = (TextView) findViewById(R.id.textView2);
         RequestQueue queue = Volley.newRequestQueue(this);
         final String useremail = ARK_auth.fetchUserEmail(this);
-        String otheremail;
+        final String otheremail;
 
         if (useremail == "user1@user1.com"){
             otheremail = "user2@user2.com";
@@ -139,7 +170,7 @@ public class MapNavDrawer extends AppCompatActivity
                     public void onResponse(JSONObject response) {
                         try {
                             JSONObject loc = response.getJSONObject("location");
-                            showPerson(new LatLng(loc.getDouble("lat"),loc.getDouble("lng")));
+                            showPerson(new LatLng(loc.getDouble("lat"),loc.getDouble("lng")),otheremail);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -258,10 +289,12 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void onMapClick(LatLng latLng) {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED){
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
         else{
+            fab.setImageResource(R.drawable.map_marker_radius);
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
     }
@@ -273,6 +306,23 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        TextView locname = (TextView)findViewById(R.id.textViewLocName);
+        TextView locdetails = (TextView)findViewById(R.id.textViewLocDetails);
+        TextView loctitle = (TextView)findViewById(R.id.textViewWaypoint);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        locname.setText(marker.getTitle());
+        loctitle.setText(marker.getTitle());
+        if (marker.equals(mPerson)){
+            locdetails.setText(marker.getPosition().toString());
+            fab.setImageResource(R.drawable.ic_person_black_24dp);
+        }
+        else if (marker.equals(mWaypoint)){
+            locdetails.setText(waypointloc);
+            fab.setImageResource(R.drawable.map_marker_radius);
+        }
+
+
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         return true;
     }
@@ -299,7 +349,7 @@ public class MapNavDrawer extends AppCompatActivity
         int PLACE_PICKER_REQUEST = 1;
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(data, this);
+                Place place = PlacePicker.getPlace(this,data);
                 setWaypoint(place);
             }
         }
@@ -312,12 +362,14 @@ public class MapNavDrawer extends AppCompatActivity
         if (mWaypoint != null) {
             mWaypoint.remove();
             locname.setText("");
+            mWaypoint = null;
         }
 
         mWaypoint = mMap.addMarker(new MarkerOptions().position(place.getLatLng())
                 .title("Ark's Hotspot"));
         locname.setText(place.getName());
         locdetails.setText(place.getAddress());
+        waypointloc = place.getAddress().toString();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -325,16 +377,39 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void deleteWaypoint(View view){
         if (mWaypoint != null) {
+            undobk = mWaypoint.getPosition();
             mWaypoint.remove();
+            mWaypoint = null;
         }
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setVisibility(view.GONE);
+
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.bottom_sheet_layout),
+                R.string.waypointremoved, Snackbar.LENGTH_LONG);
+        mySnackbar.setAction(R.string.undo_string, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mWaypoint = mMap.addMarker(new MarkerOptions().position(undobk)
+                        .title("Ark's Hotspot"));
+            }
+        }).addCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar mySnackbar, int event) {
+                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+                fab.show();
+            }
+        });
+        mySnackbar.show();
     }
 
 
-    public void showPerson(LatLng lat){
+    public void showPerson(LatLng lat, String name){
         mPerson = mMap.addMarker(new MarkerOptions()
                 .position(lat)
-                .title("User Location"));
+                .title(name + "'s Location")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
     }
 
     public LatLng getCoords(JSONObject response) throws JSONException {

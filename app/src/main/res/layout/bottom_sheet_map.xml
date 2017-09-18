@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/bottom_sheet_layout"
     tools:context=".MapNavDrawer" >
 
     <!-- Your content -->
@@ -14,11 +15,11 @@
     <!-- Bottom Sheet -->
 
     <LinearLayout
-        android:clickable="true"
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="225dp"
         android:background="#FFFFFF"
+        android:clickable="true"
         android:orientation="vertical"
         android:padding="16dp"
         app:behavior_hideable="true"
@@ -27,25 +28,24 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
             android:layout_weight="1"
-            >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textViewWaypoint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/map_waypointtitle"
-                android:textStyle="bold"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textViewLocName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textStyle="italic"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/black"
+                android:textStyle="italic" />
 
             <TextView
                 android:id="@+id/textViewLocDetails"
@@ -83,12 +83,12 @@
 
             <Button
                 android:id="@+id/button4"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_weight="1"
-                android:text="@string/map_sharewaypoint"
                 android:drawableTop="@drawable/ic_menu_share"
-                style="?android:attr/buttonBarButtonStyle"/>
+                android:text="@string/map_sharewaypoint" />
 
         </LinearLayout>
 
