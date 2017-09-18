@@ -3,7 +3,10 @@ package ark.ark;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -46,15 +49,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import ark.ark.Authentication.ARK_auth;
-
-import static ark.ark.Authentication.ARK_auth.fetchUserEmail;
 
 public class MapNavDrawer extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -71,7 +70,9 @@ public class MapNavDrawer extends AppCompatActivity
     Marker mWaypoint;
     Marker mPerson;
     String waypointloc;
-    private LatLng undobk;
+    String otheremail;
+    String useremail;
+    LatLng undobk;
     private BottomSheetBehavior mBottomSheetBehavior;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
@@ -117,9 +118,23 @@ public class MapNavDrawer extends AppCompatActivity
             }
         });
 
-//        TODO mBottomSheetBehavior.setBottomSheetCallback(){
-//
-//        };
+        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+                if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_HIDDEN){
+                    changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
+                    if (mWaypoint != null){
+                        switchBottomSheet();
+                    }
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
 
         // FAB
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -129,7 +144,7 @@ public class MapNavDrawer extends AppCompatActivity
                 View bottomSheet = findViewById( R.id.bottom_sheet );
                 mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
                 if (mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED){
-                    return;
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
                 else if(mWaypoint != null){
                     mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -150,8 +165,8 @@ public class MapNavDrawer extends AppCompatActivity
         // Instantiate the RequestQueue.
         final TextView mTextView = (TextView) findViewById(R.id.textView2);
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String useremail = ARK_auth.fetchUserEmail(this);
-        final String otheremail;
+        useremail = ARK_auth.fetchUserEmail(this);
+        mTextView.setText(useremail);
 
         if (useremail == "user1@user1.com"){
             otheremail = "user2@user2.com";
@@ -159,7 +174,6 @@ public class MapNavDrawer extends AppCompatActivity
         else{
             otheremail = "user1@user1.com";
         }
-        mTextView.setText(useremail);
         String url ="http://52.65.97.117/locations/show?email=" + otheremail;
 
         // Request a json response from the provided URL.
@@ -315,13 +329,12 @@ public class MapNavDrawer extends AppCompatActivity
         loctitle.setText(marker.getTitle());
         if (marker.equals(mPerson)){
             locdetails.setText(marker.getPosition().toString());
-            fab.setImageResource(R.drawable.ic_person_black_24dp);
+            changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
         }
         else if (marker.equals(mWaypoint)){
             locdetails.setText(waypointloc);
-            fab.setImageResource(R.drawable.map_marker_radius);
+            changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
         }
-
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         return true;
@@ -357,6 +370,7 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void setWaypoint(Place place){
         TextView locname = (TextView)findViewById(R.id.textViewLocName);
+        TextView loctitle = (TextView)findViewById(R.id.textViewWaypoint);
         TextView locdetails = (TextView)findViewById(R.id.textViewLocDetails);
 
         if (mWaypoint != null) {
@@ -366,8 +380,9 @@ public class MapNavDrawer extends AppCompatActivity
         }
 
         mWaypoint = mMap.addMarker(new MarkerOptions().position(place.getLatLng())
-                .title("Ark's Hotspot"));
+                .title(useremail +"'s Hotspot"));
         locname.setText(place.getName());
+        loctitle.setText(useremail +"'s Hotspot");
         locdetails.setText(place.getAddress());
         waypointloc = place.getAddress().toString();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
@@ -392,7 +407,7 @@ public class MapNavDrawer extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 mWaypoint = mMap.addMarker(new MarkerOptions().position(undobk)
-                        .title("Ark's Hotspot"));
+                        .title(useremail + "'s Waypoint"));
             }
         }).addCallback(new Snackbar.Callback() {
             @Override
@@ -415,5 +430,19 @@ public class MapNavDrawer extends AppCompatActivity
     public LatLng getCoords(JSONObject response) throws JSONException {
         LatLng coord = new LatLng(response.getDouble("lat"), response.getDouble("lng"));
         return coord;
+    }
+
+    private void changeFAB(FloatingActionButton fab, int icon, int colour){
+        fab.setImageResource(icon);
+        fab.setBackgroundColor(colour);
+    }
+
+    private void switchBottomSheet(){
+        TextView locname = (TextView)findViewById(R.id.textViewLocName);
+        TextView locdetails = (TextView)findViewById(R.id.textViewLocDetails);
+        TextView loctitle = (TextView)findViewById(R.id.textViewWaypoint);
+        locdetails.setText(mWaypoint.getPosition().toString());
+        loctitle.setText(mWaypoint.getTitle());
+        locname.setText(mWaypoint.getTitle());
     }
 }
