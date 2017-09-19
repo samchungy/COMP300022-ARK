@@ -8,7 +8,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_map_nav_drawer">MapNavDrawer</string>
+    <string name="title_activity_map_nav_drawer">trackAR Map</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -19,8 +19,10 @@
     <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
     <string name="location_permission_denied">This sample requires location permission to enable the \'my location\' layer. Please try again and grant access to use the location.\nIf the permission has been permanently denied, it can be enabled from the System Settings &gt; Apps &gt; \'Google Maps API Demos\'.</string>
     <string name="permission_required_toast">Location permission is required for this demo.</string>
-    <string name="map_removewaypoint">Remove Waypoint</string>
-    <string name="map_editwaypoint">Edit Waypoint</string>
-    <string name="map_sharewaypoint">Share Waypoint</string>
+    <string name="map_removewaypoint">Remove</string>
+    <string name="map_editwaypoint">Edit</string>
+    <string name="map_sharewaypoint">Share</string>
     <string name="map_waypointtitle">Ark\'s Waypoint</string>
+    <string name="waypointremoved">Waypoint Removed</string>
+    <string name="undo_string">Undo</string>
 </resources>
