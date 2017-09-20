@@ -27,7 +27,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
 
-import ark.ark.Authentication.ARK_auth;
 import ark.ark.R;
 
 /**
@@ -167,7 +166,7 @@ public class ChatFragment extends Fragment {
         RequestQueue queue = Volley.newRequestQueue(getContext());
 
         String server ="52.65.97.117";
-        String userEmail = ARK_auth.fetchUserEmail(getContext());
+        String userEmail = "user1@user1.com";
         String requestURL = "http://" + server + "/direct/show?email=" + userEmail;
 
 
@@ -219,8 +218,6 @@ public class ChatFragment extends Fragment {
         Toast toast = Toast.makeText(getContext(), message, duration);
         toast.show();
     }
-
-    //Test
 
 
 }
