@@ -13,6 +13,7 @@ import android.widget.Toast;
 import ark.ark.Authentication.ARK_auth;
 
 import ark.ark.Profile.LoginActivity;
+import ark.ark.UserLocation.LocationSingleton;
 import butterknife.ButterKnife;
 import ark.ark.Chat.ChatFragment;
 import butterknife.OnClick;
@@ -28,6 +29,7 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment frag_map = new MapFragment();
     private Fragment frag_profile = new ProfileFragment();
 
+    private LocationSingleton currentLocation;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -118,15 +120,9 @@ public class HomeActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction().replace(R.id.frag_container, targetFrag).commit();
     }
 
-
-
     public void showToast(String message) {
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(getApplicationContext(), message, duration);
-        toast.show();
+        ToastUtils.showToast(message, this);
     }
-
-
 
 
     // test switching users
@@ -142,15 +138,19 @@ public class HomeActivity extends AppCompatActivity {
         //showToast(ARK_auth.fetchUserEmail(this));
     }
 
+    public void allowUpdateLocation(View v){
+        currentLocation.getInstance().allowServerUpdates();
+    }
+
+    public void stopUpdateLocation(View v){
+        currentLocation.getInstance().stopServerUpdates();
+    }
+
+    public void getLocationDetails(View v){
+        showToast(currentLocation.getInstance().getLocation().toString() + "\n" + "allowupdates " + currentLocation.getInstance().isAllowingUpdates());
+    }
 
 
-    //random buttons for debug tests
-    public void showSessionID(View v){
-        showToast(ARK_auth.fetchSessionId(this));
-    }
-    public void showUserEmail(View v){
-        showToast(ARK_auth.fetchUserEmail(this));
-    }
     public void logoutButton(View v){
         showToast("logging out...");
         ARK_auth.clearUserData(this);
