@@ -18,8 +18,8 @@
 
     <com.wikitude.architect.ArchitectView
         android:id="@+id/architectView"
-        android:layout_width="388dp"
-        android:layout_height="462dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
