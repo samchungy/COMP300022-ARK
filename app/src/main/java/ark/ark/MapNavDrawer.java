@@ -1,11 +1,15 @@
 package ark.ark;
 
 import android.Manifest;
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
@@ -21,6 +25,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +60,9 @@ import com.google.android.gms.location.places.PlaceDetectionClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 import ark.ark.Authentication.ARK_auth;
 
@@ -444,5 +455,88 @@ public class MapNavDrawer extends AppCompatActivity
         locdetails.setText(mWaypoint.getPosition().toString());
         loctitle.setText(mWaypoint.getTitle());
         locname.setText(mWaypoint.getTitle());
+    }
+
+    public void groupSimulation(View view) {
+
+        final ArrayList<Marker> group1 = new ArrayList<Marker>();
+
+        final LatLng unimelb = new LatLng(-37.7963646, 144.9589851);
+
+
+        Marker user1 = mMap.addMarker(new MarkerOptions()
+                .position(unimelb)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        Marker user2 = mMap.addMarker(new MarkerOptions()
+                .position(unimelb)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        Marker user3 = mMap.addMarker(new MarkerOptions()
+                .position(unimelb)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        Marker user4 = mMap.addMarker(new MarkerOptions()
+                .position(unimelb)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+        Marker user5 = mMap.addMarker(new MarkerOptions()
+                .position(unimelb)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+
+        group1.add(user1);
+        group1.add(user2);
+        group1.add(user3);
+        group1.add(user4);
+        group1.add(user5);
+
+
+
+        final Handler handler = new Handler();
+        final Interpolator interpolator = new LinearInterpolator();
+
+        final long start = SystemClock.uptimeMillis();
+        final float duration = 5000;
+
+        final boolean hideMarker = false;
+
+
+        for(int i = 0; i < group1.size(); i++) {
+
+            final int member = i;
+
+            handler.post(new Runnable() {
+                Random r = new Random();
+                double deltaLAT = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
+                double deltaLNG = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
+
+                @Override
+                public void run() {
+
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed/duration);
+
+                    double newlat = (t * (group1.get(member).getPosition().latitude + deltaLAT))
+                            + ((1 - t) * group1.get(member).getPosition().latitude);
+                    double newlng = (t * (group1.get(member).getPosition().longitude + deltaLNG))
+                            + ((1 - t) * group1.get(member).getPosition().longitude);
+
+                    LatLng nextPos = new LatLng(newlat, newlng);
+
+                    group1.get(member).setPosition(nextPos);
+
+
+                    if(t < 1.0) {
+                        handler.postDelayed(this, 16);
+                    } else {
+                        if(hideMarker) {
+                            group1.get(member).setVisible(false);
+                        } else {
+                            group1.get(member).setVisible(true);
+                        }
+                    }
+
+                }
+
+            });
+        }
+
+
     }
 }
