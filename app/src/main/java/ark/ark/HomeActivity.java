@@ -11,12 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.support.v4.app.Fragment;
 import android.view.View;
-import android.widget.TextView;
 
-import java.util.Observable;
-import java.util.Observer;
-
-import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.UserRequestsUtil;
 import ark.ark.UserLocation.LocationSingleton;
 import ark.ark.UserLocation.LocationUpdateService;
 import butterknife.ButterKnife;
@@ -50,6 +47,8 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment frag_profile = new ProfileFragment();
 
     private LocationSingleton currentLocation;
+
+    private CurrentUser mCurrentUser;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -104,10 +103,12 @@ public class HomeActivity extends AppCompatActivity {
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
 
 
+
+
         // switch to home page after entering the app
         switchTo("Home");
 
-
+        mCurrentUser = mCurrentUser.getInstance();
     }
 
     @Override
@@ -174,15 +175,23 @@ public class HomeActivity extends AppCompatActivity {
 
     // test switching users
     public void austinTest_switchToUser1(View v) {
+        /*
         ARK_auth.storeUserEmail("user1@user1.com", this);
         showToast("congrats folk! You switched to user1!");
         showToast(ARK_auth.fetchUserEmail(this));
+        */
+        mCurrentUser.logOn("user1@user1.com");
+        UserRequestsUtil.updateGroups(this);
+
+        showToast(mCurrentUser.getEmail());
+        showToast(mCurrentUser.getActiveGroup().getId());
     }
 
     public void austinTest_switchToUser2(View v) {
-        ARK_auth.storeUserEmail("user2@user2.com", this);
-        showToast("ughhhh! You switched to user2!");
-        showToast(ARK_auth.fetchUserEmail(this));
+        mCurrentUser.logOn("user2@user2.com");
+        UserRequestsUtil.updateGroups(this);
+
+        showToast(mCurrentUser.getEmail());
     }
 
 
