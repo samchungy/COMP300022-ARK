@@ -8,7 +8,7 @@ import android.location.Location;
 
 public class Friend {
     private String email;
-    private Location loc;
+    private Location loc = new Location("null");
 
     public Friend(String email) {
         this.email = email;
@@ -19,12 +19,18 @@ public class Friend {
                 || loc.getLongitude() != location.getLongitude())
             loc.set(location);
     }
+
     public Location getLocation(){
         return loc;
     }
 
     public String getEmail() {
         return email;
+    }
+
+    @Override
+    public String toString() {
+        return email + "| (" + loc.getLatitude() + "," + loc.getLongitude() + ")";
     }
 
 }

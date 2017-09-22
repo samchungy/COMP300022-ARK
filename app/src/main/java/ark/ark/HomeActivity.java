@@ -183,15 +183,19 @@ public class HomeActivity extends AppCompatActivity {
         mCurrentUser.logOn("user1@user1.com");
         UserRequestsUtil.updateGroups(this);
 
+
         showToast(mCurrentUser.getEmail());
-        showToast(mCurrentUser.getActiveGroup().getId());
+        //showToast(mCurrentUser.getActiveGroup().getId());
     }
 
     public void austinTest_switchToUser2(View v) {
+        /*
         mCurrentUser.logOn("user2@user2.com");
         UserRequestsUtil.updateGroups(this);
 
         showToast(mCurrentUser.getEmail());
+        */
+        UserRequestsUtil.updateActiveGroupLocations(this);
     }
 
 

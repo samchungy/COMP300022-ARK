@@ -38,58 +38,7 @@ public class UserRequestsUtil {
     Updates the groups the user is in
      */
     public static void initialiseCurrentUser(Context context) {
-        /*
-        CurrentUser mUser = CurrentUser.getInstance();
 
-        if (mUser.getEmail() != null) {
-            RequestQueue queue = Volley.newRequestQueue(context);
-            String server = "52.65.97.117";
-
-            String path = "/group/show?";
-            String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
-            ToastUtils.showToast(requestURL, context);
-
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
-                    new Response.Listener<String>() {
-
-                        @Override
-                        public void onResponse(String response) {
-                            // after getting response, try reading the json
-                            CurrentUser mUser = CurrentUser.getInstance();
-                            ToastUtils.showToast(response, context);
-                            try {
-                                JSONObject res = new JSONObject(response);
-
-                                if (res.getString("success").equals("ok")) {
-                                    for (int i = 0; i < res.getJSONArray("groups").length(); i++) {
-                                        Group g = new Group(res.getJSONArray("groups").getString(i));
-                                        mUser.addGroup(g);
-                                    }
-
-                                } else {
-                                    ToastUtils.showToast(res.getString("msg"), context);
-                                }
-
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                ToastUtils.showToast("exception", context);
-                            }
-
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    // error handling
-                    ToastUtils.showToast("Sorry, cannot connect to the server.", context);
-                }
-            });
-
-            queue.add(stringRequest);
-        } else {
-            ToastUtils.showToast("Location doesn't exist", context);
-        }
-        */
     }
 
     public static void updateGroups(final Context context) {
@@ -120,6 +69,72 @@ public class UserRequestsUtil {
                                         mUser.addGroup(g);
                                     }
 
+
+
+                                } else {
+                                    ToastUtils.showToast(res.getString("msg"), context);
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                ToastUtils.showToast("exception", context);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // error handling
+                    ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+                }
+            });
+
+            queue.add(stringRequest);
+        } else {
+            ToastUtils.showToast("Location doesn't exist", context);
+        }
+    }
+
+    public static void updateActiveGroupLocations(final Context context) {
+        CurrentUser mUser = CurrentUser.getInstance();
+
+        if (mUser.getEmail() != null) {
+            RequestQueue queue = Volley.newRequestQueue(context);
+            String server = "52.65.97.117";
+
+            String path = "/group/locations?";
+            String requestURL = "http://" + server + path +"group_id="+ mUser.getActiveGroup().getId();
+            ToastUtils.showToast(requestURL, context);
+
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
+                    new Response.Listener<String>() {
+
+                        @Override
+                        public void onResponse(String response) {
+                            // after getting response, try reading the json
+                            CurrentUser mUser = CurrentUser.getInstance();
+                            ToastUtils.showToast(response, context);
+                            try {
+                                JSONObject res = new JSONObject(response);
+
+                                if (res.getString("success").equals("ok")) {
+                                    JSONArray friendList = res.getJSONArray("groups");
+                                    for (int i = 0; i < friendList.length(); i++) {
+                                        JSONObject friend = friendList.getJSONObject(i);
+                                        String email = friend.getString("email");
+                                        Double lat = friend.getJSONObject("location").getDouble("lat");
+                                        Double lng = friend.getJSONObject("location").getDouble("lng");
+
+                                        Location loc = new Location("Server");
+                                        loc.setLatitude(lat);
+                                        loc.setLongitude(lng);
+
+                                        Friend f = new Friend(email);
+                                        mUser.getActiveGroup().updateFriend(f);
+                                        mUser.getActiveGroup().setLocation(email, loc);
+                                        ToastUtils.showToast(email, context);
+
+                                    }
+                                    ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
 
 
                                 } else {

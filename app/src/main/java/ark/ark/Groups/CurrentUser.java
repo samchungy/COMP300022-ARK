@@ -28,6 +28,7 @@ public class CurrentUser {
     private String email;
     private HashMap<String, Group> groups = new HashMap<String, Group>();
     private Group activeGroup;
+    private Boolean isUpdating = false;
 
     public static CurrentUser getInstance() {
         return ourInstance;
@@ -49,6 +50,10 @@ public class CurrentUser {
 
     public Group getActiveGroup() {
         return activeGroup;
+    }
+
+    public boolean isUpdating() {
+        return isUpdating;
     }
 
     public HashMap<String,Group> getAllGroups() {
