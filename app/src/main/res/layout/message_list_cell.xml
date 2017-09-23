@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+
     <LinearLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
@@ -19,27 +20,32 @@
         </TextView>
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:orientation="horizontal">
-        <TextView
-            android:id="@+id/austin_MessageListCell_otherUserName"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:textSize="15dp"
-            android:paddingLeft="12dp">
-        </TextView>
-        <TextView
-            android:id="@+id/austin_MessageListCell_thisUserName"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_alignParentRight="true"
-            android:textSize="15dp"
-            android:paddingRight="12dp">
-        </TextView>
-    </RelativeLayout>
+        <RelativeLayout android:layout_height="match_parent"
+            android:layout_width="match_parent">
+            <TextView
+                android:id="@+id/austin_MessageListCell_otherUserName"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:textSize="15dp"
+                android:paddingLeft="12dp">
+            </TextView>
+            <TextView
+                android:id="@+id/austin_MessageListCell_thisUserName"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textSize="15dp"
+                android:paddingRight="12dp">
+            </TextView>
+        </RelativeLayout>
+
+
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_height="wrap_content"
