@@ -35,10 +35,60 @@ import ark.ark.ToastUtils;
 public class UserRequestsUtil {
 
     /*
-    Updates the groups the user is in
+    Updates the groups the user is in and then puts locations into the active group
      */
-    public static void initialiseCurrentUser(Context context) {
+    public static void initialiseCurrentUser(final Context context) {
+        CurrentUser mUser = CurrentUser.getInstance();
 
+        if (mUser.getEmail() != null) {
+            RequestQueue queue = Volley.newRequestQueue(context);
+            String server = "52.65.97.117";
+
+            String path = "/group/show?";
+            String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
+            ToastUtils.showToast(requestURL, context);
+
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
+                    new Response.Listener<String>() {
+
+                        @Override
+                        public void onResponse(String response) {
+                            // after getting response, try reading the json
+                            CurrentUser mUser = CurrentUser.getInstance();
+                            ToastUtils.showToast(response, context);
+                            try {
+                                JSONObject res = new JSONObject(response);
+
+                                if (res.getString("success").equals("ok")) {
+                                    for (int i = 0; i < res.getJSONArray("groups").length(); i++) {
+                                        Group g = new Group(res.getJSONArray("groups").getString(i));
+                                        mUser.addGroup(g);
+                                    }
+                                updateActiveGroupLocations(context);
+
+
+
+                                } else {
+                                    ToastUtils.showToast(res.getString("msg"), context);
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                ToastUtils.showToast("exception", context);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // error handling
+                    ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+                }
+            });
+
+            queue.add(stringRequest);
+        } else {
+            ToastUtils.showToast("Location doesn't exist", context);
+        }
     }
 
     public static void updateGroups(final Context context) {
@@ -69,8 +119,6 @@ public class UserRequestsUtil {
                                         mUser.addGroup(g);
                                     }
 
-
-
                                 } else {
                                     ToastUtils.showToast(res.getString("msg"), context);
                                 }
@@ -97,7 +145,7 @@ public class UserRequestsUtil {
     public static void updateActiveGroupLocations(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
 
-        if (mUser.getEmail() != null) {
+        if (mUser.getEmail() != null && mUser.getActiveGroup() != null) {
             RequestQueue queue = Volley.newRequestQueue(context);
             String server = "52.65.97.117";
 
@@ -132,7 +180,6 @@ public class UserRequestsUtil {
                                         mUser.getActiveGroup().updateFriend(f);
                                         mUser.getActiveGroup().setLocation(email, loc);
                                         ToastUtils.showToast(email, context);
-
                                     }
                                     ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
 

@@ -181,7 +181,7 @@ public class HomeActivity extends AppCompatActivity {
         showToast(ARK_auth.fetchUserEmail(this));
         */
         mCurrentUser.logOn("user1@user1.com");
-        UserRequestsUtil.updateGroups(this);
+        UserRequestsUtil.initialiseCurrentUser(this);
 
 
         showToast(mCurrentUser.getEmail());
@@ -195,7 +195,9 @@ public class HomeActivity extends AppCompatActivity {
 
         showToast(mCurrentUser.getEmail());
         */
-        UserRequestsUtil.updateActiveGroupLocations(this);
+        showToast(mCurrentUser.getActiveGroup().toString());
+
+        //UserRequestsUtil.updateActiveGroupLocations(this);
     }
 
 
