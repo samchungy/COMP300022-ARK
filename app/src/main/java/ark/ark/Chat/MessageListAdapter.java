@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import ark.ark.Authentication.ARK_auth;
 import ark.ark.R;
 
 
@@ -69,23 +70,25 @@ public class MessageListAdapter extends BaseAdapter {
 
         TextView thisUserName = (TextView) cell.findViewById(R.id.austin_MessageListCell_thisUserName);
         TextView otherUserName = (TextView) cell.findViewById(R.id.austin_MessageListCell_otherUserName);
-        TextView messageDecrypted = (TextView) cell.findViewById(R.id.austin_MessageListCell_messageDecrypted);
+        TextView thisMessage = (TextView) cell.findViewById(R.id.austin_MessageListCell_thisMessage);
+        TextView otherMessage = (TextView) cell.findViewById(R.id.austin_MessageListCell_otherMessage);
         TextView time = (TextView) cell.findViewById(R.id.austin_MessageListCell_time);
 
 
-        String userEmail = "user1@user1.com";
+        String userEmail = ARK_auth.fetchUserEmail(mContext);
 
 
         if (messageList.get(position).senderEmail.equals(userEmail)) {
             // if the sender is this user
             thisUserName.setText("Me");
             otherUserName.setText("");
+            thisMessage.setText(decryptMessageBody(messageList.get(position).messageEncrypted));
         } else {
             thisUserName.setText("");
             otherUserName.setText(messageList.get(position).senderNickname);
+            otherMessage.setText(decryptMessageBody(messageList.get(position).messageEncrypted));
         }
 
-        messageDecrypted.setText(decryptMessageBody(messageList.get(position).messageEncrypted));
         time.setText(messageList.get(position).time.substring(11, 19));
 
 
