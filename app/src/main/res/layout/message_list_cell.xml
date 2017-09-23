@@ -41,20 +41,33 @@
         </TextView>
     </RelativeLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:orientation="horizontal">
         <TextView
-            android:id="@+id/austin_MessageListCell_messageDecrypted"
+            android:id="@+id/austin_MessageListCell_otherMessage"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:textAlignment="center"
+            android:layout_width="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:gravity="right"
             android:textSize="20dp"
             android:paddingLeft="12dp"
+            android:paddingRight="12dp"
             android:paddingBottom="8dp">
         </TextView>
-    </LinearLayout>
+        <TextView
+            android:id="@+id/austin_MessageListCell_thisMessage"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_alignParentRight="true"
+            android:gravity="right"
+            android:textSize="20dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp">
+        </TextView>
+    </RelativeLayout>
 
 
 </LinearLayout>
