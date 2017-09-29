@@ -2,6 +2,11 @@ package ark.ark.Chat;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -16,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.R;
@@ -39,15 +45,38 @@ public class ChatLogActivity extends AppCompatActivity {
         // getting variables from the sender
         String nickname = getIntent().getStringExtra("nickname");
         setTitle(nickname);
-
         setupMessageList();
+        setupKeyboardObserver();
     }
 
 
 
 
+
+    // keyboard observer solution from: https://stackoverflow.com/questions/2150078/how-to-check-visibility-of-software-keyboard-in-android
+    private void setupKeyboardObserver() {
+        final View activityRootView = findViewById(R.id.austin_ChatListView_bottomBar);
+        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
+                if (heightDiff > dpToPx(200)) { // if more than 200 dp, it's probably a keyboard
+                    scrollToBottom();
+                }
+            }
+        });
+    }
+
+
+    // a helper function from:
+    // https://stackoverflow.com/questions/2150078/how-to-check-visibility-of-software-keyboard-in-android
+    public float dpToPx(float valueInDp) {
+        DisplayMetrics metrics = this.getResources().getDisplayMetrics();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, valueInDp, metrics);
+    }
+
+
     private void setupMessageList() {
-        // TODO: message list setup
         ListView messageListView = (ListView)findViewById(R.id.austin_MessageListView);
         messageList = new ArrayList<>();
         mAdapter = new MessageListAdapter(this, messageList);
@@ -57,8 +86,70 @@ public class ChatLogActivity extends AppCompatActivity {
     }
 
 
+
+    public void onClickSendButton(View v) {
+        EditText messageTextfield = (EditText)findViewById(R.id.austin_ChatListView_messageTextfield);
+        String msg = messageTextfield.getText().toString();
+        if (msg.equals("")) { // if empty message
+            showToast("Message cannot be empty");
+            return;
+        } else {
+            messageTextfield.setText("");
+            sendMessage(msg);
+            reloadAllMessages();
+        }
+    }
+
+
+
+    private void sendMessage(String msg) {
+        msg = encryptMessage(msg);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        String server ="52.65.97.117";
+        String conversationId = getIntent().getStringExtra("conversation_id");
+        String requestURL = "http://" + server + "/message/create?conversation_id=" + conversationId + "&email=" + ARK_auth.fetchUserEmail(this) + "&message_body=" + msg;
+
+
+        // Request a string response from the requestURL.
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // after getting response, try reading the json
+                        try {
+                            JSONObject res = new JSONObject(response);
+                            if (res.getString("success").equals("ok")) {
+                                // msg sent
+                            } else {
+                                showToast(res.getString("msg"));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // error handling
+                showToast("Sorry, cannot connect to the server.");
+            }
+        });
+
+        queue.add(stringRequest);
+
+    }
+
+
+
+    private String encryptMessage(String msg) {
+        return msg;
+    }
+
+
     private void reloadAllMessages() {
-        // TODO: load all msgs
+        // TODO: load all msgs, add observer
         RequestQueue queue = Volley.newRequestQueue(this);
 
         String server ="52.65.97.117";
@@ -93,6 +184,7 @@ public class ChatLogActivity extends AppCompatActivity {
                             }
                             // after pushing into the list, update
                             mAdapter.notifyDataSetChanged();
+                            scrollToBottom();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -107,6 +199,17 @@ public class ChatLogActivity extends AppCompatActivity {
 
         queue.add(stringRequest);
     }
+
+
+
+    private void scrollToBottom() {
+        ListView chatListView = (ListView)findViewById(R.id.austin_MessageListView);
+
+        if (!mAdapter.isEmpty()) {
+            chatListView.setSelection(mAdapter.getCount() - 1);
+        }
+    }
+
 
 
     // helper functions
