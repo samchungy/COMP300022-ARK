@@ -1,12 +1,11 @@
-package ark.ark;
+package ark.ark.Map;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -21,7 +20,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,11 +28,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -53,8 +49,17 @@ import com.google.android.gms.location.places.PlaceDetectionClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import ark.ark.Authentication.ARK_auth;
+import java.util.Observable;
+import java.util.Observer;
 
+import ark.ark.Authentication.ARK_auth;
+import ark.ark.PermissionUtils;
+import ark.ark.R;
+import ark.ark.UserLocation.LocationSingleton;
+
+/**
+ * Map + Nav Drawer Class
+ */
 public class MapNavDrawer extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         OnMapReadyCallback,
@@ -62,24 +67,26 @@ public class MapNavDrawer extends AppCompatActivity
         ActivityCompat.OnRequestPermissionsResultCallback,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMapLongClickListener,
-        GoogleMap.OnMarkerClickListener{
+        GoogleMap.OnMarkerClickListener,
+        Observer {
 
     private GoogleMap mMap;
     private UiSettings uiSettings;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    Marker mWaypoint;
+    private Marker mWaypoint = null;
+    private Geocoder geocoder;
     Marker mPerson;
     String waypointloc;
     String otheremail;
     String useremail;
     LatLng undobk;
-    private BottomSheetBehavior mBottomSheetBehavior;
+    private LocationSingleton mCurrentLocation;
+    private BottomSheet bs;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mWaypoint = null;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_nav_drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -94,60 +101,58 @@ public class MapNavDrawer extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+
+        // Geocoder
+        geocoder = new Geocoder(this);
+
+        // Bottom Sheet Initialize
+        View bs_view = findViewById(R.id.bottom_sheet);
+        bs = new BottomSheet(bs_view, geocoder);
+
+        bs_view.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if(bs.is_collapsed()){
+                   bs.set_expanded();
+                }
+                else{
+                    bs.set_collapsed();
+                }
+            }
+        });
+
+        bs.get_bsb().setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(View bottomSheet, int newState) {
+                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+                if(bs.is_hidden()){
+                    changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
+                }
+            }
+
+            @Override
+            public void onSlide(View bottomSheet, float slideOffset) {
+
+            }
+        });
+
         // Map Initiate
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        //Bottom Panel Initialise
-        View bottomSheet = findViewById( R.id.bottom_sheet );
-        mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        mBottomSheetBehavior.setPeekHeight(300);
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        bottomSheet.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                View bottomSheet = findViewById( R.id.bottom_sheet );
-                mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-                if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED){
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                }
-                else{
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-            }
-        });
-
-        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-                if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_HIDDEN){
-                    changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
-                    if (mWaypoint != null){
-                        switchBottomSheet();
-                    }
-                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
-            }
-        });
 
         // FAB
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                View bottomSheet = findViewById( R.id.bottom_sheet );
-                mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-                if (mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED){
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                if (bs.is_collapsed()){
+                    bs.set_expanded();
                 }
                 else if(mWaypoint != null){
-                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    bs.set_place_mode(findViewById(android.R.id.content),
+                            (MapWaypoint) mWaypoint.getTag());
+                    bs.set_collapsed();
                 }
                 else{
                     selectPlace(view);
@@ -201,6 +206,8 @@ public class MapNavDrawer extends AppCompatActivity
         // Add the request to the RequestQueue.
         queue.add(jsObjRequest);
 
+        mCurrentLocation.getInstance().addObserver(this);
+
     }
 
     @Override
@@ -209,11 +216,11 @@ public class MapNavDrawer extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-        else if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED){
-                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        else if(bs.is_expanded()){
+                bs.set_collapsed();
         }
-        else if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_COLLAPSED){
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        else if(bs.is_collapsed()){
+            bs.set_hidden();
         }
         else {
             super.onBackPressed();
@@ -304,12 +311,12 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     public void onMapClick(LatLng latLng) {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        if(mBottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED){
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        if(bs.is_expanded()){
+            bs.set_collapsed();
         }
         else{
             fab.setImageResource(R.drawable.map_marker_radius);
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            bs.set_hidden();
         }
     }
 
@@ -320,26 +327,31 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        TextView locname = (TextView)findViewById(R.id.textViewLocName);
-        TextView locdetails = (TextView)findViewById(R.id.textViewLocDetails);
-        TextView loctitle = (TextView)findViewById(R.id.textViewWaypoint);
+        TextView locname = (TextView)findViewById(R.id.bs_locname);
+        TextView locdetails = (TextView)findViewById(R.id.bs_locdetails);
+        TextView loctitle = (TextView)findViewById(R.id.bs_title);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
         locname.setText(marker.getTitle());
         loctitle.setText(marker.getTitle());
-        if (marker.equals(mPerson)){
-            locdetails.setText(marker.getPosition().toString());
-            changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
-        }
-        else if (marker.equals(mWaypoint)){
-            locdetails.setText(waypointloc);
+
+        if(marker.getTag() instanceof MapWaypoint){
+            bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) marker.getTag());
             changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
         }
+        else{
+            bs.set_person_mode(findViewById(android.R.id.content), marker);
+            changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
+        }
 
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bs.set_collapsed();
         return true;
     }
 
+    /**
+     * Uses Google Places API to select a waypoint.
+     * @param view
+     */
     public void selectPlace(View view) {
         int PLACE_PICKER_REQUEST = 1;
 
@@ -368,28 +380,34 @@ public class MapNavDrawer extends AppCompatActivity
         }
     }
 
+    /**
+     * Sets a waypoint for the group
+     * @param place
+     */
     public void setWaypoint(Place place){
-        TextView locname = (TextView)findViewById(R.id.textViewLocName);
-        TextView loctitle = (TextView)findViewById(R.id.textViewWaypoint);
-        TextView locdetails = (TextView)findViewById(R.id.textViewLocDetails);
+        MapWaypoint newWaypoint;
 
         if (mWaypoint != null) {
             mWaypoint.remove();
-            locname.setText("");
             mWaypoint = null;
         }
 
         mWaypoint = mMap.addMarker(new MarkerOptions().position(place.getLatLng())
                 .title(useremail +"'s Hotspot"));
-        locname.setText(place.getName());
-        loctitle.setText(useremail +"'s Hotspot");
-        locdetails.setText(place.getAddress());
+        mWaypoint.setTag(newWaypoint = new MapWaypoint(useremail + "'s Hotspot",place.getLatLng(),
+                        place.getName().toString(), place.getAddress().toString()));
+
         waypointloc = place.getAddress().toString();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
 
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bs.set_place_mode(findViewById(android.R.id.content), newWaypoint);
+        bs.set_collapsed();
     }
 
+    /**
+     * Deletes the current waypoint
+     * @param view
+     */
     public void deleteWaypoint(View view){
         if (mWaypoint != null) {
             undobk = mWaypoint.getPosition();
@@ -399,7 +417,7 @@ public class MapNavDrawer extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setVisibility(view.GONE);
 
-        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        bs.set_hidden();
 
         Snackbar mySnackbar = Snackbar.make(findViewById(R.id.bottom_sheet_layout),
                 R.string.waypointremoved, Snackbar.LENGTH_LONG);
@@ -425,6 +443,7 @@ public class MapNavDrawer extends AppCompatActivity
                 .position(lat)
                 .title(name + "'s Location")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+        mPerson.setTag(null);
     }
 
     public LatLng getCoords(JSONObject response) throws JSONException {
@@ -432,17 +451,23 @@ public class MapNavDrawer extends AppCompatActivity
         return coord;
     }
 
-    private void changeFAB(FloatingActionButton fab, int icon, int colour){
+    public void changeFAB(FloatingActionButton fab, int icon, int colour){
         fab.setImageResource(icon);
         fab.setBackgroundColor(colour);
     }
 
     private void switchBottomSheet(){
-        TextView locname = (TextView)findViewById(R.id.textViewLocName);
-        TextView locdetails = (TextView)findViewById(R.id.textViewLocDetails);
-        TextView loctitle = (TextView)findViewById(R.id.textViewWaypoint);
+        TextView locname = (TextView)findViewById(R.id.bs_locname);
+        TextView locdetails = (TextView)findViewById(R.id.bs_locdetails);
+        TextView loctitle = (TextView)findViewById(R.id.bs_title);
         locdetails.setText(mWaypoint.getPosition().toString());
         loctitle.setText(mWaypoint.getTitle());
         locname.setText(mWaypoint.getTitle());
+    }
+
+    @Override
+    public void update(Observable o, Object data) {
+        Location location = (Location)data;
+
     }
 }

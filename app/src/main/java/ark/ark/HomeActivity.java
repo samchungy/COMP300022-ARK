@@ -1,6 +1,5 @@
 package ark.ark;
 
-import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,14 +8,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.support.v4.app.Fragment;
 import android.view.View;
-import android.widget.Toast;
+
 import ark.ark.Authentication.ARK_auth;
 
+import ark.ark.Map.MapNavDrawer;
 import ark.ark.Profile.LoginActivity;
 import ark.ark.UserLocation.LocationSingleton;
 import butterknife.ButterKnife;
 import ark.ark.Chat.ChatFragment;
-import butterknife.OnClick;
 import layout.HomeFragment;
 import layout.MapFragment;
 

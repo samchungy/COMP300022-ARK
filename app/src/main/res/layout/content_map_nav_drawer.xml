@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="ark.ark.MapNavDrawer"
+    tools:context="ark.ark.Map.MapNavDrawer"
     tools:showIn="@layout/app_bar_map_nav_drawer">
     <include layout="@layout/bottom_sheet_map"/>
 

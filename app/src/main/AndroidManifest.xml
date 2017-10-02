@@ -52,7 +52,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MapNavDrawer"
+            android:name=".Map.MapNavDrawer"
             android:label="@string/title_activity_map_nav_drawer"
             android:theme="@style/AppTheme.NoActionBar" />
         <!--

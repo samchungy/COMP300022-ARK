@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ark.ark.MapNavDrawer">
+    tools:context="ark.ark.Map.MapNavDrawer">
 
     <include layout="@layout/content_map_nav_drawer"
         android:id="@+id/include" />
