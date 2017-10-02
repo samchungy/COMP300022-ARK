@@ -3,6 +3,10 @@ package ark.ark.Map;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
@@ -439,10 +443,12 @@ public class MapNavDrawer extends AppCompatActivity
 
 
     public void showPerson(LatLng lat, String name){
+        Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         mPerson = mMap.addMarker(new MarkerOptions()
                 .position(lat)
                 .title(name + "'s Location")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
+        );
         mPerson.setTag(null);
     }
 
@@ -453,21 +459,33 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void changeFAB(FloatingActionButton fab, int icon, int colour){
         fab.setImageResource(icon);
-        fab.setBackgroundColor(colour);
-    }
-
-    private void switchBottomSheet(){
-        TextView locname = (TextView)findViewById(R.id.bs_locname);
-        TextView locdetails = (TextView)findViewById(R.id.bs_locdetails);
-        TextView loctitle = (TextView)findViewById(R.id.bs_title);
-        locdetails.setText(mWaypoint.getPosition().toString());
-        loctitle.setText(mWaypoint.getTitle());
-        locname.setText(mWaypoint.getTitle());
     }
 
     @Override
     public void update(Observable o, Object data) {
         Location location = (Location)data;
 
+    }
+
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+        Bitmap bitmap = null;
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if(bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 }
