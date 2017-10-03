@@ -22,6 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.R;
 import ark.ark.ToastUtils;
 
 public class LocationUpdateService extends Service {
@@ -117,7 +118,7 @@ public class LocationUpdateService extends Service {
         if (currentLocation.getInstance().getLocation() != null) {
             RequestQueue queue = Volley.newRequestQueue(this);
             Location locationToSend = currentLocation.getInstance().getLocation();
-            String server ="52.65.97.117";
+            String server = getString(R.string.serverip);
 
             String path = "/locations/update?";
             String requestURL = "http://" + server + path +"email="+ ARK_auth.fetchUserEmail(this)

@@ -9,10 +9,16 @@ import android.view.MenuItem;
 import android.support.v4.app.Fragment;
 import android.view.View;
 
+import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.GroupLocationUpdateService;
+import ark.ark.Groups.UserRequestsUtil;
+
+import android.widget.Toast;
 import ark.ark.Authentication.ARK_auth;
 
 import ark.ark.Map.MapNavDrawer;
 import ark.ark.Profile.LoginActivity;
+
 import ark.ark.UserLocation.LocationSingleton;
 import butterknife.ButterKnife;
 import ark.ark.Chat.ChatFragment;
@@ -23,12 +29,32 @@ import layout.MapFragment;
 // the main activity
 public class HomeActivity extends AppCompatActivity {
 
+
+
+    private static final int REQUEST_LOCATION = 2;
+    /*
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
+            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
+    private Integer mUpdateCount = 1;
+    private LocationSingleton currentLocation;
+    private FusedLocationProviderClient mFusedLocationClient;
+    */
+
+    Intent mLocUpdateService;
+    Intent mGroupLocUpdateService;
+
     private Fragment frag_home = new HomeFragment();
     private Fragment frag_chat = new ChatFragment();
     private Fragment frag_map = new MapFragment();
     private Fragment frag_profile = new ProfileFragment();
 
     private LocationSingleton currentLocation;
+
+    private CurrentUser mCurrentUser;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -70,7 +96,15 @@ public class HomeActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        // switch to home page after entering the app if the user is logged in. Otherwise, switch to log in screen
+        //TODO
+
+        mLocUpdateService = new Intent(this, LocationUpdateService.class);
+        mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
+
+        // switch to home page after entering the app
+        switchTo("Home");
+
+        mCurrentUser = mCurrentUser.getInstance();
 
         //showToast(ARK_auth.fetchSessionId(getApplicationContext()));
         if(ARK_auth.fetchSessionId(getApplicationContext()).equals("no session id")) {
@@ -87,6 +121,24 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        //lblObs.setText("hello");
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Check Permissions Now
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION);
+        } else {
+            startService(mLocUpdateService);
+
+            /*
+            locationInitialise();
+            */
+        }
+        startService(mGroupLocUpdateService);
+        //lblLoc.setText("connected");
     }
 
     @Override
@@ -126,15 +178,25 @@ public class HomeActivity extends AppCompatActivity {
 
     // test switching users
     public void austinTest_switchToUser1(View v) {
+        /*
         ARK_auth.storeUserEmail("user1@user1.com", this);
         showToast("congrats folk! You switched to user1!");
-        //showToast(ARK_auth.fetchUserEmail(this));
+
+        showToast(ARK_auth.fetchUserEmail(this));
+        */
+        mCurrentUser.logOn("user1@user1.com");
+        UserRequestsUtil.initialiseCurrentUser(this);
+
+
+        showToast(mCurrentUser.getEmail());
+        //showToast(mCurrentUser.getActiveGroup().getId());
     }
 
     public void austinTest_switchToUser2(View v) {
-        ARK_auth.storeUserEmail("user2@user2.com", this);
-        showToast("ughhhh! You switched to user2!");
-        //showToast(ARK_auth.fetchUserEmail(this));
+
+        mCurrentUser.logOn("user2@user2.com");
+        UserRequestsUtil.initialiseCurrentUser(this);
+        //UserRequestsUtil.updateActiveGroupLocations(this);
     }
 
     public void allowUpdateLocation(View v){
