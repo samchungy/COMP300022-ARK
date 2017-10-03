@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 
 import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.GroupLocationUpdateService;
 import ark.ark.Groups.UserRequestsUtil;
 import ark.ark.UserLocation.LocationSingleton;
 import ark.ark.UserLocation.LocationUpdateService;
@@ -24,6 +25,7 @@ import layout.MapFragment;
 
 // the main activity
 public class HomeActivity extends AppCompatActivity {
+
 
 
     private static final int REQUEST_LOCATION = 2;
@@ -40,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
     */
 
     Intent mLocUpdateService;
+    Intent mGroupLocUpdateService;
 
     private Fragment frag_home = new HomeFragment();
     private Fragment frag_chat = new ChatFragment();
@@ -101,7 +104,7 @@ public class HomeActivity extends AppCompatActivity {
         //TODO
 
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
-
+        mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
 
 
 
@@ -124,11 +127,12 @@ public class HomeActivity extends AppCompatActivity {
                     REQUEST_LOCATION);
         } else {
             startService(mLocUpdateService);
+
             /*
             locationInitialise();
             */
         }
-
+        startService(mGroupLocUpdateService);
         //lblLoc.setText("connected");
 
     }

@@ -160,7 +160,7 @@ public class UserRequestsUtil {
                         public void onResponse(String response) {
                             // after getting response, try reading the json
                             CurrentUser mUser = CurrentUser.getInstance();
-                            ToastUtils.showToast(response, context);
+                            //ToastUtils.showToast(response, context);
                             try {
                                 JSONObject res = new JSONObject(response);
 
@@ -179,9 +179,9 @@ public class UserRequestsUtil {
                                         Friend f = new Friend(email);
                                         mUser.getActiveGroup().updateFriend(f);
                                         mUser.getActiveGroup().setLocation(email, loc);
-                                        ToastUtils.showToast(email, context);
+                                        //ToastUtils.showToast(email, context);
                                     }
-                                    ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
+                                    //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
 
 
                                 } else {
