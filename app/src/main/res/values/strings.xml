@@ -38,6 +38,8 @@
     <string name="map_hideinAR">Hide</string>
     <string name="map_message">Message</string>
     <string name="map_Navigate">Navigate</string>
+    <string name="map_dist_away">Away</string>
+    <string name="map_dist_from_waypoint">from Waypoint</string>
     <string name="waypointremoved">Waypoint Removed</string>
     <string name="undo_string">Undo</string>
 

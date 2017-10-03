@@ -35,6 +35,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -49,6 +51,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,13 +82,14 @@ public class MapNavDrawer extends AppCompatActivity
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Marker mWaypoint = null;
     private Geocoder geocoder;
-    Marker mPerson;
-    String waypointloc;
+    private Marker mPerson;
+    private MapWaypoint undobk;
     String otheremail;
     String useremail;
-    LatLng undobk;
     private LocationSingleton mCurrentLocation;
     private BottomSheet bs;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private Location mylocation;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
 
@@ -113,13 +117,12 @@ public class MapNavDrawer extends AppCompatActivity
         View bs_view = findViewById(R.id.bottom_sheet);
         bs = new BottomSheet(bs_view, geocoder);
 
-        bs_view.setOnClickListener(new View.OnClickListener(){
+        bs_view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(bs.is_collapsed()){
-                   bs.set_expanded();
-                }
-                else{
+                if (bs.is_collapsed()) {
+                    bs.set_expanded();
+                } else {
                     bs.set_collapsed();
                 }
             }
@@ -129,7 +132,7 @@ public class MapNavDrawer extends AppCompatActivity
             @Override
             public void onStateChanged(View bottomSheet, int newState) {
                 FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-                if(bs.is_hidden()){
+                if (bs.is_hidden()) {
                     changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
                 }
             }
@@ -150,15 +153,13 @@ public class MapNavDrawer extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (bs.is_collapsed()){
+                if (bs.is_collapsed()) {
                     bs.set_expanded();
-                }
-                else if(mWaypoint != null){
+                } else if (mWaypoint != null) {
                     bs.set_place_mode(findViewById(android.R.id.content),
-                            (MapWaypoint) mWaypoint.getTag());
+                            (MapWaypoint) mWaypoint.getTag(), get_location());
                     bs.set_collapsed();
-                }
-                else{
+                } else {
                     selectPlace(view);
                 }
             }
@@ -177,13 +178,12 @@ public class MapNavDrawer extends AppCompatActivity
         useremail = ARK_auth.fetchUserEmail(this);
         mTextView.setText(useremail);
 
-        if (useremail == "user1@user1.com"){
+        if (useremail == "user1@user1.com") {
             otheremail = "user2@user2.com";
-        }
-        else{
+        } else {
             otheremail = "user1@user1.com";
         }
-        String url ="http://52.65.97.117/locations/show?email=" + otheremail;
+        String url = "http://52.65.97.117/locations/show?email=" + otheremail;
 
         // Request a json response from the provided URL.
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -193,7 +193,7 @@ public class MapNavDrawer extends AppCompatActivity
                     public void onResponse(JSONObject response) {
                         try {
                             JSONObject loc = response.getJSONObject("location");
-                            showPerson(new LatLng(loc.getDouble("lat"),loc.getDouble("lng")),otheremail);
+                            showPerson(new LatLng(loc.getDouble("lat"), loc.getDouble("lng")), otheremail);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -211,6 +211,7 @@ public class MapNavDrawer extends AppCompatActivity
         queue.add(jsObjRequest);
 
         mCurrentLocation.getInstance().addObserver(this);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
     }
 
@@ -219,14 +220,11 @@ public class MapNavDrawer extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        }
-        else if(bs.is_expanded()){
-                bs.set_collapsed();
-        }
-        else if(bs.is_collapsed()){
+        } else if (bs.is_expanded()) {
+            bs.set_collapsed();
+        } else if (bs.is_collapsed()) {
             bs.set_hidden();
-        }
-        else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -277,6 +275,7 @@ public class MapNavDrawer extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -315,10 +314,9 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     public void onMapClick(LatLng latLng) {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        if(bs.is_expanded()){
+        if (bs.is_expanded()) {
             bs.set_collapsed();
-        }
-        else{
+        } else {
             fab.setImageResource(R.drawable.map_marker_radius);
             bs.set_hidden();
         }
@@ -331,20 +329,22 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        TextView locname = (TextView)findViewById(R.id.bs_locname);
-        TextView locdetails = (TextView)findViewById(R.id.bs_locdetails);
-        TextView loctitle = (TextView)findViewById(R.id.bs_title);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        locname.setText(marker.getTitle());
-        loctitle.setText(marker.getTitle());
-
-        if(marker.getTag() instanceof MapWaypoint){
-            bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) marker.getTag());
+        if (marker.getTag() instanceof MapWaypoint) {
+            bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) marker.getTag(),
+                    get_location());
             changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
-        }
-        else{
-            bs.set_person_mode(findViewById(android.R.id.content), marker);
+        } else {
+            if (mWaypoint != null){
+                bs.set_person_mode(findViewById(android.R.id.content), marker, get_location(),
+                        (MapWaypoint) mWaypoint.getTag());
+            }
+            else{
+                bs.set_person_mode(findViewById(android.R.id.content), marker, get_location(),
+                        null);
+            }
+
             changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
         }
 
@@ -378,7 +378,7 @@ public class MapNavDrawer extends AppCompatActivity
         int PLACE_PICKER_REQUEST = 1;
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(this,data);
+                Place place = PlacePicker.getPlace(this, data);
                 setWaypoint(place);
             }
         }
@@ -388,38 +388,42 @@ public class MapNavDrawer extends AppCompatActivity
      * Sets a waypoint for the group
      * @param place
      */
-    public void setWaypoint(Place place){
-        MapWaypoint newWaypoint;
+    public void setWaypoint(Place place) {
 
         if (mWaypoint != null) {
             mWaypoint.remove();
             mWaypoint = null;
         }
 
-        mWaypoint = mMap.addMarker(new MarkerOptions().position(place.getLatLng())
-                .title(useremail +"'s Hotspot"));
-        mWaypoint.setTag(newWaypoint = new MapWaypoint(useremail + "'s Hotspot",place.getLatLng(),
+        add_waypoint_marker(place.getLatLng(), useremail + "'s Hotspot",
+                new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
                         place.getName().toString(), place.getAddress().toString()));
 
-        waypointloc = place.getAddress().toString();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
-
-        bs.set_place_mode(findViewById(android.R.id.content), newWaypoint);
         bs.set_collapsed();
+    }
+
+    public void add_waypoint_marker(LatLng pos, String title, MapWaypoint mw) {
+        mWaypoint = mMap.addMarker(new MarkerOptions()
+                .position(pos)
+                .title(title)
+        );
+        mWaypoint.setTag(mw);
+
+        bs.set_place_mode(findViewById(android.R.id.content), mw, get_location());
     }
 
     /**
      * Deletes the current waypoint
      * @param view
      */
-    public void deleteWaypoint(View view){
+    public void deleteWaypoint(View view) {
         if (mWaypoint != null) {
-            undobk = mWaypoint.getPosition();
+            undobk = (MapWaypoint) mWaypoint.getTag();
             mWaypoint.remove();
             mWaypoint = null;
         }
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setVisibility(view.GONE);
+        hide_fab();
 
         bs.set_hidden();
 
@@ -428,21 +432,20 @@ public class MapNavDrawer extends AppCompatActivity
         mySnackbar.setAction(R.string.undo_string, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mWaypoint = mMap.addMarker(new MarkerOptions().position(undobk)
-                        .title(useremail + "'s Waypoint"));
+                add_waypoint_marker(undobk.getLocation(), undobk.getTitle(), undobk);
+
             }
         }).addCallback(new Snackbar.Callback() {
             @Override
             public void onDismissed(Snackbar mySnackbar, int event) {
-                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-                fab.show();
+                show_fab();
             }
         });
         mySnackbar.show();
     }
 
 
-    public void showPerson(LatLng lat, String name){
+    public void showPerson(LatLng lat, String name) {
         Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         mPerson = mMap.addMarker(new MarkerOptions()
                 .position(lat)
@@ -457,27 +460,37 @@ public class MapNavDrawer extends AppCompatActivity
         return coord;
     }
 
-    public void changeFAB(FloatingActionButton fab, int icon, int colour){
+    public void changeFAB(FloatingActionButton fab, int icon, int colour) {
         fab.setImageResource(icon);
     }
 
     @Override
     public void update(Observable o, Object data) {
-        Location location = (Location)data;
+        Location location = (Location) data;
+        if (bs.is_place_mode()) {
+            bs.set_distance_waypoint(findViewById(android.R.id.content),
+                    new LatLng(location.getLatitude(), location.getLongitude()),
+                    mWaypoint.getPosition()
+            );
+        } else {
+            bs.set_distance_person(findViewById(android.R.id.content), location,
+                    mPerson.getPosition(), (MapWaypoint) mWaypoint.getTag()
+            );
+        }
 
     }
 
-    public static Bitmap drawableToBitmap (Drawable drawable) {
+    public static Bitmap drawableToBitmap(Drawable drawable) {
         Bitmap bitmap = null;
 
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if(bitmapDrawable.getBitmap() != null) {
+            if (bitmapDrawable.getBitmap() != null) {
                 return bitmapDrawable.getBitmap();
             }
         }
 
-        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
             bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
         } else {
             bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -487,5 +500,33 @@ public class MapNavDrawer extends AppCompatActivity
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
+    }
+
+    private Location get_location() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        }
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            mylocation = location;
+                        }
+                    }
+                });
+        return mylocation;
+    }
+
+    public void hide_fab(){
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setVisibility(View.GONE);
+    }
+
+    public void show_fab(){
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setVisibility(View.VISIBLE);
     }
 }

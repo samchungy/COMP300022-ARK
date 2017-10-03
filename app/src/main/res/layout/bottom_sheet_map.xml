@@ -53,6 +53,14 @@
                 android:layout_height="wrap_content"
                 android:text=""
                 android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/bs_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@android:color/black" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -70,7 +78,6 @@
                 android:layout_height="100dp"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/ic_visibility_off_black_24dp"
-                android:onClick="selectPlace"
                 android:text="@string/map_hideinAR" />
 
             <Button
@@ -80,7 +87,6 @@
                 android:layout_height="100dp"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/ic_chat_black_24dp"
-                android:onClick="deleteWaypoint"
                 android:text="@string/map_message" />
 
             <Button
@@ -133,6 +139,7 @@
         </LinearLayout>
 
     </LinearLayout>
+
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

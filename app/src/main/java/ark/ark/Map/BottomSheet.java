@@ -1,12 +1,13 @@
 package ark.ark.Map;
 
-import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.support.design.widget.BottomSheetBehavior;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import java.io.IOException;
@@ -19,11 +20,12 @@ import ark.ark.R;
  */
 public class BottomSheet extends MapNavDrawer {
 
-    private static final int PEEK_HEIGHT = 300;
+    private static final int PEEK_HEIGHT = 340;
     private static final int MAX_RESULTS = 1;
 
     private BottomSheetBehavior mBottomSheetBehavior;
     private Geocoder geocoder;
+    private boolean placemode = false;
 
     /**
      *
@@ -57,19 +59,27 @@ public class BottomSheet extends MapNavDrawer {
     /**
      * Changes bottom sheet to Place Mode.
      */
-    public void set_place_mode(View v, MapWaypoint waypoint){
+    public void set_place_mode(View v, MapWaypoint waypoint, Location user){
         View place_layout = v.findViewById(R.id.place_buttons);
         View person_layout = v.findViewById(R.id.person_buttons);
-
-        set_text(waypoint.getTitle(),waypoint.getNam(),waypoint.getDetails(), v);
+        set_text(waypoint.getTitle(),waypoint.getNam(),waypoint.getDetails(),v);
+        if (user != null){
+            set_distance_waypoint(v,new LatLng(user.getLatitude(),user.getLongitude()),
+                    waypoint.getLocation());
+        }
         person_layout.setVisibility(View.GONE);
         place_layout.setVisibility(View.VISIBLE);
+        placemode = true;
     }
 
     /**
      * Changes bottom sheet to Person Mode.
      */
-    public void set_person_mode(View v, Marker marker){
+    public void set_person_mode(View v, Marker marker, Location user, MapWaypoint wp){
+
+        View place_layout = v.findViewById(R.id.place_buttons);
+        View person_layout = v.findViewById(R.id.person_buttons);
+
         String featurename = null;
         List<Address> addresses = null;
 
@@ -79,8 +89,6 @@ public class BottomSheet extends MapNavDrawer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        View place_layout = v.findViewById(R.id.place_buttons);
-        View person_layout = v.findViewById(R.id.person_buttons);
 
         if((featurename = addresses.get(0).getFeatureName()) != null){
             featurename = addresses.get(0).getLocality() +", "+ addresses.get(0).getCountryName();
@@ -90,6 +98,10 @@ public class BottomSheet extends MapNavDrawer {
                 addresses.get(0).getLocality() + ", " + addresses.get(0).getPostalCode(), v);
         place_layout.setVisibility(View.GONE);
         person_layout.setVisibility(View.VISIBLE);
+
+        set_distance_person(v, user,
+                    marker.getPosition(),wp);
+        placemode = false;
     }
 
     /**
@@ -143,6 +155,68 @@ public class BottomSheet extends MapNavDrawer {
      */
     public BottomSheetBehavior get_bsb(){
         return mBottomSheetBehavior;
+    }
+
+    /**
+     * Sets the distance of user from another user + the distance to the waypoint
+     * @param v View
+     * @param user User
+     * @param other Other User
+     * @param wp Waypoint
+     */
+    public void set_distance_person(View v, Location user, LatLng other, MapWaypoint wp){
+        TextView distance = (TextView) v.findViewById(R.id.bs_distance);
+        String distancetext = "";
+        Location usera = new Location("Point A");
+        Location userb = new Location("Point B");
+
+        userb.setLatitude(other.latitude);
+        userb.setLongitude(other.longitude);
+
+        if(user != null){
+            usera.setLatitude(user.getLatitude());
+            usera.setLongitude(user.getLongitude());
+            distancetext += Math.round(usera.distanceTo(userb))+" metres Away. ";
+        }
+        if (wp != null){
+            distancetext += Math.round(distance_to_waypoint(other,
+                    new LatLng(wp.getLocation().latitude,wp.getLocation().longitude)))+" metres from Waypoint.";
+        }
+
+        distance.setText(distancetext);
+    }
+
+    /**
+     * Set the distance form user to the waypoint
+     * @param v View
+     * @param user User
+     * @param wp Waypoint
+     */
+    public void set_distance_waypoint(View v, LatLng user, LatLng wp){
+        TextView distance = (TextView) v.findViewById(R.id.bs_distance);
+        distance.setText(Math.round(distance_to_waypoint(user,wp))+" metres Away.");
+    }
+
+    /**
+     * Return the distance to the waypoint
+     * @param user User
+     * @param wp Waypoint
+     * @return Distance (float)
+     */
+    private float distance_to_waypoint(LatLng user, LatLng wp){
+        Location usera = new Location("Point A");
+        Location waypoint = new Location("Point C");
+        usera.setLatitude(user.latitude);
+        usera.setLongitude(user.longitude);
+        waypoint.setLatitude(wp.latitude);
+        waypoint.setLongitude(wp.longitude);
+
+        return usera.distanceTo(waypoint);
+
+    }
+
+    public boolean is_place_mode(){
+        return placemode;
     }
 
 }

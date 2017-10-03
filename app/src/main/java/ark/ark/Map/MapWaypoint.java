@@ -30,7 +30,7 @@ public class MapWaypoint {
         return Place_title;
     }
 
-    public LatLng getLoation() {
+    public LatLng getLocation() {
         return Place_location;
     }
 
