@@ -57,14 +57,22 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.algo.Algorithm;
+import com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Random;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.UserLocation.ArkMarker;
 
 public class MapNavDrawer extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -75,6 +83,8 @@ public class MapNavDrawer extends AppCompatActivity
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMarkerClickListener{
 
+    private ClusterManager<ArkMarker> mClusterManager;
+    private Algorithm<ArkMarker> clusterManagerAlgorithm;
     private GoogleMap mMap;
     private UiSettings uiSettings;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -457,7 +467,47 @@ public class MapNavDrawer extends AppCompatActivity
         locname.setText(mWaypoint.getTitle());
     }
 
+    private void initiateClusterer() {
+        mClusterManager = new ClusterManager<ArkMarker>(this, mMap);
+        clusterManagerAlgorithm = new NonHierarchicalDistanceBasedAlgorithm();
+        mClusterManager.setAlgorithm(clusterManagerAlgorithm);
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        addMarkers();
+    }
+
+    private void addMarkers() {
+        final LatLng unimelb = new LatLng(-37.7963646, 144.9589851);
+
+        for (int i = 0; i < 5; i++) {
+
+            Random r = new Random();
+            double deltaLAT = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
+            double deltaLNG = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
+
+            LatLng nextPos = new LatLng(unimelb.latitude + deltaLAT, unimelb.longitude + deltaLNG);
+            ArkMarker add = new ArkMarker(i, nextPos);
+            mClusterManager.addItem(add);
+        }
+    }
+
+    private class MarkerRenderer extends DefaultClusterRenderer<ArkMarker> {
+
+        public MarkerRenderer() {
+            super(getApplicationContext(), mMap, mClusterManager);
+        }
+
+        @Override
+        protected void onClusterRendered(Cluster<ArkMarker> cluster, Marker marker) {
+            super.onClusterRendered(cluster, marker);
+        }
+    }
+
+
+
     public void groupSimulation(View view) {
+
+        /*
 
         final ArrayList<Marker> group1 = new ArrayList<Marker>();
 
@@ -486,7 +536,13 @@ public class MapNavDrawer extends AppCompatActivity
         group1.add(user4);
         group1.add(user5);
 
+        */
 
+        initiateClusterer();
+
+        Collection<ArkMarker> temp = clusterManagerAlgorithm.getItems();
+        final ArrayList<ArkMarker> users = new ArrayList<>();
+        users.addAll(temp);
 
         final Handler handler = new Handler();
         final Interpolator interpolator = new LinearInterpolator();
@@ -494,17 +550,19 @@ public class MapNavDrawer extends AppCompatActivity
         final long start = SystemClock.uptimeMillis();
         final float duration = 5000;
 
-        final boolean hideMarker = false;
+
+        for(int i = 0; i < users.size(); i++) {
+
+            final int j = i;
 
 
-        for(int i = 0; i < group1.size(); i++) {
-
-            final int member = i;
-
-            handler.post(new Runnable() {
+            /* handler.post(new Runnable() {
                 Random r = new Random();
                 double deltaLAT = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
                 double deltaLNG = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
+
+
+                // Based on https://github.com/shohrabuddin/move_markers_in_map_smoothly
 
                 @Override
                 public void run() {
@@ -512,30 +570,23 @@ public class MapNavDrawer extends AppCompatActivity
                     long elapsed = SystemClock.uptimeMillis() - start;
                     float t = interpolator.getInterpolation((float) elapsed/duration);
 
-                    double newlat = (t * (group1.get(member).getPosition().latitude + deltaLAT))
-                            + ((1 - t) * group1.get(member).getPosition().latitude);
-                    double newlng = (t * (group1.get(member).getPosition().longitude + deltaLNG))
-                            + ((1 - t) * group1.get(member).getPosition().longitude);
+                    double newlat = (t * users.get(j).getPosition().latitude + deltaLAT)
+                            + ((1 - t) * users.get(j).getPosition().latitude);
+                    double newlng = (t * users.get(j).getPosition().longitude + deltaLNG)
+                            + ((1 - t) * users.get(j).getPosition().longitude);
 
                     LatLng nextPos = new LatLng(newlat, newlng);
 
-                    group1.get(member).setPosition(nextPos);
-
+                    users.get(j).setPosition(nextPos);
 
                     if(t < 1.0) {
                         handler.postDelayed(this, 16);
-                    } else {
-                        if(hideMarker) {
-                            group1.get(member).setVisible(false);
-                        } else {
-                            group1.get(member).setVisible(true);
-                        }
                     }
-
                 }
+            }); */
 
-            });
         }
+
 
 
     }
