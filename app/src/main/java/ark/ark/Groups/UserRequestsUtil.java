@@ -61,7 +61,7 @@ public class UserRequestsUtil {
 
                                 if (res.getString("success").equals("ok")) {
                                     for (int i = 0; i < res.getJSONArray("groups").length(); i++) {
-                                        Group g = new Group(res.getJSONArray("groups").getString(i));
+                                        Group g = new Group(res.getJSONArray("groups").getString(i), mUser.getEmail());
                                         mUser.addGroup(g);
                                     }
                                 updateActiveGroupLocations(context);
@@ -115,7 +115,7 @@ public class UserRequestsUtil {
 
                                 if (res.getString("success").equals("ok")) {
                                     for (int i = 0; i < res.getJSONArray("groups").length(); i++) {
-                                        Group g = new Group(res.getJSONArray("groups").getString(i));
+                                        Group g = new Group(res.getJSONArray("groups").getString(i), mUser.getEmail());
                                         mUser.addGroup(g);
                                     }
 

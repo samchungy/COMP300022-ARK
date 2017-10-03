@@ -2,6 +2,7 @@ package ark.ark.Groups;
 
 import android.location.Location;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
@@ -13,14 +14,16 @@ import java.util.List;
 public class Group {
     private static int nGroups = 0;
     private String groupName;
+    private String ownerEmail;
 
     private String groupID;
     private HashMap<String, Friend> friendsInGroup = new HashMap<>();
 
-    public Group(String id) {
+    public Group(String id, String ownerEmail) {
         nGroups += 1;
         groupName = "Group " + nGroups;
         groupID = id;
+        this.ownerEmail = ownerEmail;
     }
 
     public HashMap<String, Friend> getFriends() {
@@ -31,10 +34,13 @@ public class Group {
         return groupID;
     }
 
+    public String getOwner() { return ownerEmail; }
+
     /*
     @param
     dict: HashMap of email and location of users
      */
+    /*
     public void setLocations(HashMap<String, Location> dict) {
 
         for (String email : dict.keySet()) {
@@ -49,15 +55,19 @@ public class Group {
             }
         }
     }
+    */
 
     public void updateFriend(Friend friend) {
-        if (!friendsInGroup.containsKey(friend.getEmail())) {
+        if (!friendsInGroup.containsKey(friend.getEmail()) && !friend.getEmail().equals(ownerEmail)) {
             friendsInGroup.put(friend.getEmail(), friend);
         }
     }
 
     public void setLocation(String email, Location location) {
-        friendsInGroup.get(email).setLocation(location);
+        if (friendsInGroup.containsKey(email)){
+            friendsInGroup.get(email).setLocation(location);
+        }
+
     }
 
     @Override

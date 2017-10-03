@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Observable;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.ToastUtils;
@@ -22,7 +23,7 @@ import ark.ark.ToastUtils;
  * Created by khtin on 21/09/2017.
  */
 
-public class CurrentUser {
+public class CurrentUser extends Observable{
     private static final CurrentUser ourInstance = new CurrentUser();
     //private String nickname;
     private String email;
@@ -50,6 +51,18 @@ public class CurrentUser {
 
     public Group getActiveGroup() {
         return activeGroup;
+    }
+
+    public void setActiveGroupLocation(String email, Location loc) {
+        activeGroup.setLocation(email, loc);
+        setChanged();
+        notifyObservers();
+    }
+
+    public void updateActiveGroupFriend(Friend friend) {
+        activeGroup.updateFriend(friend);
+        setChanged();
+        notifyObservers();
     }
 
     public boolean isUpdating() {

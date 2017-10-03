@@ -196,6 +196,8 @@ public class HomeActivity extends AppCompatActivity {
         showToast(mCurrentUser.getEmail());
         */
         showToast(mCurrentUser.getActiveGroup().toString());
+        showToast(mCurrentUser.getActiveGroup().getFriends().toString());
+        showToast(mCurrentUser.getActiveGroup().getOwner());
 
         //UserRequestsUtil.updateActiveGroupLocations(this);
     }
