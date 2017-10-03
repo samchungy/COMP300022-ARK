@@ -473,9 +473,15 @@ public class MapNavDrawer extends AppCompatActivity
                     mWaypoint.getPosition()
             );
         } else {
-            bs.set_distance_person(findViewById(android.R.id.content), location,
-                    mPerson.getPosition(), (MapWaypoint) mWaypoint.getTag()
-            );
+            if (mWaypoint != null){
+                bs.set_distance_person(findViewById(android.R.id.content), location,
+                        mPerson.getPosition(), (MapWaypoint) mWaypoint.getTag()
+                );
+            }
+            else{
+                bs.set_distance_person(findViewById(android.R.id.content), location,
+                        mPerson.getPosition(), null);
+            }
         }
 
     }

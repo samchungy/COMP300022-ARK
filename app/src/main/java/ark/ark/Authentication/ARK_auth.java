@@ -49,14 +49,12 @@ public class ARK_auth extends Activity {
 
     public static String fetchUserEmail(Context context) {
         CurrentUser.getInstance().getEmail();
-        /*
         String preferenceName = "system_cache";
         SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
 
         String userEmail = systemCache.getString("user_email", "no user email");
 
         return userEmail;
-        */
     }
 
     public static void clearUserData(Context context) {
