@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/bottom_sheet_layout"
-    tools:context=".MapNavDrawer" >
+    tools:context=".Map.MapNavDrawer" >
 
     <!-- Your content -->
     <include layout="@layout/activity_maps"
@@ -32,7 +32,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textViewWaypoint"
+                android:id="@+id/bs_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/map_waypointtitle"
@@ -40,7 +40,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/textViewLocName"
+                android:id="@+id/bs_locname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
@@ -48,14 +48,60 @@
                 android:textStyle="italic" />
 
             <TextView
-                android:id="@+id/textViewLocDetails"
+                android:id="@+id/bs_locdetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
                 android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/bs_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@android:color/black" />
+
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/person_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom|end"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/button5"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_visibility_off_black_24dp"
+                android:text="@string/map_hideinAR" />
+
+            <Button
+                android:id="@+id/button6"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_chat_black_24dp"
+                android:text="@string/map_message" />
+
+            <Button
+                android:id="@+id/button7"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_navigation_black_24dp"
+                android:text="@string/map_Navigate" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/place_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="bottom|end"
@@ -93,6 +139,7 @@
         </LinearLayout>
 
     </LinearLayout>
+
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

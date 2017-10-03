@@ -2,9 +2,11 @@ package ark.ark;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.support.v4.app.Fragment;
@@ -18,9 +20,11 @@ import ark.ark.Groups.UserRequestsUtil;
 import android.widget.Toast;
 import ark.ark.Authentication.ARK_auth;
 
+import ark.ark.Map.MapNavDrawer;
 import ark.ark.Profile.LoginActivity;
 
 import ark.ark.UserLocation.LocationSingleton;
+import ark.ark.UserLocation.LocationUpdateService;
 import butterknife.ButterKnife;
 import ark.ark.Chat.ChatFragment;
 import butterknife.OnClick;
