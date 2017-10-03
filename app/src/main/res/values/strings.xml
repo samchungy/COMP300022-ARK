@@ -29,7 +29,7 @@
     <string name="password_prompt">Enter your password</string>
     <string name="nickname_prompt">Enter your nickname</string>
     <string name="title_activity_login">Log in</string>
-    <string name="sign_up_prompt">Don\'t have an account? &#13;&#10;Click here to register!</string>
+
 
     <string name="map_removewaypoint">Remove</string>
     <string name="map_editwaypoint">Edit</string>
@@ -37,5 +37,9 @@
     <string name="map_waypointtitle">Ark\'s Waypoint</string>
     <string name="waypointremoved">Waypoint Removed</string>
     <string name="undo_string">Undo</string>
+    <string name="serverip">52.65.97.117</string>
+
+    <string name="sign_up_prompt">Don\'t have an account? &#13;&#10;Click here to register!</string>
+
 
 </resources>

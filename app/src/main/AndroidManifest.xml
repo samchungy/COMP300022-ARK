@@ -76,6 +76,10 @@
         <service
             android:name=".UserLocation.LocationUpdateService"
             android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".Groups.GroupLocationUpdateService"
+            android:enabled="true"
             android:exported="true"></service>
     </application>
 
