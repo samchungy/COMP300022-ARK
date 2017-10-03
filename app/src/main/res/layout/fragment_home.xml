@@ -50,4 +50,12 @@
         android:onClick="austinTest_switchToUser2"
         />
 
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="276dp"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:onClick="logoutButton"
+        />
+
 </LinearLayout>

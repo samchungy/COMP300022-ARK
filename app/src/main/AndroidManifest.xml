@@ -70,9 +70,9 @@
         <activity
             android:name=".ArActivity"
             android:configChanges="screenSize|orientation" />
-        <activity android:name=".Chat.ChatLogActivity" />
+        <activity android:name=".Chat.ChatLogActivity" android:windowSoftInputMode="stateHidden"/>
         <activity android:name=".Profile.ProfileCreationActivity" />
-
+        <activity android:name=".Profile.LoginActivity"></activity>
         <service
             android:name=".UserLocation.LocationUpdateService"
             android:enabled="true"

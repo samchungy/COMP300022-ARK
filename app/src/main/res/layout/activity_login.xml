@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ark.ark.Profile.ProfileCreationActivity"
+    tools:context="ark.ark.Profile.LoginActivity"
     android:gravity="center">
 
     <!-- TODO: Update blank fragment layout -->
@@ -12,11 +12,11 @@
         android:id="@+id/userCreationTiltle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:text="@string/heading_signup"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/create_nickname"
-        app:layout_constraintHorizontal_bias="0.501"
+        android:layout_marginBottom="40dp"
+        android:text="@string/heading_login"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/login_email"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
@@ -27,10 +27,9 @@
         android:ems="10"
         android:hint="@string/email_prompt"
         android:inputType="textEmailAddress"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="@+id/userCreationTiltle"
+        app:layout_constraintRight_toRightOf="@+id/userCreationTiltle"
         app:layout_constraintHorizontal_bias="0.514"
-        android:layout_marginBottom="-2dp"
         app:layout_constraintBottom_toTopOf="@+id/login_password" />
 
     <EditText
@@ -40,34 +39,46 @@
         android:ems="10"
         android:hint="@string/password_prompt"
         android:inputType="textPassword"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintLeft_toLeftOf="@+id/login_email"
+        app:layout_constraintRight_toRightOf="@+id/login_email"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.448" />
 
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:onClick="signUpButton"
-        android:text="Sign Up!"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:onClick="loginButton"
+        android:text="Login"
+        app:layout_constraintLeft_toLeftOf="@+id/login_password"
+        app:layout_constraintRight_toRightOf="@+id/login_password"
         app:layout_constraintTop_toBottomOf="@+id/login_password" />
 
-    <EditText
-        android:id="@+id/create_nickname"
+    <TextView
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/nickname_prompt"
-        android:inputType="textPersonName"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="38dp"
+        android:onClick="goToSignUp"
+        android:text="@string/sign_up_prompt"
+        android:textSize="18sp"
         app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintLeft_toLeftOf="@+id/button"
+        app:layout_constraintRight_toRightOf="@+id/button"
+        app:layout_constraintTop_toBottomOf="@+id/button" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/login_email" />
+        android:layout_marginRight="8dp"
+        android:onClick="LoginAsGuest"
+        android:text="Login as guest"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

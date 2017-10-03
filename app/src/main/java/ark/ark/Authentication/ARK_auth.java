@@ -10,7 +10,7 @@ import ark.ark.Groups.CurrentUser;
 
 public class ARK_auth extends Activity {
     public static void storeSessionId(String sessionId, Context context) {
-        /*
+        
         String preferenceName = "system_cache";
         SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
         SharedPreferences.Editor cacheEditor = systemCache.edit();
@@ -18,7 +18,7 @@ public class ARK_auth extends Activity {
 
         // commit
         cacheEditor.commit();
-        */
+        
     }
 
     public static void storeUserEmail(String userEmail, Context context) {
@@ -36,14 +36,14 @@ public class ARK_auth extends Activity {
 
 
     public static String fetchSessionId(Context context) {
-        /*
+        
         String preferenceName = "system_cache";
         SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
 
         String sessionId = systemCache.getString("session_id", "no session id");
 
         return sessionId;
-        */
+        
     }
 
 
@@ -58,4 +58,18 @@ public class ARK_auth extends Activity {
         return userEmail;
         */
     }
+
+    public static void clearUserData(Context context) {
+        String preferenceName = "system_cache";
+        SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
+        SharedPreferences.Editor cacheEditor = systemCache.edit();
+        cacheEditor.putString("session_id", null);
+        cacheEditor.putString("user_email",null);
+
+        // commit
+        cacheEditor.commit();
+
+    }
+
+
 }

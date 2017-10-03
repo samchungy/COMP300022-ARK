@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:gravity="top"
     tools:context="ark.ark.Chat.ChatLogActivity">
 
@@ -10,7 +10,38 @@
         android:layout_width="match_parent"
         android:id="@+id/austin_MessageListView"
         tools:layout_editor_absoluteY="0dp"
-        tools:layout_editor_absoluteX="8dp">
+        tools:layout_editor_absoluteX="8dp"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/austin_ChatListView_bottomBar">
     </ListView>
 
-</LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/austin_ChatListView_bottomBar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="0dp"
+        android:layout_alignParentBottom="true"
+        >
+        <EditText
+            android:id="@+id/austin_ChatListView_messageTextfield"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:hint="Message here..."
+            android:layout_toLeftOf="@+id/austin_ChatListView_buttonSend"/>
+
+        <Button
+            android:id="@+id/austin_ChatListView_buttonSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="2dp"
+            android:layout_marginBottom="2dp"
+            android:text="Send"
+            android:onClick="onClickSendButton"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>
