@@ -56,10 +56,15 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.Friend;
+import ark.ark.Groups.Group;
 import ark.ark.PermissionUtils;
 import ark.ark.R;
 import ark.ark.UserLocation.LocationSingleton;
@@ -90,6 +95,8 @@ public class MapNavDrawer extends AppCompatActivity
     private BottomSheet bs;
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mylocation;
+    private HashMap<String, Marker> mGroup;
+    private CurrentUser curruser;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
 
@@ -178,37 +185,48 @@ public class MapNavDrawer extends AppCompatActivity
         useremail = ARK_auth.fetchUserEmail(this);
         mTextView.setText(useremail);
 
-        if (useremail == "user1@user1.com") {
-            otheremail = "user2@user2.com";
-        } else {
-            otheremail = "user1@user1.com";
+//        if (useremail == "user1@user1.com") {
+//            otheremail = "user2@user2.com";
+//        } else {
+//            otheremail = "user1@user1.com";
+//        }
+//        String url = "http://52.65.97.117/locations/show?email=" + otheremail;
+//
+//        // Request a json response from the provided URL.
+//        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+//                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+//
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        try {
+//                            JSONObject loc = response.getJSONObject("location");
+//                            set_person_marker(new LatLng(loc.getDouble("lat"), loc.getDouble("lng")), otheremail);
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//
+//                }, new Response.ErrorListener() {
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        // TODO Auto-generated method stub
+//
+//                    }
+//                });
+//        // Add the request to the RequestQueue.
+//        queue.add(jsObjRequest);
+        curruser = CurrentUser.getInstance();
+        curruser.addObserver(this);
+        Group group = curruser.getActiveGroup();
+        if (group != null){
+            if (group.getFriends() != null){
+                for(Map.Entry<String, Friend> entry : group.getFriends().entrySet()){
+                    entry.getValue().getLocation();
+                }
+            }
         }
-        String url = "http://52.65.97.117/locations/show?email=" + otheremail;
 
-        // Request a json response from the provided URL.
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONObject loc = response.getJSONObject("location");
-                            showPerson(new LatLng(loc.getDouble("lat"), loc.getDouble("lng")), otheremail);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });
-        // Add the request to the RequestQueue.
-        queue.add(jsObjRequest);
 
         mCurrentLocation.getInstance().addObserver(this);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -445,14 +463,16 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
 
-    public void showPerson(LatLng lat, String name) {
+    public void set_person_marker(LatLng lat, String name) {
         Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
+        int distance = 0;
         mPerson = mMap.addMarker(new MarkerOptions()
                 .position(lat)
                 .title(name + "'s Location")
                 .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
         );
-        mPerson.setTag(null);
+        mPerson.setTag(distance);
+        mGroup.put(name,mPerson);
     }
 
     public LatLng getCoords(JSONObject response) throws JSONException {
@@ -473,6 +493,7 @@ public class MapNavDrawer extends AppCompatActivity
                     mWaypoint.getPosition()
             );
         } else {
+
             if (mWaypoint != null){
                 bs.set_distance_person(findViewById(android.R.id.content), location,
                         mPerson.getPosition(), (MapWaypoint) mWaypoint.getTag()
@@ -484,6 +505,12 @@ public class MapNavDrawer extends AppCompatActivity
             }
         }
 
+    }
+
+    private void update_distances(){
+        for(Map.Entry<String, Marker> entry : mGroup.entrySet()){
+            entry.getValue().get
+        }
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {

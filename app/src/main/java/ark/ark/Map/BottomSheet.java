@@ -57,7 +57,10 @@ public class BottomSheet extends MapNavDrawer {
     }
 
     /**
-     * Changes bottom sheet to Place Mode.
+     * Set place mode
+     * @param v
+     * @param waypoint
+     * @param user
      */
     public void set_place_mode(View v, MapWaypoint waypoint, Location user){
         View place_layout = v.findViewById(R.id.place_buttons);
@@ -94,8 +97,7 @@ public class BottomSheet extends MapNavDrawer {
             featurename = addresses.get(0).getLocality() +", "+ addresses.get(0).getCountryName();
         }
 
-        set_text(marker.getTitle(),featurename,addresses.get(0).getAddressLine(0) +", "+
-                addresses.get(0).getLocality() + ", " + addresses.get(0).getPostalCode(), v);
+        set_text(marker.getTitle(),featurename,addresses.get(0).getAddressLine(0), v);
         place_layout.setVisibility(View.GONE);
         person_layout.setVisibility(View.VISIBLE);
 
