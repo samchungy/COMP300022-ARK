@@ -218,7 +218,9 @@ public class MapNavDrawer extends AppCompatActivity
 
         mGroup = new HashMap<>();
 
-        mCurrentLocation.getInstance().addObserver(this);
+        mCurrentLocation = LocationSingleton.getInstance();
+        mCurrentLocation.addObserver(this);
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
@@ -300,7 +302,7 @@ public class MapNavDrawer extends AppCompatActivity
                 for(Map.Entry<String, Friend> entry : group.getFriends().entrySet()){
                     LatLng loc = new LatLng(entry.getValue().getLocation().getLatitude(),
                             entry.getValue().getLocation().getLongitude());
-                    set_person_marker(loc,entry.getValue().getEmail() + "'s Location.");
+                    set_person_marker(loc,entry.getValue().getEmail());
                 }
             }
         }
@@ -356,11 +358,11 @@ public class MapNavDrawer extends AppCompatActivity
         } else {
             if (mWaypoint != null){
                 bs.set_person_mode(findViewById(android.R.id.content), marker, get_location(),
-                        (MapWaypoint) mWaypoint.getTag());
+                        (MapWaypoint) mWaypoint.getTag(),(String) marker.getTag());
             }
             else{
                 bs.set_person_mode(findViewById(android.R.id.content), marker, get_location(),
-                        null);
+                        null, (String) marker.getTag());
             }
 
             changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
@@ -468,10 +470,10 @@ public class MapNavDrawer extends AppCompatActivity
         Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         mPerson = mMap.addMarker(new MarkerOptions()
                 .position(lat)
-                .title(name)
+                .title(name +  "'s Location.")
                 .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
         );
-        mPerson.setTag(null);
+        mPerson.setTag(name);
         mGroup.put(name,mPerson);
     }
 
@@ -481,16 +483,43 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void update(Observable o, Object data) {
-        if (o == curruser){
-            update_position(curruser.getActiveGroup().getFriends());
+        HashMap<String, Friend> friendslist = null;
+        if (curruser.getActiveGroup() != null) {
+            friendslist = curruser.getActiveGroup().getFriends();
         }
-        else if (o == mCurrentLocation){
+        if (o == curruser){
+            Log.d("TEST","update icon");
+            if (friendslist != null) {
+                update_position(friendslist);
+            }
+        }
+        if (o == mCurrentLocation){
+            Log.d("BEEP","BOOP");
             Location location = (Location) data;
             if (bs.is_place_mode()) {
                 bs.set_distance_waypoint(findViewById(android.R.id.content),
                         new LatLng(location.getLatitude(), location.getLongitude()),
                         mWaypoint.getPosition()
                 );
+            }
+            else{
+                if(bs.is_user_mode()){
+                    LatLng loc = null;
+                    if (friendslist != null){
+                        loc = new LatLng(friendslist.get(bs.get_active_user())
+                                .getLocation().getLatitude(), friendslist.get(bs.get_active_user())
+                                .getLocation().getLongitude());
+                    }
+                    if (mWaypoint != null){
+                        bs.set_distance_person(findViewById(android.R.id.content),
+                                location, loc, (MapWaypoint) mWaypoint.getTag());
+                    }
+                    else{
+                        bs.set_distance_person(findViewById(android.R.id.content),
+                                location, loc, null);
+                    }
+
+                }
             }
         }
 
