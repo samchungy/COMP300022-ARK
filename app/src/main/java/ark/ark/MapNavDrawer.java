@@ -45,6 +45,7 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -418,7 +419,7 @@ public class MapNavDrawer extends AppCompatActivity
             mWaypoint = null;
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setVisibility(view.GONE);
+        fab.setVisibility(View.GONE);
 
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
@@ -467,51 +468,56 @@ public class MapNavDrawer extends AppCompatActivity
         locname.setText(mWaypoint.getTitle());
     }
 
-    private void initiateClusterer() {
-        mClusterManager = new ClusterManager<ArkMarker>(this, mMap);
-        clusterManagerAlgorithm = new NonHierarchicalDistanceBasedAlgorithm();
-        mClusterManager.setAlgorithm(clusterManagerAlgorithm);
-        mMap.setOnCameraIdleListener(mClusterManager);
-        mMap.setOnMarkerClickListener(mClusterManager);
-        addMarkers();
-    }
+    public void smoothMove(Marker target, LatLng from, LatLng to) {
 
-    private void addMarkers() {
-        final LatLng unimelb = new LatLng(-37.7963646, 144.9589851);
+        final Handler handler = new Handler();
+        final Interpolator interpolator = new LinearInterpolator();
 
-        for (int i = 0; i < 5; i++) {
+        final long start = SystemClock.uptimeMillis();
+        final float duration = 5000;
 
+        final Marker copyTarget = target;
+        target.remove();
+
+        handler.post(new Runnable() {
             Random r = new Random();
             double deltaLAT = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
             double deltaLNG = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
 
-            LatLng nextPos = new LatLng(unimelb.latitude + deltaLAT, unimelb.longitude + deltaLNG);
-            ArkMarker add = new ArkMarker(i, nextPos);
-            mClusterManager.addItem(add);
-        }
+
+            // Based on https://github.com/shohrabuddin/move_markers_in_map_smoothly
+
+            @Override
+            public void run() {
+
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed/duration);
+
+                double newlat = (t * copyTarget.getPosition().latitude + deltaLAT)
+                        + ((1 - t) * copyTarget.getPosition().latitude);
+                double newlng = (t * copyTarget.getPosition().longitude + deltaLNG)
+                        + ((1 - t) * copyTarget.getPosition().longitude);
+
+                LatLng nextPos = new LatLng(newlat, newlng);
+
+                copyTarget.setPosition(nextPos);
+
+                if(t < 1.0) {
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
+
     }
-
-    private class MarkerRenderer extends DefaultClusterRenderer<ArkMarker> {
-
-        public MarkerRenderer() {
-            super(getApplicationContext(), mMap, mClusterManager);
-        }
-
-        @Override
-        protected void onClusterRendered(Cluster<ArkMarker> cluster, Marker marker) {
-            super.onClusterRendered(cluster, marker);
-        }
-    }
-
-
 
     public void groupSimulation(View view) {
 
-        /*
 
         final ArrayList<Marker> group1 = new ArrayList<Marker>();
 
         final LatLng unimelb = new LatLng(-37.7963646, 144.9589851);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(unimelb, 15));
 
 
         Marker user1 = mMap.addMarker(new MarkerOptions()
@@ -536,13 +542,6 @@ public class MapNavDrawer extends AppCompatActivity
         group1.add(user4);
         group1.add(user5);
 
-        */
-
-        initiateClusterer();
-
-        Collection<ArkMarker> temp = clusterManagerAlgorithm.getItems();
-        final ArrayList<ArkMarker> users = new ArrayList<>();
-        users.addAll(temp);
 
         final Handler handler = new Handler();
         final Interpolator interpolator = new LinearInterpolator();
@@ -550,13 +549,15 @@ public class MapNavDrawer extends AppCompatActivity
         final long start = SystemClock.uptimeMillis();
         final float duration = 5000;
 
+        final boolean visible = false;
 
-        for(int i = 0; i < users.size(); i++) {
+
+        for(int i = 0; i < group1.size(); i++) {
 
             final int j = i;
 
 
-            /* handler.post(new Runnable() {
+            handler.post(new Runnable() {
                 Random r = new Random();
                 double deltaLAT = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
                 double deltaLNG = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
@@ -568,26 +569,30 @@ public class MapNavDrawer extends AppCompatActivity
                 public void run() {
 
                     long elapsed = SystemClock.uptimeMillis() - start;
-                    float t = interpolator.getInterpolation((float) elapsed/duration);
+                    float t = interpolator.getInterpolation((float) elapsed / duration);
 
-                    double newlat = (t * users.get(j).getPosition().latitude + deltaLAT)
-                            + ((1 - t) * users.get(j).getPosition().latitude);
-                    double newlng = (t * users.get(j).getPosition().longitude + deltaLNG)
-                            + ((1 - t) * users.get(j).getPosition().longitude);
+                    double newlat = (t * group1.get(j).getPosition().latitude + deltaLAT)
+                            + ((1 - t) * group1.get(j).getPosition().latitude);
+                    double newlng = (t * group1.get(j).getPosition().longitude + deltaLNG)
+                            + ((1 - t) * group1.get(j).getPosition().longitude);
 
                     LatLng nextPos = new LatLng(newlat, newlng);
 
-                    users.get(j).setPosition(nextPos);
+                    group1.get(j).setPosition(nextPos);
 
-                    if(t < 1.0) {
+                    if (t < 1.0) {
                         handler.postDelayed(this, 16);
+                    } else {
+                        if(visible == true) {
+                            group1.get(j).setVisible(true);
+                        } else {
+                            group1.get(j).setVisible(false);
+                        }
                     }
                 }
-            }); */
+            });
 
         }
-
-
 
     }
 }
