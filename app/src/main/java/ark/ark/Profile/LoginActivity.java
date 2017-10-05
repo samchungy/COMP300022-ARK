@@ -118,8 +118,10 @@ public class LoginActivity extends AppCompatActivity {
         toast.show();
     }
 
-    public void LoginAsGuest(View v){
+    public void LoginAsDev(View v){
         ARK_auth.storeSessionId("guest",getApplicationContext());
+        ARK_auth.storeUserEmail("test@test.test",getApplicationContext());
+
         goToHome();
     }
 }
