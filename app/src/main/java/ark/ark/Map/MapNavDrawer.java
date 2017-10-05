@@ -484,44 +484,44 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     public void update(Observable o, Object data) {
         HashMap<String, Friend> friendslist = null;
+        Location location = get_location();
+
         if (curruser.getActiveGroup() != null) {
             friendslist = curruser.getActiveGroup().getFriends();
         }
         if (o == curruser){
-            Log.d("TEST","update icon");
             if (friendslist != null) {
                 update_position(friendslist);
             }
         }
         if (o == mCurrentLocation){
-            Log.d("BEEP","BOOP");
-            Location location = (Location) data;
             if (bs.is_place_mode()) {
                 bs.set_distance_waypoint(findViewById(android.R.id.content),
                         new LatLng(location.getLatitude(), location.getLongitude()),
                         mWaypoint.getPosition()
                 );
             }
-            else{
-                if(bs.is_user_mode()){
-                    LatLng loc = null;
-                    if (friendslist != null){
-                        loc = new LatLng(friendslist.get(bs.get_active_user())
-                                .getLocation().getLatitude(), friendslist.get(bs.get_active_user())
-                                .getLocation().getLongitude());
-                    }
-                    if (mWaypoint != null){
-                        bs.set_distance_person(findViewById(android.R.id.content),
-                                location, loc, (MapWaypoint) mWaypoint.getTag());
-                    }
-                    else{
-                        bs.set_distance_person(findViewById(android.R.id.content),
-                                location, loc, null);
-                    }
-
-                }
-            }
         }
+
+        if(bs.is_user_mode()){
+            LatLng loc = null;
+            if (friendslist != null){
+                loc = new LatLng(friendslist.get(bs.get_active_user())
+                        .getLocation().getLatitude(), friendslist.get(bs.get_active_user())
+                        .getLocation().getLongitude());
+            }
+            if (mWaypoint != null){
+                bs.set_distance_person(findViewById(android.R.id.content),
+                        location, loc, (MapWaypoint) mWaypoint.getTag());
+            }
+            else{
+                bs.set_distance_person(findViewById(android.R.id.content),
+                        location, loc, null);
+            }
+
+        }
+
+
 
 
     }
