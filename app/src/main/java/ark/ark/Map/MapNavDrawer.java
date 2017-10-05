@@ -15,6 +15,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,11 +28,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -87,7 +84,6 @@ public class MapNavDrawer extends AppCompatActivity
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Marker mWaypoint = null;
     private Geocoder geocoder;
-    private Marker mPerson;
     private MapWaypoint undobk;
     String otheremail;
     String useremail;
@@ -216,21 +212,14 @@ public class MapNavDrawer extends AppCompatActivity
 //                });
 //        // Add the request to the RequestQueue.
 //        queue.add(jsObjRequest);
+
         curruser = CurrentUser.getInstance();
         curruser.addObserver(this);
-        Group group = curruser.getActiveGroup();
-        if (group != null){
-            if (group.getFriends() != null){
-                for(Map.Entry<String, Friend> entry : group.getFriends().entrySet()){
-                    entry.getValue().getLocation();
-                }
-            }
-        }
 
+        mGroup = new HashMap<>();
 
         mCurrentLocation.getInstance().addObserver(this);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
     }
 
     @Override
@@ -304,6 +293,17 @@ public class MapNavDrawer extends AppCompatActivity
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerClickListener(this);
         enableMyLocation();
+
+        Group group = curruser.getActiveGroup();
+        if (group != null){
+            if (group.getFriends() != null){
+                for(Map.Entry<String, Friend> entry : group.getFriends().entrySet()){
+                    LatLng loc = new LatLng(entry.getValue().getLocation().getLatitude(),
+                            entry.getValue().getLocation().getLongitude());
+                    set_person_marker(loc,entry.getValue().getEmail() + "'s Location.");
+                }
+            }
+        }
     }
 
     /**
@@ -464,20 +464,15 @@ public class MapNavDrawer extends AppCompatActivity
 
 
     public void set_person_marker(LatLng lat, String name) {
+        Marker mPerson;
         Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
-        int distance = 0;
         mPerson = mMap.addMarker(new MarkerOptions()
                 .position(lat)
-                .title(name + "'s Location")
+                .title(name)
                 .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
         );
-        mPerson.setTag(distance);
+        mPerson.setTag(null);
         mGroup.put(name,mPerson);
-    }
-
-    public LatLng getCoords(JSONObject response) throws JSONException {
-        LatLng coord = new LatLng(response.getDouble("lat"), response.getDouble("lng"));
-        return coord;
     }
 
     public void changeFAB(FloatingActionButton fab, int icon, int colour) {
@@ -486,30 +481,38 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void update(Observable o, Object data) {
-        Location location = (Location) data;
-        if (bs.is_place_mode()) {
-            bs.set_distance_waypoint(findViewById(android.R.id.content),
-                    new LatLng(location.getLatitude(), location.getLongitude()),
-                    mWaypoint.getPosition()
-            );
-        } else {
-
-            if (mWaypoint != null){
-                bs.set_distance_person(findViewById(android.R.id.content), location,
-                        mPerson.getPosition(), (MapWaypoint) mWaypoint.getTag()
+        if (o == curruser){
+            update_position(curruser.getActiveGroup().getFriends());
+        }
+        else if (o == mCurrentLocation){
+            Location location = (Location) data;
+            if (bs.is_place_mode()) {
+                bs.set_distance_waypoint(findViewById(android.R.id.content),
+                        new LatLng(location.getLatitude(), location.getLongitude()),
+                        mWaypoint.getPosition()
                 );
-            }
-            else{
-                bs.set_distance_person(findViewById(android.R.id.content), location,
-                        mPerson.getPosition(), null);
             }
         }
 
+
     }
 
-    private void update_distances(){
+    private void update_position(HashMap<String,Friend> f){
+        Marker mPerson;
+        Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         for(Map.Entry<String, Marker> entry : mGroup.entrySet()){
-            entry.getValue().get
+            LatLng currloc = new LatLng(f.get(entry.getValue()).getLocation().getLatitude(),
+                    f.get(entry.getValue()).getLocation().getLongitude());
+            if (!(entry.getValue().getPosition().equals(currloc))){
+                entry.getValue().remove();
+                mPerson = mMap.addMarker(new MarkerOptions()
+                        .position(entry.getValue().getPosition())
+                        .title(entry.getValue().getTitle())
+                        .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
+                );
+                mPerson.setTag(null);
+                mGroup.put(entry.getKey(),mPerson);
+            }
         }
     }
 
