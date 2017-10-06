@@ -84,8 +84,6 @@ public class MapNavDrawer extends AppCompatActivity
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMarkerClickListener{
 
-    private ClusterManager<ArkMarker> mClusterManager;
-    private Algorithm<ArkMarker> clusterManagerAlgorithm;
     private GoogleMap mMap;
     private UiSettings uiSettings;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -479,6 +477,8 @@ public class MapNavDrawer extends AppCompatActivity
         final Marker copyTarget = target;
         target.remove();
 
+        final boolean visible = true;
+
         handler.post(new Runnable() {
             Random r = new Random();
             double deltaLAT = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
@@ -502,8 +502,14 @@ public class MapNavDrawer extends AppCompatActivity
 
                 copyTarget.setPosition(nextPos);
 
-                if(t < 1.0) {
+                if (t < 1.0) {
                     handler.postDelayed(this, 16);
+                } else {
+                    if(visible == true) {
+                        copyTarget.setVisible(true);
+                    } else {
+                        copyTarget.setVisible(false);
+                    }
                 }
             }
         });
