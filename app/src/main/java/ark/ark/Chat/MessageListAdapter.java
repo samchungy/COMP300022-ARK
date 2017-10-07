@@ -1,6 +1,7 @@
 package ark.ark.Chat;
 
 import android.content.Context;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,11 +10,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.volley.toolbox.ByteArrayPool;
+
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.CurrentUser;
 import ark.ark.R;
 
 
@@ -96,9 +102,31 @@ public class MessageListAdapter extends BaseAdapter {
     }
 
 
-
+    /** decoding msg from hex string
+     * @param messageBody
+     * @return
+     */
     private String decryptMessageBody(String messageBody) {
-        return messageBody;
+        String msg = "";
+        try {
+            msg = new String(hexStringToByteArray(messageBody), Charset.forName("UTF-8"));
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+
+        return msg;
+    }
+
+
+
+    private byte[] hexStringToByteArray(String hex) {
+        int l = hex.length();
+        byte[] data = new byte[l/2];
+        for (int i = 0; i < l; i += 2) {
+            data[i/2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                    + Character.digit(hex.charAt(i+1), 16));
+        }
+        return data;
     }
 
 

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.CurrentUser;
 import ark.ark.R;
 
 /**
@@ -167,7 +168,9 @@ public class ChatFragment extends Fragment {
         RequestQueue queue = Volley.newRequestQueue(getContext());
 
         String server ="52.65.97.117";
-        String userEmail = ARK_auth.fetchUserEmail(getContext());
+
+        String userEmail = CurrentUser.getInstance().getEmail();
+
         String requestURL = "http://" + server + "/direct/show?email=" + userEmail;
 
 
@@ -188,6 +191,19 @@ public class ChatFragment extends Fragment {
                                     String conversation_id = res.getJSONArray("directs").getJSONObject(i).getString("conversation_id");
 
                                     ConvoListAdapter.convo item = new ConvoListAdapter.convo(nickname, "hi", last_updated, conversation_id);
+
+                                    // pushing the new item into the list
+                                    convoList.add(item);
+                                }
+
+                                // the group chat list
+                                for (int i=0;i<res.getJSONArray("groups").length();i++) {
+                                    // getting attributes from the json
+                                    String groupName = res.getJSONArray("groups").getJSONObject(i).getString("groupName");
+                                    String last_updated = res.getJSONArray("groups").getJSONObject(i).getString("time");
+                                    String conversation_id = res.getJSONArray("groups").getJSONObject(i).getString("conversation_id");
+
+                                    ConvoListAdapter.convo item = new ConvoListAdapter.convo(groupName, "hi", last_updated, conversation_id);
 
                                     // pushing the new item into the list
                                     convoList.add(item);

@@ -2,6 +2,7 @@ package ark.ark.Chat;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -20,10 +21,16 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.CurrentUser;
 import ark.ark.R;
 
 public class ChatLogActivity extends AppCompatActivity {
@@ -96,7 +103,6 @@ public class ChatLogActivity extends AppCompatActivity {
         } else {
             messageTextfield.setText("");
             sendMessage(msg);
-            reloadAllMessages();
         }
     }
 
@@ -109,7 +115,7 @@ public class ChatLogActivity extends AppCompatActivity {
 
         String server ="52.65.97.117";
         String conversationId = getIntent().getStringExtra("conversation_id");
-        String requestURL = "http://" + server + "/message/create?conversation_id=" + conversationId + "&email=" + ARK_auth.fetchUserEmail(this) + "&message_body=" + msg;
+        String requestURL = "http://" + server + "/message/create?conversation_id=" + conversationId + "&email=" + CurrentUser.getInstance().getEmail() + "&message_body=" + msg;
 
 
         // Request a string response from the requestURL.
@@ -120,8 +126,8 @@ public class ChatLogActivity extends AppCompatActivity {
                         // after getting response, try reading the json
                         try {
                             JSONObject res = new JSONObject(response);
-                            if (res.getString("success").equals("ok")) {
-                                // msg sent
+                            if (res.getString("success").equals("ok")) { // msg sent
+                                reloadAllMessages();
                             } else {
                                 showToast(res.getString("msg"));
                             }
@@ -138,14 +144,17 @@ public class ChatLogActivity extends AppCompatActivity {
         });
 
         queue.add(stringRequest);
-
     }
 
 
-
+    /** encoding msg into hex string
+     * @param msg
+     * @return
+     */
     private String encryptMessage(String msg) {
-        return msg;
+        return String.format("%040x", new BigInteger(1, msg.getBytes(Charset.forName("UTF-8"))));
     }
+
 
 
     private void reloadAllMessages() {
