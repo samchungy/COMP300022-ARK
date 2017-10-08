@@ -472,7 +472,10 @@ public class MapNavDrawer extends AppCompatActivity
         final Interpolator interpolator = new LinearInterpolator();
 
         final long start = SystemClock.uptimeMillis();
-        final float duration = 5000;
+        final float duration = 1000;
+
+        final LatLng origin = from;
+        final LatLng destination = to;
 
         final Marker copyTarget = target;
         target.remove();
@@ -480,10 +483,6 @@ public class MapNavDrawer extends AppCompatActivity
         final boolean visible = true;
 
         handler.post(new Runnable() {
-            Random r = new Random();
-            double deltaLAT = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
-            double deltaLNG = -0.00005 + (0.00005 - (-0.00005)) * r.nextDouble();
-
 
             // Based on https://github.com/shohrabuddin/move_markers_in_map_smoothly
 
@@ -493,10 +492,10 @@ public class MapNavDrawer extends AppCompatActivity
                 long elapsed = SystemClock.uptimeMillis() - start;
                 float t = interpolator.getInterpolation((float) elapsed/duration);
 
-                double newlat = (t * copyTarget.getPosition().latitude + deltaLAT)
-                        + ((1 - t) * copyTarget.getPosition().latitude);
-                double newlng = (t * copyTarget.getPosition().longitude + deltaLNG)
-                        + ((1 - t) * copyTarget.getPosition().longitude);
+                double newlat = (t * destination.latitude)
+                        + ((1 - t) * origin.latitude);
+                double newlng = (t * destination.longitude)
+                        + ((1 - t) * origin.longitude);
 
                 LatLng nextPos = new LatLng(newlat, newlng);
 
