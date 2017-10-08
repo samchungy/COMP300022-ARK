@@ -26,6 +26,8 @@ public class BottomSheet extends MapNavDrawer {
     private BottomSheetBehavior mBottomSheetBehavior;
     private Geocoder geocoder;
     private boolean placemode = false;
+    private boolean usermode = false;
+    private String activeuser;
 
     /**
      *
@@ -57,7 +59,10 @@ public class BottomSheet extends MapNavDrawer {
     }
 
     /**
-     * Changes bottom sheet to Place Mode.
+     * Set place mode
+     * @param v
+     * @param waypoint
+     * @param user
      */
     public void set_place_mode(View v, MapWaypoint waypoint, Location user){
         View place_layout = v.findViewById(R.id.place_buttons);
@@ -69,13 +74,16 @@ public class BottomSheet extends MapNavDrawer {
         }
         person_layout.setVisibility(View.GONE);
         place_layout.setVisibility(View.VISIBLE);
+        usermode = false;
         placemode = true;
     }
 
     /**
      * Changes bottom sheet to Person Mode.
      */
-    public void set_person_mode(View v, Marker marker, Location user, MapWaypoint wp){
+    public void set_person_mode(View v, Marker marker, Location user, MapWaypoint wp, String username){
+
+        activeuser = username;
 
         View place_layout = v.findViewById(R.id.place_buttons);
         View person_layout = v.findViewById(R.id.person_buttons);
@@ -94,14 +102,14 @@ public class BottomSheet extends MapNavDrawer {
             featurename = addresses.get(0).getLocality() +", "+ addresses.get(0).getCountryName();
         }
 
-        set_text(marker.getTitle(),featurename,addresses.get(0).getAddressLine(0) +", "+
-                addresses.get(0).getLocality() + ", " + addresses.get(0).getPostalCode(), v);
+        set_text(marker.getTitle(),featurename,addresses.get(0).getAddressLine(0), v);
         place_layout.setVisibility(View.GONE);
         person_layout.setVisibility(View.VISIBLE);
 
         set_distance_person(v, user,
                     marker.getPosition(),wp);
         placemode = false;
+        usermode = true;
     }
 
     /**
@@ -217,6 +225,12 @@ public class BottomSheet extends MapNavDrawer {
 
     public boolean is_place_mode(){
         return placemode;
+    }
+
+    public boolean is_user_mode(){ return usermode;}
+
+    public String get_active_user(){
+        return activeuser;
     }
 
 }
