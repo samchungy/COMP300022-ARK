@@ -22,24 +22,33 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
     compile(name: 'wikitudesdk', ext: 'aar')
 
 
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:support-vector-drawable:25.3.1'
+
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support:design:25.4.0'
+    compile 'com.android.support:support-vector-drawable:25.4.0'
+    compile 'com.android.support:support-v4:25.4.0'
+
+    compile 'com.android.volley:volley:1.0.0'
     compile 'com.jakewharton:butterknife:8.8.0'
-    compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
     compile 'com.google.android.gms:play-services-maps:11.2.0'
     compile 'com.google.android.gms:play-services-places:11.2.0'
     compile 'com.google.android.gms:play-services-location:11.2.0'
-    compile 'com.android.volley:volley:1.0.0'
-    testCompile 'junit:junit:4.12'
+
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
+
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestCompile 'com.android.support.test:runner:1.0.1'
+    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
+
+    testCompile 'junit:junit:4.12'
 }
 
 
