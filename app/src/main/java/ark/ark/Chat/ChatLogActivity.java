@@ -20,10 +20,11 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.List;
 
-import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.CurrentUser;
 import ark.ark.R;
 
 public class ChatLogActivity extends AppCompatActivity {
@@ -61,7 +62,7 @@ public class ChatLogActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
                 if (heightDiff > dpToPx(200)) { // if more than 200 dp, it's probably a keyboard
-                    scrollToBottom();
+                    scrollToBottom(true);
                 }
             }
         });
@@ -96,7 +97,6 @@ public class ChatLogActivity extends AppCompatActivity {
         } else {
             messageTextfield.setText("");
             sendMessage(msg);
-            reloadAllMessages();
         }
     }
 
@@ -109,7 +109,7 @@ public class ChatLogActivity extends AppCompatActivity {
 
         String server ="52.65.97.117";
         String conversationId = getIntent().getStringExtra("conversation_id");
-        String requestURL = "http://" + server + "/message/create?conversation_id=" + conversationId + "&email=" + ARK_auth.fetchUserEmail(this) + "&message_body=" + msg;
+        String requestURL = "http://" + server + "/message/create?conversation_id=" + conversationId + "&email=" + CurrentUser.getInstance().getEmail() + "&message_body=" + msg;
 
 
         // Request a string response from the requestURL.
@@ -120,8 +120,8 @@ public class ChatLogActivity extends AppCompatActivity {
                         // after getting response, try reading the json
                         try {
                             JSONObject res = new JSONObject(response);
-                            if (res.getString("success").equals("ok")) {
-                                // msg sent
+                            if (res.getString("success").equals("ok")) { // msg sent
+                                reloadAllMessages();
                             } else {
                                 showToast(res.getString("msg"));
                             }
@@ -138,14 +138,17 @@ public class ChatLogActivity extends AppCompatActivity {
         });
 
         queue.add(stringRequest);
-
     }
 
 
-
+    /** encoding msg into hex string
+     * @param msg
+     * @return
+     */
     private String encryptMessage(String msg) {
-        return msg;
+        return String.format("%040x", new BigInteger(1, msg.getBytes(Charset.forName("UTF-8"))));
     }
+
 
 
     private void reloadAllMessages() {
@@ -184,7 +187,7 @@ public class ChatLogActivity extends AppCompatActivity {
                             }
                             // after pushing into the list, update
                             mAdapter.notifyDataSetChanged();
-                            scrollToBottom();
+                            scrollToBottom(true);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -202,11 +205,15 @@ public class ChatLogActivity extends AppCompatActivity {
 
 
 
-    private void scrollToBottom() {
+    private void scrollToBottom(Boolean smooth) {
         ListView chatListView = (ListView)findViewById(R.id.austin_MessageListView);
 
         if (!mAdapter.isEmpty()) {
-            chatListView.setSelection(mAdapter.getCount() - 1);
+            if (smooth) {
+                chatListView.smoothScrollToPosition(mAdapter.getCount() - 1);
+            } else {
+                chatListView.setSelection(mAdapter.getCount() - 1);
+            }
         }
     }
 
