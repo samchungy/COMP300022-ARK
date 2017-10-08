@@ -98,18 +98,27 @@ public class BottomSheet extends MapNavDrawer {
             e.printStackTrace();
         }
 
-        if((featurename = addresses.get(0).getFeatureName()) != null){
-            featurename = addresses.get(0).getLocality() +", "+ addresses.get(0).getCountryName();
+        if (addresses != null && addresses.get(0)!=null) {
+
+            if ((featurename = addresses.get(0).getFeatureName()) != null) {
+                if ((featurename = addresses.get(0).getLocality()) == null){
+                    featurename = addresses.get(0).getCountryName();
+                }
+                else{
+                    featurename += ", " + addresses.get(0).getCountryName();
+                }
+
+            }
+
+            set_text(marker.getTitle(), featurename, addresses.get(0).getAddressLine(0), v);
+            place_layout.setVisibility(View.GONE);
+            person_layout.setVisibility(View.VISIBLE);
+
+            set_distance_person(v, user,
+                    marker.getPosition(), wp);
+            placemode = false;
+            usermode = true;
         }
-
-        set_text(marker.getTitle(),featurename,addresses.get(0).getAddressLine(0), v);
-        place_layout.setVisibility(View.GONE);
-        person_layout.setVisibility(View.VISIBLE);
-
-        set_distance_person(v, user,
-                    marker.getPosition(),wp);
-        placemode = false;
-        usermode = true;
     }
 
     /**
@@ -165,6 +174,15 @@ public class BottomSheet extends MapNavDrawer {
         return mBottomSheetBehavior;
     }
 
+    private String metres_to_km(float distance){
+        if(distance >= 1000.0){
+            return (String.format("%.1f km", distance/1000.0f));
+        }
+        else{
+            return (String.format("%d m", Math.round(distance)));
+        }
+    }
+
     /**
      * Sets the distance of user from another user + the distance to the waypoint
      * @param v View
@@ -184,11 +202,11 @@ public class BottomSheet extends MapNavDrawer {
         if(user != null){
             usera.setLatitude(user.getLatitude());
             usera.setLongitude(user.getLongitude());
-            distancetext += Math.round(usera.distanceTo(userb))+" metres Away. ";
+            distancetext += metres_to_km((usera.distanceTo(userb)))+" Away. ";
         }
         if (wp != null){
             distancetext += Math.round(distance_to_waypoint(other,
-                    new LatLng(wp.getLocation().latitude,wp.getLocation().longitude)))+" metres from Waypoint.";
+                    new LatLng(wp.getLocation().latitude,wp.getLocation().longitude)))+" from Waypoint.";
         }
 
         distance.setText(distancetext);
@@ -202,7 +220,7 @@ public class BottomSheet extends MapNavDrawer {
      */
     public void set_distance_waypoint(View v, LatLng user, LatLng wp){
         TextView distance = (TextView) v.findViewById(R.id.bs_distance);
-        distance.setText(Math.round(distance_to_waypoint(user,wp))+" metres Away.");
+        distance.setText((metres_to_km(distance_to_waypoint(user,wp)))+" Away.");
     }
 
     /**
