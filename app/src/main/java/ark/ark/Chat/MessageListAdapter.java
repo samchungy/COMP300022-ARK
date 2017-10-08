@@ -81,11 +81,10 @@ public class MessageListAdapter extends BaseAdapter {
         TextView time = (TextView) cell.findViewById(R.id.austin_MessageListCell_time);
 
 
-        String userEmail = ARK_auth.fetchUserEmail(mContext);
+        String userEmail = CurrentUser.getInstance().getEmail();
 
 
-        if (messageList.get(position).senderEmail.equals(userEmail)) {
-            // if the sender is this user
+        if (messageList.get(position).senderEmail.equals(userEmail)) { // if the sender is this user
             thisUserName.setText("Me");
             otherUserName.setText("");
             thisMessage.setText(decryptMessageBody(messageList.get(position).messageEncrypted));

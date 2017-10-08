@@ -27,7 +27,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
 
-import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.R;
 

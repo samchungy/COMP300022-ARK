@@ -2,7 +2,6 @@ package ark.ark.Chat;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
@@ -24,12 +23,7 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.List;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-
-import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.R;
 
@@ -68,7 +62,7 @@ public class ChatLogActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
                 if (heightDiff > dpToPx(200)) { // if more than 200 dp, it's probably a keyboard
-                    scrollToBottom();
+                    scrollToBottom(true);
                 }
             }
         });
@@ -193,7 +187,7 @@ public class ChatLogActivity extends AppCompatActivity {
                             }
                             // after pushing into the list, update
                             mAdapter.notifyDataSetChanged();
-                            scrollToBottom();
+                            scrollToBottom(true);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -211,11 +205,15 @@ public class ChatLogActivity extends AppCompatActivity {
 
 
 
-    private void scrollToBottom() {
+    private void scrollToBottom(Boolean smooth) {
         ListView chatListView = (ListView)findViewById(R.id.austin_MessageListView);
 
         if (!mAdapter.isEmpty()) {
-            chatListView.setSelection(mAdapter.getCount() - 1);
+            if (smooth) {
+                chatListView.smoothScrollToPosition(mAdapter.getCount() - 1);
+            } else {
+                chatListView.setSelection(mAdapter.getCount() - 1);
+            }
         }
     }
 
