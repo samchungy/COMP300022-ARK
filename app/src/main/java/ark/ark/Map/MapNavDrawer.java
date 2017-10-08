@@ -96,6 +96,10 @@ public class MapNavDrawer extends AppCompatActivity
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
 
+    // Stuff for Zengster for navigation drawer
+    private TextView currentUserName, currentUserGroup;
+    private View drawerHeader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,6 +115,17 @@ public class MapNavDrawer extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Assorted drawer code
+        drawerHeader = navigationView.getHeaderView(0);
+        currentUserName = (TextView) drawerHeader.findViewById(R.id.userEmail);
+        currentUserGroup = (TextView) drawerHeader.findViewById(R.id.activeGroup);
+        initiateDrawerHeader();
+
+        final Menu menu = navigationView.getMenu();
+        for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
+            menu.add(tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
+        }
 
 
         // Geocoder
@@ -224,6 +239,11 @@ public class MapNavDrawer extends AppCompatActivity
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
+    private void initiateDrawerHeader() {
+        currentUserName.setText(CurrentUser.getInstance().getEmail());
+        currentUserGroup.setText(CurrentUser.getInstance().getActiveGroup().getId());
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -265,20 +285,6 @@ public class MapNavDrawer extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_settings) {
-
-        } else if (id == R.id.nav_help) {
-
-        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
