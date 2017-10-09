@@ -1,6 +1,7 @@
 package ark.ark.Map;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -99,6 +100,7 @@ public class MapNavDrawer extends AppCompatActivity
     // Stuff for Zengster for navigation drawer
     private TextView currentUserName, currentUserGroup;
     private View drawerHeader;
+    int numGroupMembers = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,9 +125,14 @@ public class MapNavDrawer extends AppCompatActivity
         initiateDrawerHeader();
 
         final Menu menu = navigationView.getMenu();
+        numGroupMembers = 0;
+        int j = 0;
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
-            menu.add(tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
+            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
+            numGroupMembers++;
+            j++;
         }
+        j = 0;
 
 
         // Geocoder
@@ -239,6 +246,7 @@ public class MapNavDrawer extends AppCompatActivity
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
+
     private void initiateDrawerHeader() {
         currentUserName.setText(CurrentUser.getInstance().getEmail());
         currentUserGroup.setText(CurrentUser.getInstance().getActiveGroup().getId());
@@ -272,9 +280,15 @@ public class MapNavDrawer extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        Context context = getApplicationContext();
+        CharSequence text = "Hello toast!";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == 0) {
+            toast.show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -285,6 +299,19 @@ public class MapNavDrawer extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+
+        Context context = getApplicationContext();
+        CharSequence text = "Hello toast!";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+
+        //noinspection SimplifiableIfStatement
+        if (id == 0) {
+            toast.show();
+        } else if (id == 1) {
+            toast.show();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
