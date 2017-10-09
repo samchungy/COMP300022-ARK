@@ -93,6 +93,7 @@ public class MapNavDrawer extends AppCompatActivity
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mylocation;
     private HashMap<String, Marker> mGroup;
+    private HashMap<Integer, String> idToEmail = new HashMap<>();
     private CurrentUser curruser;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
@@ -122,17 +123,9 @@ public class MapNavDrawer extends AppCompatActivity
         drawerHeader = navigationView.getHeaderView(0);
         currentUserName = (TextView) drawerHeader.findViewById(R.id.userEmail);
         currentUserGroup = (TextView) drawerHeader.findViewById(R.id.activeGroup);
-        initiateDrawerHeader();
+        initiateDrawer();
 
-        final Menu menu = navigationView.getMenu();
-        numGroupMembers = 0;
-        int j = 0;
-        for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
-            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
-            numGroupMembers++;
-            j++;
-        }
-        j = 0;
+
 
 
         // Geocoder
@@ -247,9 +240,23 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
 
-    private void initiateDrawerHeader() {
+    private void initiateDrawer() {
         currentUserName.setText(CurrentUser.getInstance().getEmail());
-        currentUserGroup.setText(CurrentUser.getInstance().getActiveGroup().getId());
+        currentUserGroup.setText(CurrentUser.getInstance().getActiveGroup().getName());
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        final Menu menu = navigationView.getMenu();
+        invalidateOptionsMenu();
+        numGroupMembers = 0;
+        int j = 0;
+        for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
+            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
+            idToEmail.put(j, tempFriend.getEmail());
+            numGroupMembers++;
+            j++;
+        }
+        j = 0;
     }
 
     @Override
@@ -287,9 +294,7 @@ public class MapNavDrawer extends AppCompatActivity
         Toast toast = Toast.makeText(context, text, duration);
 
         //noinspection SimplifiableIfStatement
-        if (id == 0) {
-            toast.show();
-        }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -301,16 +306,20 @@ public class MapNavDrawer extends AppCompatActivity
         int id = item.getItemId();
 
         Context context = getApplicationContext();
-        CharSequence text = "Hello toast!";
+        CharSequence text = "HashMap search successful.";
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
 
         //noinspection SimplifiableIfStatement
-        if (id == 0) {
-            toast.show();
-        } else if (id == 1) {
-            toast.show();
+        for(int friendID: idToEmail.keySet()) {
+            if (id == friendID) {
+                LatLng moveCamera = new LatLng(
+                        mGroup.get(idToEmail.get(id)).getPosition().latitude,
+                        mGroup.get(idToEmail.get(id)).getPosition().longitude
+                );
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera, 15));
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
