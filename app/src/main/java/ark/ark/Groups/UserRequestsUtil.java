@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import java.util.Timer;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Map.MapWaypoint;
 import ark.ark.R;
 import ark.ark.ToastUtils;
 
@@ -65,7 +66,7 @@ public class UserRequestsUtil {
                                         mUser.addGroup(g);
                                     }
                                 updateActiveGroupLocations(context);
-
+                                updateActiveGroupWaypoint(context);
 
 
                                 } else {
@@ -207,4 +208,118 @@ public class UserRequestsUtil {
         }
     }
 
+    public static void updateActiveGroupWaypoint(final Context context) {
+        CurrentUser mUser = CurrentUser.getInstance();
+
+        if (mUser.getEmail() != null && mUser.getActiveGroup() != null) {
+            RequestQueue queue = Volley.newRequestQueue(context);
+            String server = "52.65.97.117";
+
+            String path = "/waypoint/show?";
+            String requestURL = "http://" + server + path +"group_id="+ mUser.getActiveGroup().getId();
+            ToastUtils.showToast(requestURL, context);
+
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
+                    new Response.Listener<String>() {
+
+                        @Override
+                        public void onResponse(String response) {
+                            // after getting response, try reading the json
+                            CurrentUser mUser = CurrentUser.getInstance();
+                            ToastUtils.showToast(response, context);
+                            try {
+                                JSONObject res = new JSONObject(response);
+
+                                if (res.getString("success").equals("ok")) {
+                                    ToastUtils.showToast("inside success", context);
+                                    JSONObject waypoint = res.getJSONObject("waypoint").getJSONObject("waypoint");
+                                    String name = res.getJSONObject("waypoint").getString("creator_nickname");
+                                    Double lat = waypoint.getDouble("lat");
+                                    Double lng = waypoint.getDouble("lng");
+
+                                    mUser.getActiveGroup().setWaypoint(lat, lng, name);
+                                    //ToastUtils.showToast(email, context);
+                                    //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
+
+
+                                } else {
+                                    ToastUtils.showToast(res.getString("msg"), context);
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                ToastUtils.showToast(e.getMessage(), context);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // error handling
+                    ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+                }
+            });
+
+            queue.add(stringRequest);
+        } else {
+            ToastUtils.showToast("Location doesn't exist", context);
+        }
+    }
+
+
+
+    public static void sendActiveWaypointToServer(final Context context){
+        CurrentUser mUser = CurrentUser.getInstance();
+        if (mUser.getActiveGroup().getWaypoint() != null) {
+            RequestQueue queue = Volley.newRequestQueue(context);
+            MapWaypoint waypoint = mUser.getActiveGroup().getWaypoint();
+            String server = "52.65.97.117";
+            String path = "/waypoint/create?";
+            String requestURL = "http://" + server + path +"email="+ mUser.getEmail()
+                    +"&lat="+waypoint.getLocation().latitude+
+                    "&lng="+waypoint.getLocation().longitude+
+                    "&group_id="+mUser.getActiveGroup().getId();
+            ToastUtils.showToast(requestURL, context);
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // after getting response, try reading the json
+                            try {
+                                JSONObject res = new JSONObject(response);
+                                if (res.getString("success").equals("ok")) {
+                                    // iterate through the direct list to populate the convo list
+
+                                    //ToastUtils.showToast("Congratulations! Your location is updated!", getApplicationContext());
+
+                                } else {
+                                    ToastUtils.showToast(res.getString("msg"), context);
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                ToastUtils.showToast(e.getMessage(), context);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // error handling
+                    ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+                }
+            });
+
+            queue.add(stringRequest);
+        } else {
+            ToastUtils.showToast("Location doesn't exist", context);
+        }
+
+
+
+
+
+        // Request a string response from the requestURL.
+
+
+    }
 }
