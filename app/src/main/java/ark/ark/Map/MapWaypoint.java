@@ -35,7 +35,7 @@ public class MapWaypoint {
         return Place_location;
     }
 
-    public String getNam() {
+    public String getName() {
         return Place_name;
     }
 

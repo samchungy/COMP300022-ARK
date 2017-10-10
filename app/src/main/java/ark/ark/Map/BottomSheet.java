@@ -67,7 +67,7 @@ public class BottomSheet extends MapNavDrawer {
     public void set_place_mode(View v, MapWaypoint waypoint, Location user){
         View place_layout = v.findViewById(R.id.place_buttons);
         View person_layout = v.findViewById(R.id.person_buttons);
-        set_text(waypoint.getTitle(),waypoint.getNam(),waypoint.getDetails(),v);
+        set_text(waypoint.getTitle(),waypoint.getName(),waypoint.getDetails(),v);
         if (user != null){
             set_distance_waypoint(v,new LatLng(user.getLatitude(),user.getLongitude()),
                     waypoint.getLocation());

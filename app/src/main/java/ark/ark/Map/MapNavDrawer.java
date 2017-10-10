@@ -453,6 +453,7 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void update(Observable o, Object data) {
+
         HashMap<String, Friend> friendslist = null;
         Location location = get_location();
         MapWaypoint mw = null;
@@ -460,7 +461,11 @@ public class MapNavDrawer extends AppCompatActivity
         if (curruser.getActiveGroup() != null) {
             friendslist = curruser.getActiveGroup().getFriends();
         }
-        if (o == curruser){
+        if (o == CurrentUser.getInstance()){
+            curruser = (CurrentUser)o;
+            if (curruser.getActiveGroup() != null) {
+                friendslist = curruser.getActiveGroup().getFriends();
+            }
             if (friendslist != null) {
                 update_position(friendslist);
 
@@ -472,7 +477,7 @@ public class MapNavDrawer extends AppCompatActivity
                 }
             }
         }
-        if (o == mCurrentLocation){
+        if (o == LocationSingleton.getInstance()){
             if (bs.is_place_mode()) {
                 bs.set_distance_waypoint(findViewById(android.R.id.content),
                         new LatLng(location.getLatitude(), location.getLongitude()),
@@ -508,17 +513,19 @@ public class MapNavDrawer extends AppCompatActivity
         Marker mPerson;
         Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         for(Map.Entry<String, Marker> entry : mGroup.entrySet()){
-            LatLng currloc = new LatLng(f.get(entry.getValue()).getLocation().getLatitude(),
-                    f.get(entry.getValue()).getLocation().getLongitude());
-            if (!(entry.getValue().getPosition().equals(currloc))){
-                entry.getValue().remove();
-                mPerson = mMap.addMarker(new MarkerOptions()
-                        .position(entry.getValue().getPosition())
-                        .title(entry.getValue().getTitle())
-                        .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
-                );
-                mPerson.setTag(null);
-                mGroup.put(entry.getKey(),mPerson);
+            if (f.get(entry.getValue())!= null) {
+                LatLng currloc = new LatLng(f.get(entry.getValue()).getLocation().getLatitude(),
+                        f.get(entry.getValue()).getLocation().getLongitude());
+                if (!(entry.getValue().getPosition().equals(currloc))) {
+                    entry.getValue().remove();
+                    mPerson = mMap.addMarker(new MarkerOptions()
+                            .position(entry.getValue().getPosition())
+                            .title(entry.getValue().getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
+                    );
+                    mPerson.setTag(null);
+                    mGroup.put(entry.getKey(), mPerson);
+                }
             }
         }
     }
