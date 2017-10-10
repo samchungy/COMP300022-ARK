@@ -176,10 +176,10 @@ public class BottomSheet extends MapNavDrawer {
 
     private String metres_to_km(float distance){
         if(distance >= 1000.0){
-            return (String.format("%.1f km", distance/1000.0f));
+            return (String.format("%.1fkm", distance/1000.0f));
         }
         else{
-            return (String.format("%d m", Math.round(distance)));
+            return (String.format("%dm", Math.round(distance)));
         }
     }
 
@@ -205,8 +205,8 @@ public class BottomSheet extends MapNavDrawer {
             distancetext += metres_to_km((usera.distanceTo(userb)))+" Away. ";
         }
         if (wp != null){
-            distancetext += Math.round(distance_to_waypoint(other,
-                    new LatLng(wp.getLocation().latitude,wp.getLocation().longitude)))+" from Waypoint.";
+            distancetext += metres_to_km((distance_to_waypoint(other,
+                    new LatLng(wp.getLocation().latitude,wp.getLocation().longitude))))+" from Waypoint.";
         }
 
         distance.setText(distancetext);
