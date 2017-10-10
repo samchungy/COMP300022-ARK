@@ -31,7 +31,7 @@ public class GroupLocationUpdateService extends Service {
 
     private void startService()
     {
-        timer.scheduleAtFixedRate(new mainTask(), 0, 5000);
+        timer.scheduleAtFixedRate(new mainTask(), 0, 10000);
     }
 
     private class mainTask extends TimerTask

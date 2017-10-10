@@ -45,7 +45,7 @@ public class ArActivity extends AppCompatActivity implements Observer {
         this.lblCoord = (TextView)this.findViewById(R.id.lblCoord);
 
         // Set up architect view and AR interface
-        this.architectView = (ArchitectView)this.findViewById( R.id.architectView );
+        //this.architectView = (ArchitectView)this.findViewById( R.id.architectView );
         final ArchitectStartupConfiguration config = new ArchitectStartupConfiguration();
         config.setLicenseKey(getString(R.string.licensekey));
         this.architectView.onCreate( config );
@@ -100,11 +100,9 @@ public class ArActivity extends AppCompatActivity implements Observer {
         } else if (o == CurrentUser.getInstance()) {
             String email = (String)data;
             CurrentUser user = (CurrentUser)o;
-            Location loc = user.getActiveGroup().getFriends().get(email).getLocation();
+            Location loc = user.getActiveGroup().getFriend(email).getLocation();
             updatePOI(loc.getLatitude(), loc.getLongitude(), email);
         }
-
-
 
     }
 
