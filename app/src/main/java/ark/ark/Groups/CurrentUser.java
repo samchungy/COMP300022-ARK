@@ -29,7 +29,7 @@ public class CurrentUser extends Observable{
     private String email;
     private HashMap<String, Group> groups = new HashMap<String, Group>();
     private Group activeGroup;
-    private Boolean isUpdating = false;
+    private Boolean isUpdating = true;
 
     public static CurrentUser getInstance() {
         return ourInstance;
@@ -54,15 +54,17 @@ public class CurrentUser extends Observable{
     }
 
     public void setActiveGroupLocation(String email, Location loc) {
-        activeGroup.setLocation(email, loc);
-        setChanged();
-        notifyObservers();
+        if(activeGroup.getFriend(email) != null){
+            activeGroup.setLocation(email, loc);
+            setChanged();
+            notifyObservers(email);
+        }
     }
 
     public void updateActiveGroupFriend(Friend friend) {
         activeGroup.updateFriend(friend);
-        setChanged();
-        notifyObservers();
+        //setChanged();
+        //notifyObservers();
     }
 
     public boolean isUpdating() {

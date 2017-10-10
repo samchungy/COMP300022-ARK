@@ -36,6 +36,8 @@ public class Group {
         return friendsInGroup;
     }
 
+    public Friend getFriend(String email) { return friendsInGroup.get(email); }
+
     public String getId() {
         return groupID;
     }

@@ -179,8 +179,8 @@ public class UserRequestsUtil {
 
                                         Friend f = new Friend(email);
                                         mUser.getActiveGroup().updateFriend(f);
-                                        mUser.getActiveGroup().setLocation(email, loc);
-                                        //ToastUtils.showToast(email, context);
+                                        mUser.setActiveGroupLocation(email, loc);
+                                        ToastUtils.showToast(email, context);
                                     }
                                     //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
 

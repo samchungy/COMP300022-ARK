@@ -2,14 +2,16 @@
     <head>
         <script src="architect://architect.js"></script>
         <script src="https://wikitude.com/libs/architect.js"></script>
+        <script src="wikitude/ade.js"></script>
     </head>
     <body>
       <div style="position:absolute;top:10px;left:10px;width:250px;height:250px;" id="radarContainer"></div>
-
+      <button onclick="setNewPOI(28, -144, 'user1')">Initial Location</button>
+      <button onclick="updatePOI(0, 0, 'user1')"> Set loc 0, 0</button>
+      
     </body>
 
     <script>
-
         var loaded = false;
         AR.radar.container = document.getElementById("radarContainer");
         AR.radar.background = new AR.ImageResource("assets/radarImg.png");
@@ -22,23 +24,45 @@
         AR.radar.northIndicator.image = new AR.ImageResource("assets/north_arrow.png");
         AR.radar.northIndicator.radius = 0.4;
         //AR.radar.onClick = function(){ AR.logger.info(‘radar was clicked’);};
-	      AR.radar.enabled = true;
+	    AR.radar.enabled = true;
 
         var radarCircle = new AR.Circle(0.05, {style: {fillColor: '#83ff7b'}});
+        var friendList = [];
+        var avatarList = ['assets/av1.png', 'assets/av2.png', 'assets/av3.png'];
+        var currentavatar = 0;
 
+        AR.logger.activateDebugMode();
 
+        function updatePOI(lat, lon, user) {
+            if (friendList.find(x => x.user === user) == null){
+                AR.logger.info('user not found -> creating ' + user);
+                var marker_image = new AR.ImageResource(avatarList[currentavatar]);
+                var marker_loc = new AR.GeoLocation(lat, lon);
+                var marker_drawable = new AR.ImageDrawable(marker_image, 2);
+                var label = new AR.Label(user + "\n" + lat + "\n" + lon, 2, {
+                        opacity : 1
+                });
 
+                var marker_drawable = new AR.ImageDrawable(marker_image, 8);
 
-        function setNewPOI(lat, lon) {
-          var marker_image = new AR.ImageResource("assets/girl.png");
-          var marker_loc = new AR.GeoLocation(lat, lon);
-          var marker_drawable = new AR.ImageDrawable(marker_image, 2);
-          var marker_object = new AR.GeoObject(marker_loc, {
-            drawables: {
-                cam: [marker_drawable],
-                radar: radarCircle
+                var marker_object = new AR.GeoObject(marker_loc, {
+                drawables: {
+                    cam: [marker_drawable, label],
+                    radar: radarCircle
+                }
+                });
+                
+                AR.logger.info('poi is set at ' + lat + ',' + lon + 'for ' + user);
+                friendList.push( { 'user': user, 'marker': marker_object } );
+                currentavatar = (currentavatar + 1) % 4;
+                
+            } else {
+                var friend = friendList.find(x => x.user === user);
+                friend.marker.locations[0].latitude = lat;
+                friend.marker.locations[0].longitude = lon;
+                friend.marker.drawables.cam[1].text = user + "\n" + lat + "\n" + lon;
+                AR.logger.info('poi is update at ' + lat + ',' + lon + 'for ' + user);
             }
-          });
         }
 
         function locationChanged(lat, lon, alt, acc) {
@@ -53,17 +77,22 @@
                       cam: [marker_drawable]
                   }
                 });
-
-                setNewPOI(38, -144);
                 */
+
+                //setNewPOI(38, -144, 'user1');
+                
+                //setNewPOI(1, 1, 'user');
+                //updatePOI(1, 1, 'user');
                 loaded = true;
+            } else {
+                //updatePOI(0, 0, 'user1');
+                //updatePOI(1, 2, 'user');
             }
         }
 
 
 
         // Start logging
-        AR.logger.activateDebugMode();
 
         AR.context.onLocationChanged = locationChanged;
     </script>
