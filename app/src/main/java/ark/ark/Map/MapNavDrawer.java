@@ -455,6 +455,7 @@ public class MapNavDrawer extends AppCompatActivity
     public void update(Observable o, Object data) {
         HashMap<String, Friend> friendslist = null;
         Location location = get_location();
+        MapWaypoint mw = null;
 
         if (curruser.getActiveGroup() != null) {
             friendslist = curruser.getActiveGroup().getFriends();
@@ -462,6 +463,13 @@ public class MapNavDrawer extends AppCompatActivity
         if (o == curruser){
             if (friendslist != null) {
                 update_position(friendslist);
+
+                //Update WayPoint
+                if ((mw = curruser.getActiveGroup().getWaypoint()) != null &&
+                        !(mWaypoint.getPosition().equals(mw.getLocation()))){
+                    setWaypoint(mw);
+                    //TODO NOTIFY USER OF CHANGE
+                }
             }
         }
         if (o == mCurrentLocation){
