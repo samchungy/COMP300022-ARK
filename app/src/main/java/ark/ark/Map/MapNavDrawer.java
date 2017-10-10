@@ -86,7 +86,7 @@ public class MapNavDrawer extends AppCompatActivity
     private Geocoder geocoder;
     private MapWaypoint undobk;
     String otheremail;
-    String useremail;
+    private String useremail;
     private LocationSingleton mCurrentLocation;
     private BottomSheet bs;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -174,47 +174,13 @@ public class MapNavDrawer extends AppCompatActivity
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
-        //Initiate RequestQueue
-        // Instantiate the RequestQueue.
-        final TextView mTextView = (TextView) findViewById(R.id.textView2);
-        RequestQueue queue = Volley.newRequestQueue(this);
-        useremail = ARK_auth.fetchUserEmail(this);
-        mTextView.setText(useremail);
-
-//        if (useremail == "user1@user1.com") {
-//            otheremail = "user2@user2.com";
-//        } else {
-//            otheremail = "user1@user1.com";
-//        }
-//        String url = "http://52.65.97.117/locations/show?email=" + otheremail;
-//
-//        // Request a json response from the provided URL.
-//        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-//                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-//
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        try {
-//                            JSONObject loc = response.getJSONObject("location");
-//                            set_person_marker(new LatLng(loc.getDouble("lat"), loc.getDouble("lng")), otheremail);
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//
-//                }, new Response.ErrorListener() {
-//
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        // TODO Auto-generated method stub
-//
-//                    }
-//                });
-//        // Add the request to the RequestQueue.
-//        queue.add(jsObjRequest);
-
+        //Get User
         curruser = CurrentUser.getInstance();
         curruser.addObserver(this);
+
+        final TextView mTextView = (TextView) findViewById(R.id.textView2);
+        useremail = curruser.getEmail();
+        mTextView.setText(useremail);
 
         mGroup = new HashMap<>();
 
@@ -306,6 +272,8 @@ public class MapNavDrawer extends AppCompatActivity
                 }
             }
         }
+
+        setWaypoint(curruser.getActiveGroup().getWaypoint());
     }
 
     /**
@@ -399,27 +367,28 @@ public class MapNavDrawer extends AppCompatActivity
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
-                setWaypoint(place);
+                setWaypoint(new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
+                        place.getName().toString(), place.getAddress().toString()));
             }
         }
     }
 
     /**
      * Sets a waypoint for the group
-     * @param place
+     * @param wp Waypoint
      */
-    public void setWaypoint(Place place) {
+    public void setWaypoint(MapWaypoint wp) {
 
         if (mWaypoint != null) {
             mWaypoint.remove();
             mWaypoint = null;
         }
 
-        add_waypoint_marker(place.getLatLng(), useremail + "'s Hotspot",
-                new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
-                        place.getName().toString(), place.getAddress().toString()));
+        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
+        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
+                wp.getLocation().longitude, useremail);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
         bs.set_collapsed();
     }
 
@@ -459,6 +428,7 @@ public class MapNavDrawer extends AppCompatActivity
             @Override
             public void onDismissed(Snackbar mySnackbar, int event) {
                 show_fab();
+//                TODO curruser.getActiveGroup().setWaypoint(null);
             }
         });
         mySnackbar.show();

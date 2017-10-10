@@ -77,7 +77,7 @@ public class Group {
     }
 
     public void setWaypoint(Double lat, Double lng, String creator){
-        String title = "title";
+        String title = creator + "'s Waypoint.";
         String desc = "test";
         LatLng loc = new LatLng(lat, lng);
         waypoint = new MapWaypoint(title, loc, creator, desc);

@@ -11,6 +11,7 @@ public class MapWaypoint {
     private LatLng Place_location;
     private String Place_name;
     private String Place_details;
+    private String Place_user;
 
     /**
      * Creates a new waypoint
@@ -41,4 +42,5 @@ public class MapWaypoint {
     public String getDetails(){
         return Place_details;
     }
+
 }
