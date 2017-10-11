@@ -101,7 +101,7 @@ public class UserRequestsUtil {
 
             String path = "/group/show?";
             String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
-            ToastUtils.showToast(requestURL, context);
+            //ToastUtils.showToast(requestURL, context);
 
             StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
                     new Response.Listener<String>() {
@@ -110,7 +110,7 @@ public class UserRequestsUtil {
                         public void onResponse(String response) {
                             // after getting response, try reading the json
                             CurrentUser mUser = CurrentUser.getInstance();
-                            ToastUtils.showToast(response, context);
+                            //ToastUtils.showToast(response, context);
                             try {
                                 JSONObject res = new JSONObject(response);
 
@@ -152,7 +152,7 @@ public class UserRequestsUtil {
 
             String path = "/group/locations?";
             String requestURL = "http://" + server + path +"group_id="+ mUser.getActiveGroup().getId();
-            ToastUtils.showToast(requestURL, context);
+            //ToastUtils.showToast(requestURL, context);
 
             StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
                     new Response.Listener<String>() {
@@ -180,7 +180,7 @@ public class UserRequestsUtil {
                                         Friend f = new Friend(email);
                                         mUser.getActiveGroup().updateFriend(f);
                                         mUser.setActiveGroupLocation(email, loc);
-                                        ToastUtils.showToast(email, context);
+                                        //ToastUtils.showToast(email, context);
                                     }
                                     //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
 
@@ -217,7 +217,7 @@ public class UserRequestsUtil {
 
             String path = "/waypoint/show?";
             String requestURL = "http://" + server + path +"group_id="+ mUser.getActiveGroup().getId();
-            ToastUtils.showToast(requestURL, context);
+            //ToastUtils.showToast(requestURL, context);
 
             StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
                     new Response.Listener<String>() {
@@ -226,12 +226,12 @@ public class UserRequestsUtil {
                         public void onResponse(String response) {
                             // after getting response, try reading the json
                             CurrentUser mUser = CurrentUser.getInstance();
-                            ToastUtils.showToast(response, context);
+                            //ToastUtils.showToast(response, context);
                             try {
                                 JSONObject res = new JSONObject(response);
 
                                 if (res.getString("success").equals("ok")) {
-                                    ToastUtils.showToast("inside success", context);
+                                    //ToastUtils.showToast("inside success", context);
                                     JSONObject waypoint = res.getJSONObject("waypoint").getJSONObject("waypoint");
                                     String name = res.getJSONObject("waypoint").getString("creator_nickname");
                                     Double lat = waypoint.getDouble("lat");
@@ -278,7 +278,7 @@ public class UserRequestsUtil {
                     +"&lat="+waypoint.getLocation().latitude+
                     "&lng="+waypoint.getLocation().longitude+
                     "&group_id="+mUser.getActiveGroup().getId();
-            ToastUtils.showToast(requestURL, context);
+            //ToastUtils.showToast(requestURL, context);
 
             StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
                     new Response.Listener<String>() {

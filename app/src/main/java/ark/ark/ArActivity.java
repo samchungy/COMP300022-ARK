@@ -140,8 +140,8 @@ public class ArActivity extends AppCompatActivity implements Observer {
     */
     private void updatePOI(Double lat, Double lng, String user){
         architectView.callJavascript("updatePOI(" + lat + ", " + lng + ", '" +  user + "');");
-        showToast(user + " updated");
-        showToast("updatePOI(" + lat + ", " + lng + ", '" +  user + "');");
+        //showToast(user + " updated");
+        //showToast("updatePOI(" + lat + ", " + lng + ", '" +  user + "');");
     }
 
     public void initLoc(View v){
