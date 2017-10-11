@@ -480,11 +480,9 @@ public class MapNavDrawer extends AppCompatActivity
 
         if(bs.is_user_mode()){
             LatLng loc = null;
-            if (friendslist != null){
-                loc = new LatLng(curruser.getActiveGroup().getFriends().get(bs.get_active_user())
-                        .getLocation().getLatitude(), friendslist.get(bs.get_active_user())
-                        .getLocation().getLongitude());
-            }
+            loc = new LatLng(curruser.getActiveGroup().getFriends().get(bs.get_active_user())
+                    .getLocation().getLatitude(), curruser.getActiveGroup().getFriends().get(bs.get_active_user())
+                    .getLocation().getLongitude());
             if (mWaypoint != null){
                 bs.set_distance_person(findViewById(android.R.id.content),
                         location, loc, (MapWaypoint) mWaypoint.getTag());
