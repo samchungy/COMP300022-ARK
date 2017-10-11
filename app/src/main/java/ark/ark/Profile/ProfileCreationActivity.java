@@ -74,7 +74,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
         String server ="52.65.97.117";
         String path = "/users/create?";
-        String description = "creating a new user from ARK app with android studio and volley";
+        String description = "creatingNewUserFromARK";
 
         String requestURL = "http://" + server + path +"email="+email+"&nick_name="+nickname+
                 "&password_salted="+password+"&description="+description;
