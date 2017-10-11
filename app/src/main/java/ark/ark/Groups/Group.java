@@ -42,6 +42,8 @@ public class Group {
         return groupID;
     }
 
+    public String getName() { return groupName; }
+
     public String getOwner() { return ownerEmail; }
 
     /*

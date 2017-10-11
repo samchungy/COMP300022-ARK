@@ -1,6 +1,7 @@
 package ark.ark.Map;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -25,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -92,9 +94,17 @@ public class MapNavDrawer extends AppCompatActivity
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mylocation;
     private HashMap<String, Marker> mGroup;
+    private HashMap<Integer, String> idToEmail = new HashMap<>();
     private CurrentUser curruser;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
+
+    // Stuff for Zengster for navigation drawer
+    private ImageView profilePicture, headerImage;
+    private TextView currentUserName, currentUserGroup;
+    private View drawerHeader;
+    boolean isPopulated;
+    int numGroupMembers = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,12 +115,24 @@ public class MapNavDrawer extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerClosed(View view) {
+                initiateDrawer();
+            }
+        };
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Assorted drawer code
+        drawerHeader = navigationView.getHeaderView(0);
+        currentUserName = (TextView) drawerHeader.findViewById(R.id.userEmail);
+        currentUserGroup = (TextView) drawerHeader.findViewById(R.id.activeGroup);
+        profilePicture = (ImageView) drawerHeader.findViewById(R.id.profileImg);
+        initiateDrawer();
 
 
         // Geocoder
@@ -190,6 +212,41 @@ public class MapNavDrawer extends AppCompatActivity
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
+
+    private void initiateDrawer() {
+        currentUserName.setText(CurrentUser.getInstance().getEmail());
+        currentUserGroup.setText(CurrentUser.getInstance().getActiveGroup().getName());
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        final Menu menu = navigationView.getMenu();
+        numGroupMembers = 0;
+        int j = 0;
+
+        Context context = getApplicationContext();
+        CharSequence text = "Group member list refreshed!";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+
+        if(isPopulated == true) {
+            for(int key: idToEmail.keySet()) {
+                menu.removeItem(key);
+            }
+            toast.show();
+        }
+
+        for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
+            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
+            idToEmail.put(j, tempFriend.getEmail());
+            numGroupMembers++;
+            j++;
+            isPopulated = true;
+        }
+
+        j = 0;
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -218,10 +275,14 @@ public class MapNavDrawer extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        Context context = getApplicationContext();
+        CharSequence text = "Hello toast!";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -232,18 +293,21 @@ public class MapNavDrawer extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        Context context = getApplicationContext();
+        CharSequence text = "HashMap search successful.";
+        int duration = Toast.LENGTH_SHORT;
 
-        } else if (id == R.id.nav_slideshow) {
+        Toast toast = Toast.makeText(context, text, duration);
 
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_settings) {
-
-        } else if (id == R.id.nav_help) {
-
+        //noinspection SimplifiableIfStatement
+        for(int friendID: idToEmail.keySet()) {
+            if (id == friendID) {
+                LatLng moveCamera = new LatLng(
+                        mGroup.get(idToEmail.get(id)).getPosition().latitude,
+                        mGroup.get(idToEmail.get(id)).getPosition().longitude
+                );
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera, 15));
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
