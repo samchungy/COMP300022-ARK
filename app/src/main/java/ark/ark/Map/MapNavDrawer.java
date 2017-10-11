@@ -273,7 +273,9 @@ public class MapNavDrawer extends AppCompatActivity
             }
         }
 
-        setWaypoint(curruser.getActiveGroup().getWaypoint());
+        if (curruser.getActiveGroup().getWaypoint() != null) {
+            setWaypoint(curruser.getActiveGroup().getWaypoint());
+        }
     }
 
     /**
@@ -457,20 +459,15 @@ public class MapNavDrawer extends AppCompatActivity
         Location location = get_location();
         MapWaypoint mw = null;
 
-        if (curruser.getActiveGroup() != null) {
-            friendslist = curruser.getActiveGroup().getFriends();
-        }
         if (o == curruser){
-            if (friendslist != null) {
-                update_position(friendslist);
+            String email = (String)data;
+            Location loc = curruser.getActiveGroup().getFriend(email).getLocation();
 
-                //Update WayPoint
-                if ((mw = curruser.getActiveGroup().getWaypoint()) != null &&
-                        !(mWaypoint.getPosition().equals(mw.getLocation()))){
-                    setWaypoint(mw);
-                    //TODO NOTIFY USER OF CHANGE
-                }
+            if (loc != null){
+                LatLng l = new LatLng(loc.getLatitude(),loc.getLongitude());
+                update_position(l, email);
             }
+
         }
         if (o == mCurrentLocation){
             if (bs.is_place_mode()) {
@@ -484,7 +481,7 @@ public class MapNavDrawer extends AppCompatActivity
         if(bs.is_user_mode()){
             LatLng loc = null;
             if (friendslist != null){
-                loc = new LatLng(friendslist.get(bs.get_active_user())
+                loc = new LatLng(curruser.getActiveGroup().getFriends().get(bs.get_active_user())
                         .getLocation().getLatitude(), friendslist.get(bs.get_active_user())
                         .getLocation().getLongitude());
             }
@@ -504,22 +501,18 @@ public class MapNavDrawer extends AppCompatActivity
 
     }
 
-    private void update_position(HashMap<String,Friend> f){
+    private void update_position(LatLng l, String email){
         Marker mPerson;
         Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
-        for(Map.Entry<String, Marker> entry : mGroup.entrySet()){
-            LatLng currloc = new LatLng(f.get(entry.getValue()).getLocation().getLatitude(),
-                    f.get(entry.getValue()).getLocation().getLongitude());
-            if (!(entry.getValue().getPosition().equals(currloc))){
-                entry.getValue().remove();
-                mPerson = mMap.addMarker(new MarkerOptions()
-                        .position(entry.getValue().getPosition())
-                        .title(entry.getValue().getTitle())
-                        .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
-                );
-                mPerson.setTag(null);
-                mGroup.put(entry.getKey(),mPerson);
-            }
+        if(!(mGroup.get(email).getPosition().equals(l))){
+            mGroup.get(email).remove();
+            mPerson = mMap.addMarker(new MarkerOptions()
+                    .position(l)
+                    .title(mGroup.get(email).getTitle())
+                    .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
+            );
+            mPerson.setTag(null);
+            mGroup.put(email,mPerson);
         }
     }
 
