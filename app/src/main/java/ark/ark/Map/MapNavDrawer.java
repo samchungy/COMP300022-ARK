@@ -26,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -99,8 +100,10 @@ public class MapNavDrawer extends AppCompatActivity
     protected PlaceDetectionClient mPlaceDetectionClient;
 
     // Stuff for Zengster for navigation drawer
+    private ImageView profilePicture, headerImage;
     private TextView currentUserName, currentUserGroup;
     private View drawerHeader;
+    boolean isPopulated;
     int numGroupMembers = 0;
 
     @Override
@@ -112,7 +115,12 @@ public class MapNavDrawer extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerClosed(View view) {
+                initiateDrawer();
+            }
+        };
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -123,9 +131,8 @@ public class MapNavDrawer extends AppCompatActivity
         drawerHeader = navigationView.getHeaderView(0);
         currentUserName = (TextView) drawerHeader.findViewById(R.id.userEmail);
         currentUserGroup = (TextView) drawerHeader.findViewById(R.id.activeGroup);
+        profilePicture = (ImageView) drawerHeader.findViewById(R.id.profileImg);
         initiateDrawer();
-
-
 
 
         // Geocoder
@@ -247,15 +254,30 @@ public class MapNavDrawer extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
         final Menu menu = navigationView.getMenu();
-        invalidateOptionsMenu();
         numGroupMembers = 0;
         int j = 0;
+
+        Context context = getApplicationContext();
+        CharSequence text = "Group member list refreshed!";
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+
+        if(isPopulated == true) {
+            for(int key: idToEmail.keySet()) {
+                menu.removeItem(key);
+            }
+            toast.show();
+        }
+
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
             menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
             idToEmail.put(j, tempFriend.getEmail());
             numGroupMembers++;
             j++;
+            isPopulated = true;
         }
+
         j = 0;
     }
 
