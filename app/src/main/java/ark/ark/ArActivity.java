@@ -45,7 +45,7 @@ public class ArActivity extends AppCompatActivity implements Observer {
         this.lblCoord = (TextView)this.findViewById(R.id.lblCoord);
 
         // Set up architect view and AR interface
-        //this.architectView = (ArchitectView)this.findViewById( R.id.architectView );
+        this.architectView = (ArchitectView)this.findViewById( R.id.architectView );
         final ArchitectStartupConfiguration config = new ArchitectStartupConfiguration();
         config.setLicenseKey(getString(R.string.licensekey));
         this.architectView.onCreate( config );
