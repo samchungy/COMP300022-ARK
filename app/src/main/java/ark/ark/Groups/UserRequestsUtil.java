@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -40,6 +41,10 @@ public class UserRequestsUtil {
      */
     public static void initialiseCurrentUser(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
+        // logHead is the heading to add to the log for this function
+        String logHead = "initialiseCurrentUser";
+
+        Log.d(logHead,"function start");
 
         if (mUser.getEmail() != null) {
             RequestQueue queue = Volley.newRequestQueue(context);
@@ -47,7 +52,8 @@ public class UserRequestsUtil {
 
             String path = "/group/show?";
             String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
-            ToastUtils.showToast(requestURL, context);
+
+            Log.d(logHead,requestURL);
 
             StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
                     new Response.Listener<String>() {
@@ -57,6 +63,7 @@ public class UserRequestsUtil {
                             // after getting response, try reading the json
                             CurrentUser mUser = CurrentUser.getInstance();
                             ToastUtils.showToast(response, context);
+                            Log.d("Init Curr User",response);
                             try {
                                 JSONObject res = new JSONObject(response);
 
@@ -76,6 +83,8 @@ public class UserRequestsUtil {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 ToastUtils.showToast("exception", context);
+                                Log.d("initcurr", e.getMessage());
+
                             }
                         }
                     }, new Response.ErrorListener() {

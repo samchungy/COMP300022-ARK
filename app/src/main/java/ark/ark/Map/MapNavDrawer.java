@@ -64,9 +64,14 @@ import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
 import ark.ark.Groups.Group;
+import ark.ark.Groups.GroupLocationUpdateService;
+import ark.ark.Groups.UserRequestsUtil;
+import ark.ark.HomeActivity;
 import ark.ark.PermissionUtils;
+import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.UserLocation.LocationSingleton;
+import ark.ark.UserLocation.LocationUpdateService;
 
 /**
  * Map + Nav Drawer Class
@@ -81,13 +86,19 @@ public class MapNavDrawer extends AppCompatActivity
         GoogleMap.OnMarkerClickListener,
         Observer {
 
+    private static final int REQUEST_LOCATION = 2;
+
+    //Services
+    Intent mLocUpdateService;
+    Intent mGroupLocUpdateService;
+
+    //Map Stuff
     private GoogleMap mMap;
     private UiSettings uiSettings;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Marker mWaypoint = null;
     private Geocoder geocoder;
     private MapWaypoint undobk;
-    String otheremail;
     private String useremail;
     private LocationSingleton mCurrentLocation;
     private BottomSheet bs;
@@ -110,6 +121,41 @@ public class MapNavDrawer extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_nav_drawer);
+
+        //showToast(ARK_auth.fetchSessionId(getApplicationContext()));
+        if(ARK_auth.fetchSessionId(getApplicationContext()).equals("no session id")) {
+            Intent myIntent2 = new Intent(this, LoginActivity.class);
+            //Intent myIntent2 = new Intent(HomeActivity.this, ProfileCreationActivity.class);
+            startActivity(myIntent2);
+            this.finish();
+        }
+
+        //Get User
+        curruser = CurrentUser.getInstance();
+        curruser.addObserver(this);
+
+        mLocUpdateService = new Intent(this, LocationUpdateService.class);
+        mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
+
+        Log.d("TEST",ARK_auth.fetchUserEmail(this));
+        curruser.logOn(ARK_auth.fetchUserEmail(this));
+        UserRequestsUtil.initialiseCurrentUser(this);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Check Permissions Now
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION);
+        } else {
+            startService(mLocUpdateService);
+
+            /*
+            locationInitialise();
+            */
+        }
+        startService(mGroupLocUpdateService);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -195,10 +241,6 @@ public class MapNavDrawer extends AppCompatActivity
         mGeoDataClient = Places.getGeoDataClient(this, null);
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
-
-        //Get User
-        curruser = CurrentUser.getInstance();
-        curruser.addObserver(this);
 
         final TextView mTextView = (TextView) findViewById(R.id.textView2);
         useremail = curruser.getEmail();

@@ -202,7 +202,7 @@ public class HomeActivity extends AppCompatActivity {
 
         mCurrentUser.logOn("user2@user2.com");
         UserRequestsUtil.initialiseCurrentUser(this);
-        //UserRequestsUtil.updateActiveGroupLocations(this);
+            //UserRequestsUtil.updateActiveGroupLocations(this);
     }
 
     public void allowUpdateLocation(View v){
