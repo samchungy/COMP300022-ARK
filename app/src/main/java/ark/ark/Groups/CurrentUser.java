@@ -1,5 +1,6 @@
 package ark.ark.Groups;
 
+import android.content.Context;
 import android.location.Location;
 
 import com.android.volley.Request;
@@ -29,14 +30,14 @@ public class CurrentUser extends Observable{
     private String email;
     private HashMap<String, Group> groups = new HashMap<String, Group>();
     private Group activeGroup;
-    private Boolean isUpdating = true;
+    private Boolean isUpdating = false;
 
     public static CurrentUser getInstance() {
         return ourInstance;
     }
 
-    public void logOn(String email) {
-        this.email = email;
+    public void logOn(String email, Context context) {
+        this.email = ARK_auth.fetchUserEmail(context);
     }
 
     public String getEmail() {
@@ -54,17 +55,15 @@ public class CurrentUser extends Observable{
     }
 
     public void setActiveGroupLocation(String email, Location loc) {
-        if(activeGroup.getFriend(email) != null){
-            activeGroup.setLocation(email, loc);
-            setChanged();
-            notifyObservers(email);
-        }
+        activeGroup.setLocation(email, loc);
+        setChanged();
+        notifyObservers();
     }
 
     public void updateActiveGroupFriend(Friend friend) {
         activeGroup.updateFriend(friend);
-        //setChanged();
-        //notifyObservers();
+        setChanged();
+        notifyObservers();
     }
 
     public boolean isUpdating() {

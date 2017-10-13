@@ -24,6 +24,8 @@ import ark.ark.R;
 
 public class LoginActivity extends AppCompatActivity {
 
+    Boolean isDev = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,8 +64,10 @@ public class LoginActivity extends AppCompatActivity {
     private void goToHome(){
         Intent myIntent = new Intent(LoginActivity.this, HomeActivity.class);
         startActivity(myIntent);
+        myIntent.putExtra("isDev", isDev);
         this.finish();
     }
+
 
     private void postUserLogin(final String email, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -72,6 +76,8 @@ public class LoginActivity extends AppCompatActivity {
         String path = "/users/login?";
 
         String requestURL = "http://" + server + path +"email="+email+"&password_salted="+password;
+
+        showToast(requestURL);
 
         // Request a string response from the requestURL.
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
@@ -120,6 +126,8 @@ public class LoginActivity extends AppCompatActivity {
 
     public void LoginAsGuest(View v){
         ARK_auth.storeSessionId("guest",getApplicationContext());
+        ARK_auth.storeUserEmail("user1@user1.com",getApplicationContext());
+        isDev=true;
         goToHome();
     }
 }

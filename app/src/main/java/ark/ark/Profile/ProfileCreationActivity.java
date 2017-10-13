@@ -39,21 +39,6 @@ public class ProfileCreationActivity extends AppCompatActivity {
         EditText password = (EditText) findViewById(R.id.login_password);
         EditText email = (EditText) findViewById(R.id.login_email);
 
-        /**Password hashing via BCrpyt**/
-        /*String parse = password.getText().toString();
-        String hashed;
-        hashed = BCrypt.hashpw(parse, BCrypt.gensalt(10));
-
-        postUserCreation(nickname.getText().toString(), email.getText().toString(),
-                hashed);*/
-
-        /*
-        For verification just use:
-
-        if(BCrypt.checkpw(password user typed, hashed actual password)) {...}
-
-        You can put it in the right place.
-         */
 
 
         postUserCreation(nickname.getText().toString(), email.getText().toString(), password.getText().toString());
@@ -74,7 +59,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
         String server ="52.65.97.117";
         String path = "/users/create?";
-        String description = "creating a new user from ARK app with android studio and volley";
+        String description = "creatingNewUserFromARK";
 
         String requestURL = "http://" + server + path +"email="+email+"&nick_name="+nickname+
                 "&password_salted="+password+"&description="+description;
