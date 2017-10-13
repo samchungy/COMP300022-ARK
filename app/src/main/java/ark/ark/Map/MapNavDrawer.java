@@ -11,10 +11,15 @@ import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -26,6 +31,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,12 +68,15 @@ import java.util.Observable;
 import java.util.Observer;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Debugging;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
 import ark.ark.Groups.Group;
+import ark.ark.HomeActivity;
 import ark.ark.PermissionUtils;
 import ark.ark.R;
 import ark.ark.UserLocation.LocationSingleton;
+import layout.HomeFragment;
 
 /**
  * Map + Nav Drawer Class
@@ -126,6 +136,11 @@ public class MapNavDrawer extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //Get User
+        curruser = CurrentUser.getInstance();
+        curruser.addObserver(this);
+
 
         // Assorted drawer code
         drawerHeader = navigationView.getHeaderView(0);
@@ -196,9 +211,6 @@ public class MapNavDrawer extends AppCompatActivity
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
 
-        //Get User
-        curruser = CurrentUser.getInstance();
-        curruser.addObserver(this);
 
         final TextView mTextView = (TextView) findViewById(R.id.textView2);
         useremail = curruser.getEmail();
@@ -214,14 +226,6 @@ public class MapNavDrawer extends AppCompatActivity
 
 
     private void initiateDrawer() {
-        currentUserName.setText(CurrentUser.getInstance().getEmail());
-        currentUserGroup.setText(CurrentUser.getInstance().getActiveGroup().getName());
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
-        final Menu menu = navigationView.getMenu();
-        numGroupMembers = 0;
-        int j = 0;
 
         Context context = getApplicationContext();
         CharSequence text = "Group member list refreshed!";
@@ -229,22 +233,49 @@ public class MapNavDrawer extends AppCompatActivity
 
         Toast toast = Toast.makeText(context, text, duration);
 
+
+        if(curruser != null) {
+            currentUserName.setText(curruser.getEmail());
+            currentUserGroup.setText(curruser.getActiveGroup().getName());
+        } else {
+            currentUserName.setText("Not set");
+            currentUserGroup.setText("Not set");
+        }
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        final Menu menu = navigationView.getMenu();
+
         if(isPopulated == true) {
+            invalidateOptionsMenu();
+            menu.removeItem(0);
             for(int key: idToEmail.keySet()) {
                 menu.removeItem(key);
             }
             toast.show();
         }
 
-        for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
-            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
-            idToEmail.put(j, tempFriend.getEmail());
-            numGroupMembers++;
-            j++;
-            isPopulated = true;
+        numGroupMembers = 0;
+        int j = 1;
+        menu.add(0, 0, 0, "Debugging");
+
+
+
+
+
+        if(curruser != null) {
+            for(Friend tempFriend: curruser.getActiveGroup().getFriends().values()) {
+                menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
+                idToEmail.put(j, tempFriend.getEmail());
+                numGroupMembers++;
+                j++;
+                isPopulated = true;
+            }
         }
 
-        j = 0;
+
+
+
     }
 
     @Override
@@ -298,6 +329,11 @@ public class MapNavDrawer extends AppCompatActivity
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
+        Intent intent = null;
+
+        if(id == 0) {
+            intent = new Intent(this, Debugging.class);
+        }
 
         //noinspection SimplifiableIfStatement
         for(int friendID: idToEmail.keySet()) {
@@ -312,6 +348,7 @@ public class MapNavDrawer extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        startActivity(intent);
         return true;
     }
 
@@ -542,24 +579,20 @@ public class MapNavDrawer extends AppCompatActivity
             }
         }
 
-        if(bs.is_user_mode()){
+        if(bs.is_user_mode()) {
             LatLng loc = null;
             loc = new LatLng(curruser.getActiveGroup().getFriends().get(bs.get_active_user())
                     .getLocation().getLatitude(), curruser.getActiveGroup().getFriends().get(bs.get_active_user())
                     .getLocation().getLongitude());
-            if (mWaypoint != null){
+            if (mWaypoint != null) {
                 bs.set_distance_person(findViewById(android.R.id.content),
                         location, loc, (MapWaypoint) mWaypoint.getTag());
-            }
-            else{
+            } else {
                 bs.set_distance_person(findViewById(android.R.id.content),
                         location, loc, null);
             }
 
         }
-
-
-
 
     }
 
@@ -626,5 +659,54 @@ public class MapNavDrawer extends AppCompatActivity
     public void show_fab(){
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
+    }
+
+    public void smoothMove(Marker target, LatLng from, LatLng to) {
+
+        final Handler handler = new Handler();
+        final Interpolator interpolator = new LinearInterpolator();
+
+        final long start = SystemClock.uptimeMillis();
+        final float duration = 1000;
+
+        final LatLng origin = from;
+        final LatLng destination = to;
+
+        final Marker copyTarget = target;
+        target.remove();
+
+        final boolean visible = true;
+
+        handler.post(new Runnable() {
+
+            // Based on https://github.com/shohrabuddin/move_markers_in_map_smoothly
+
+            @Override
+            public void run() {
+
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed/duration);
+
+                double newlat = (t * destination.latitude)
+                        + ((1 - t) * origin.latitude);
+                double newlng = (t * destination.longitude)
+                        + ((1 - t) * origin.longitude);
+
+                LatLng nextPos = new LatLng(newlat, newlng);
+
+                copyTarget.setPosition(nextPos);
+
+                if (t < 1.0) {
+                    handler.postDelayed(this, 16);
+                } else {
+                    if(visible == true) {
+                        copyTarget.setVisible(true);
+                    } else {
+                        copyTarget.setVisible(false);
+                    }
+                }
+            }
+        });
+
     }
 }
