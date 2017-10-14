@@ -30,6 +30,7 @@ public class CurrentUser extends Observable{
     private HashMap<String, Group> groups = new HashMap<String, Group>();
     private Group activeGroup;
     private Boolean isUpdating = true;
+    private Boolean isInitialised = false;
 
     public static CurrentUser getInstance() {
         return ourInstance;
@@ -82,5 +83,15 @@ public class CurrentUser extends Observable{
                 switchActiveGroup(group.getId());
             }
         }
+    }
+
+    public void setInitialised(){
+        isInitialised = true;
+        setChanged();
+        notifyObservers(this);
+    }
+
+    public boolean getIsInitialised() {
+        return isInitialised;
     }
 }
