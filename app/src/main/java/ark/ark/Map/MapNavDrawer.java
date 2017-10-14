@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import ark.ark.ArActivity;
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
@@ -259,6 +260,27 @@ public class MapNavDrawer extends AppCompatActivity
             }
         });
 
+        // FAB
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO OPEN CHAT ACTIVITY
+                Intent myIntent2 = new Intent(MapNavDrawer.this, HomeActivity.class);
+                startActivity(myIntent2);
+            }
+        });
+
+        // FAB
+        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        fab3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent2 = new Intent(MapNavDrawer.this, ArActivity.class);
+                startActivity(myIntent2);
+            }
+        });
+
         hide_fab();
 
         final TextView mTextView = (TextView) findViewById(R.id.textView2);
@@ -336,32 +358,6 @@ public class MapNavDrawer extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.map_nav_drawer, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        Context context = getApplicationContext();
-        CharSequence text = "Hello toast!";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-
-        //noinspection SimplifiableIfStatement
-
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -382,6 +378,20 @@ public class MapNavDrawer extends AppCompatActivity
                         mGroup.get(idToEmail.get(id)).getPosition().longitude
                 );
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera, 15));
+
+                if (mWaypoint != null){
+                    bs.set_person_mode(findViewById(android.R.id.content),
+                            mGroup.get(idToEmail.get(id)).getPosition(), get_location(),
+                            (MapWaypoint) mWaypoint.getTag(),idToEmail.get(id));
+                }
+                else{
+                    bs.set_person_mode(findViewById(android.R.id.content),
+                            mGroup.get(idToEmail.get(id)).getPosition(), get_location(),
+                            null, idToEmail.get(id));
+                }
+                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+                changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
+                bs.set_expanded();
             }
         }
 
@@ -400,6 +410,7 @@ public class MapNavDrawer extends AppCompatActivity
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerClickListener(this);
         enableMyLocation();
+        mMap.setPadding(150,0,0,0);
 
     }
 
@@ -452,11 +463,11 @@ public class MapNavDrawer extends AppCompatActivity
             changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
         } else {
             if (mWaypoint != null){
-                bs.set_person_mode(findViewById(android.R.id.content), marker, get_location(),
+                bs.set_person_mode(findViewById(android.R.id.content), marker.getPosition(), get_location(),
                         (MapWaypoint) mWaypoint.getTag(),(String) marker.getTag());
             }
             else{
-                bs.set_person_mode(findViewById(android.R.id.content), marker, get_location(),
+                bs.set_person_mode(findViewById(android.R.id.content), marker.getPosition(), get_location(),
                         null, (String) marker.getTag());
             }
 
@@ -598,25 +609,24 @@ public class MapNavDrawer extends AppCompatActivity
             }
             if (o == mCurrentLocation){
                 if (bs.is_place_mode()) {
-                    bs.set_distance_waypoint(findViewById(android.R.id.content),
-                            new LatLng(location.getLatitude(), location.getLongitude()),
-                            mWaypoint.getPosition()
-                    );
+                    if (location != null && mWaypoint != null){
+                        bs.set_distance_waypoint(findViewById(android.R.id.content),location,
+                                mWaypoint.getPosition()
+                        );
+                    }
                 }
             }
 
             if(bs.is_user_mode()){
-                LatLng loc = null;
-                loc = new LatLng(curruser.getActiveGroup().getFriends().get(bs.get_active_user())
-                        .getLocation().getLatitude(), curruser.getActiveGroup().getFriends().get(bs.get_active_user())
-                        .getLocation().getLongitude());
                 if (mWaypoint != null){
                     bs.set_distance_person(findViewById(android.R.id.content),
-                            location, loc, (MapWaypoint) mWaypoint.getTag());
+                            location, curruser.getActiveGroup().getFriends().get(bs.get_active_user())
+                                    .getLocation(), (MapWaypoint) mWaypoint.getTag());
                 }
                 else{
                     bs.set_distance_person(findViewById(android.R.id.content),
-                            location, loc, null);
+                            location, curruser.getActiveGroup().getFriends().get(bs.get_active_user())
+                                    .getLocation(), null);
                 }
 
             }
@@ -686,12 +696,20 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void hide_fab(){
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
         fab.setVisibility(View.GONE);
+        fab2.setVisibility(View.GONE);
+        fab3.setVisibility(View.GONE);
     }
 
     public void show_fab(){
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
         fab.setVisibility(View.VISIBLE);
+        fab2.setVisibility(View.VISIBLE);
+        fab3.setVisibility(View.VISIBLE);
     }
 
     public static MapNavDrawer getInstance(){
@@ -701,5 +719,18 @@ public class MapNavDrawer extends AppCompatActivity
     public void open_drawer(View view){
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.openDrawer(Gravity.LEFT);
+    }
+
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        isLoaded = false;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        UserRequestsUtil.initialiseCurrentUser(this);
     }
 }
