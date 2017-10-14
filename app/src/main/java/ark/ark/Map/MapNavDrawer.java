@@ -6,11 +6,18 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -42,6 +49,7 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -86,7 +94,7 @@ public class MapNavDrawer extends AppCompatActivity
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMarkerClickListener,
-        Observer {
+        Observer, DrawerLayout.DrawerListener{
 
     private static final int REQUEST_LOCATION = 2;
     private static final MapNavDrawer ourInstance = new MapNavDrawer();
@@ -153,25 +161,10 @@ public class MapNavDrawer extends AppCompatActivity
                     REQUEST_LOCATION);
         } else {
             startService(mLocUpdateService);
-
-            /*
-            locationInitialise();
-            */
         }
         startService(mGroupLocUpdateService);
 
 //
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-//            @Override
-//            public void onDrawerClosed(View view) {
-//                initiateDrawer();
-//            }
-//        };
-//        drawer.addDrawerListener(toggle);
-//        toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -253,6 +246,7 @@ public class MapNavDrawer extends AppCompatActivity
                 } else if (mWaypoint != null) {
                     bs.set_place_mode(findViewById(android.R.id.content),
                             (MapWaypoint) mWaypoint.getTag(), get_location());
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mWaypoint.getPosition(), 15));
                     bs.set_collapsed();
                 } else {
                     selectPlace(view);
@@ -410,7 +404,7 @@ public class MapNavDrawer extends AppCompatActivity
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerClickListener(this);
         enableMyLocation();
-        mMap.setPadding(150,0,0,0);
+        mMap.setPadding(0,0,0,0);
 
     }
 
@@ -640,17 +634,22 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
     private void update_position(LatLng l, String email){
-        Marker mPerson;
-        Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         if(!(mGroup.get(email).getPosition().equals(l))){
-            mGroup.get(email).remove();
-            mPerson = mMap.addMarker(new MarkerOptions()
-                    .position(l)
-                    .title(mGroup.get(email).getTitle())
-                    .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
-            );
-            mPerson.setTag(null);
-            mGroup.put(email,mPerson);
+            Log.d("LOK B4", mGroup.get(email).getPosition().toString());
+            animateMarker(mGroup.get(email),l, false);
+            mGroup.get(email).setPosition(l);
+            if (bs.is_user_mode() && email.equals(bs.get_active_user())){
+                if (mWaypoint != null){
+                    Log.d("NONO","HEHE");
+                    Log.d("LOK AFTER", mGroup.get(email).getPosition().toString());
+                    bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
+                            (MapWaypoint) mWaypoint.getTag(),(String) mGroup.get(email).getTag());
+                }
+                else{
+                    bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
+                            null, (String) mGroup.get(email).getTag());
+                }
+            }
         }
     }
 
@@ -733,4 +732,70 @@ public class MapNavDrawer extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         UserRequestsUtil.initialiseCurrentUser(this);
     }
+
+    @Override
+    public void onDrawerSlide(View view, float v) {
+
+    }
+
+    @Override
+    public void onDrawerOpened(View view) {
+
+    }
+
+    @Override
+    public void onDrawerClosed(View view) {
+        if(isLoaded){
+            initiateDrawer();
+        }
+    }
+
+    @Override
+    public void onDrawerStateChanged(int i) {
+
+    }
+
+    /**
+     * Smooth Animation of Marker taken from: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/MarkerDemoActivity.java
+     * @param marker
+     * @param toPosition
+     * @param hideMarker
+     */
+    public void animateMarker(final Marker marker, final LatLng toPosition,
+        final boolean hideMarker) {
+
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            Projection proj = mMap.getProjection();
+            Point startPoint = proj.toScreenLocation(marker.getPosition());
+            final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+            final long duration = 500;
+
+            final Interpolator interpolator = new LinearInterpolator();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed
+                            / duration);
+                    double lng = t * toPosition.longitude + (1 - t)
+                            * startLatLng.longitude;
+                    double lat = t * toPosition.latitude + (1 - t)
+                            * startLatLng.latitude;
+                    marker.setPosition(new LatLng(lat, lng));
+
+                    if (t < 1.0) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 16);
+                    } else {
+                        if (hideMarker) {
+                            marker.setVisible(false);
+                        } else {
+                            marker.setVisible(true);
+                        }
+                    }
+                }
+            });
+        }
 }
