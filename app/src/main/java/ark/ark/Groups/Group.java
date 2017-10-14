@@ -86,7 +86,7 @@ public class Group {
         LatLng loc = new LatLng(lat, lng);
         waypoint = new MapWaypoint(title, loc, creator, desc);
 
-        UserRequestsUtil.get
+        //UserRequestsUtil.get
     }
 
     public MapWaypoint getWaypoint(){ return waypoint;}

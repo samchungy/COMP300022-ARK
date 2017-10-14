@@ -333,6 +333,8 @@ public class MapNavDrawer extends AppCompatActivity
 
         if(id == 0) {
             intent = new Intent(this, Debugging.class);
+            startActivity(intent);
+            return true;
         }
 
         //noinspection SimplifiableIfStatement
@@ -348,7 +350,6 @@ public class MapNavDrawer extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
-        startActivity(intent);
         return true;
     }
 
