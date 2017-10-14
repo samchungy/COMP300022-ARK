@@ -94,7 +94,8 @@ public class MapNavDrawer extends AppCompatActivity
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMarkerClickListener,
-        Observer, DrawerLayout.DrawerListener{
+        Observer,
+        DrawerLayout.DrawerListener{
 
     private static final int REQUEST_LOCATION = 2;
     private static final MapNavDrawer ourInstance = new MapNavDrawer();
@@ -499,7 +500,7 @@ public class MapNavDrawer extends AppCompatActivity
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
-                setWaypoint(new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
+                updateWaypoint(new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
                         place.getName().toString(), place.getAddress().toString()));
             }
         }
@@ -511,17 +512,23 @@ public class MapNavDrawer extends AppCompatActivity
      */
     public void setWaypoint(MapWaypoint wp) {
 
+        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
+        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
+                wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
+        bs.set_collapsed();
+    }
+
+    public void updateWaypoint(MapWaypoint wp){
         if (mWaypoint != null) {
             mWaypoint.remove();
             mWaypoint = null;
         }
 
-        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
-        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
-                wp.getLocation().longitude, useremail);
+        setWaypoint(wp);
+        UserRequestsUtil.sendActiveWaypointToServer(this);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
-        bs.set_collapsed();
     }
 
     public void add_waypoint_marker(LatLng pos, String title, MapWaypoint mw) {
@@ -560,10 +567,15 @@ public class MapNavDrawer extends AppCompatActivity
             @Override
             public void onDismissed(Snackbar mySnackbar, int event) {
                 show_fab();
-//                TODO curruser.getActiveGroup().setWaypoint(null);
+                remove_waypoint_server();
             }
         });
         mySnackbar.show();
+    }
+
+    public void remove_waypoint_server(){
+        curruser.getActiveGroup().deleteWaypoint();
+        UserRequestsUtil.sendActiveWaypointToServer(this);
     }
 
 

@@ -112,7 +112,7 @@ public class BottomSheet extends MapNavDrawer {
 
             }
 
-            set_text(username+"'s Waypoint.", featurename, addresses.get(0).getAddressLine(0), v);
+            set_text(username+"'s Location.", featurename, addresses.get(0).getAddressLine(0), v);
             place_layout.setVisibility(View.GONE);
             person_layout.setVisibility(View.VISIBLE);
 

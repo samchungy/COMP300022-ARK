@@ -1,6 +1,7 @@
 package ark.ark.Groups;
 
 import android.location.Location;
+import android.view.View;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.SquareCap;
@@ -10,6 +11,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 
+import ark.ark.Map.MapNavDrawer;
 import ark.ark.Map.MapWaypoint;
 
 /**
@@ -80,12 +82,21 @@ public class Group {
 
     }
 
-    public void setWaypoint(Double lat, Double lng, String creator){
-        String title = creator + "'s Waypoint.";
-        String desc = "test";
-        LatLng loc = new LatLng(lat, lng);
-        waypoint = new MapWaypoint(title, loc, creator, desc);
+    public void setWaypoint(Double lat, Double lng, String creator, String placename,
+                            String placeaddress, Boolean active){
+        if (active){
+            String title = creator + "'s Waypoint.";
+            LatLng loc = new LatLng(lat, lng);
+            waypoint = new MapWaypoint(title, loc, placename, placeaddress);
+        }
+        else{
+            deleteWaypoint();
+        }
 
+    }
+
+    public void deleteWaypoint(){
+        waypoint = null;
     }
 
     public MapWaypoint getWaypoint(){ return waypoint;}
