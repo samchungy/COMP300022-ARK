@@ -69,8 +69,7 @@ public class BottomSheet extends MapNavDrawer {
         View person_layout = v.findViewById(R.id.person_buttons);
         set_text(waypoint.getTitle(),waypoint.getNam(),waypoint.getDetails(),v);
         if (user != null){
-            set_distance_waypoint(v,new LatLng(user.getLatitude(),user.getLongitude()),
-                    waypoint.getLocation());
+            set_distance_waypoint(v,user, waypoint.getLocation());
         }
         person_layout.setVisibility(View.GONE);
         place_layout.setVisibility(View.VISIBLE);
@@ -81,9 +80,12 @@ public class BottomSheet extends MapNavDrawer {
     /**
      * Changes bottom sheet to Person Mode.
      */
-    public void set_person_mode(View v, Marker marker, Location user, MapWaypoint wp, String username){
+    public void set_person_mode(View v, LatLng marker, Location user, MapWaypoint wp, String username){
 
         activeuser = username;
+        Location loc = new Location("Temp");
+        loc.setLatitude(marker.latitude);
+        loc.setLongitude(marker.longitude);
 
         View place_layout = v.findViewById(R.id.place_buttons);
         View person_layout = v.findViewById(R.id.person_buttons);
@@ -92,8 +94,8 @@ public class BottomSheet extends MapNavDrawer {
         List<Address> addresses = null;
 
         try {
-            addresses = geocoder.getFromLocation(marker.getPosition().latitude,
-                    marker.getPosition().longitude, MAX_RESULTS);
+            addresses = geocoder.getFromLocation(marker.latitude,
+                    marker.longitude, MAX_RESULTS);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,12 +112,11 @@ public class BottomSheet extends MapNavDrawer {
 
             }
 
-            set_text(marker.getTitle(), featurename, addresses.get(0).getAddressLine(0), v);
+            set_text(username+"'s Waypoint.", featurename, addresses.get(0).getAddressLine(0), v);
             place_layout.setVisibility(View.GONE);
             person_layout.setVisibility(View.VISIBLE);
 
-            set_distance_person(v, user,
-                    marker.getPosition(), wp);
+            set_distance_person(v, user, loc, wp);
             placemode = false;
             usermode = true;
         }
@@ -190,23 +191,16 @@ public class BottomSheet extends MapNavDrawer {
      * @param other Other User
      * @param wp Waypoint
      */
-    public void set_distance_person(View v, Location user, LatLng other, MapWaypoint wp){
+    public void set_distance_person(View v, Location user, Location other, MapWaypoint wp){
         TextView distance = (TextView) v.findViewById(R.id.bs_distance);
         String distancetext = "";
-        Location usera = new Location("Point A");
-        Location userb = new Location("Point B");
-
-        userb.setLatitude(other.latitude);
-        userb.setLongitude(other.longitude);
 
         if(user != null){
-            usera.setLatitude(user.getLatitude());
-            usera.setLongitude(user.getLongitude());
-            distancetext += metres_to_km((usera.distanceTo(userb)))+" Away. ";
+            distancetext += metres_to_km((user.distanceTo(other)))+" Away. ";
         }
         if (wp != null){
             distancetext += metres_to_km((distance_to_waypoint(other,
-                    new LatLng(wp.getLocation().latitude,wp.getLocation().longitude))))+" from Waypoint.";
+                    wp.getLocation())))+" from Waypoint.";
         }
 
         distance.setText(distancetext);
@@ -218,7 +212,7 @@ public class BottomSheet extends MapNavDrawer {
      * @param user User
      * @param wp Waypoint
      */
-    public void set_distance_waypoint(View v, LatLng user, LatLng wp){
+    public void set_distance_waypoint(View v, Location user, LatLng wp){
         TextView distance = (TextView) v.findViewById(R.id.bs_distance);
         distance.setText((metres_to_km(distance_to_waypoint(user,wp)))+" Away.");
     }
@@ -229,15 +223,12 @@ public class BottomSheet extends MapNavDrawer {
      * @param wp Waypoint
      * @return Distance (float)
      */
-    private float distance_to_waypoint(LatLng user, LatLng wp){
-        Location usera = new Location("Point A");
+    private float distance_to_waypoint(Location user, LatLng wp){
         Location waypoint = new Location("Point C");
-        usera.setLatitude(user.latitude);
-        usera.setLongitude(user.longitude);
         waypoint.setLatitude(wp.latitude);
         waypoint.setLongitude(wp.longitude);
 
-        return usera.distanceTo(waypoint);
+        return user.distanceTo(waypoint);
 
     }
 
