@@ -63,8 +63,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private void goToHome(){
         Intent myIntent = new Intent(LoginActivity.this, HomeActivity.class);
-        startActivity(myIntent);
         myIntent.putExtra("isDev", isDev);
+        startActivity(myIntent);
+
         this.finish();
     }
 

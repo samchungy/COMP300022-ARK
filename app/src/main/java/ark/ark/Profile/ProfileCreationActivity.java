@@ -100,57 +100,6 @@ public class ProfileCreationActivity extends AppCompatActivity {
     }
 
 
-    //GET request example
-
-    private void getRequestExample() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        showToast("creating user...");
-
-        String server ="52.65.97.117";
-        String userEmail = "user1@user1.com";
-        String testUserID = "62390ede67dbbec5b650dfd1b0f33d15";
-        String requestURL = "http://" + server + "/direct/show?email=" + userEmail;
-
-        requestURL = "http://" + server + "/users/show?user_id=" + testUserID;
-
-        // Request a string response from the requestURL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // after getting response, try reading the json
-                        try {
-                            JSONObject res = new JSONObject(response);
-                            if (res.getString("success").equals("ok")) {
-                                // iterate through the direct list to populate the convo list
-
-                                showToast("data GET!");
-                                showToast(res.getString("user_info"));
-                                showToast(res.getJSONObject("user_info").getString("email"));
-
-                            } else {
-                                showToast(res.getString("msg"));
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            showToast("exception");
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // error handling
-                showToast("Sorry, cannot connect to the server.");
-            }
-        });
-
-        queue.add(stringRequest);
-    }
-
-
-
     private void showToast(String message) {
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(this, message, duration);

@@ -70,9 +70,12 @@
         <activity
             android:name=".ArActivity"
             android:configChanges="screenSize|orientation" />
-        <activity android:name=".Chat.ChatLogActivity" android:windowSoftInputMode="stateHidden"/>
+        <activity
+            android:name=".Chat.ChatLogActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity android:name=".Profile.ProfileCreationActivity" />
-        <activity android:name=".Profile.LoginActivity"></activity>
+        <activity android:name=".Profile.LoginActivity" />
+
         <service
             android:name=".UserLocation.LocationUpdateService"
             android:enabled="true"
@@ -80,7 +83,11 @@
         <service
             android:name=".Groups.GroupLocationUpdateService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity android:name=".Groups.GroupCreationActivity" />
+        <activity android:name=".Groups.GroupListActivity" />
+        <activity android:name=".Groups.JoinGroupActivity"></activity>
     </application>
 
 </manifest>
