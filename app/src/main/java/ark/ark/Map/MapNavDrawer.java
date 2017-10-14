@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
@@ -18,6 +19,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -28,9 +30,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amulyakhare.textdrawable.TextDrawable;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -113,7 +117,7 @@ public class MapNavDrawer extends AppCompatActivity
     protected PlaceDetectionClient mPlaceDetectionClient;
 
     // Stuff for Zengster for navigation drawer
-    private ImageView profilePicture, headerImage;
+    private ImageView profilePicture;
     private TextView currentUserName, currentUserGroup;
     private View drawerHeader;
     boolean isLoaded = false;
@@ -178,7 +182,12 @@ public class MapNavDrawer extends AppCompatActivity
         drawerHeader = navigationView.getHeaderView(0);
         currentUserName = (TextView) drawerHeader.findViewById(R.id.userEmail);
         currentUserGroup = (TextView) drawerHeader.findViewById(R.id.activeGroup);
+
+        // Picture processing uses library from https://github.com/amulyakhare/TextDrawable
+        TextDrawable drawable = TextDrawable.builder().buildRound(
+                curruser.getEmail().substring(0, 1), Color.BLUE);
         profilePicture = (ImageView) drawerHeader.findViewById(R.id.profileImg);
+        profilePicture.setImageDrawable(drawable);
 
 
         // Geocoder
@@ -312,7 +321,14 @@ public class MapNavDrawer extends AppCompatActivity
         }
 
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
-            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
+            TextDrawable tempIcon = TextDrawable.builder().buildRound(
+                    tempFriend.getEmail().substring(0, 1), Color.BLUE);
+            LinearLayout accessXML =
+                    (LinearLayout) ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+                            .inflate(R.layout.custom_user_icon, null);
+            ImageView tempImgView = (ImageView) accessXML.findViewById(R.id.letterPic);
+            tempImgView.setImageDrawable(tempIcon);
+            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(tempImgView.getDrawable());
             idToEmail.put(j, tempFriend.getEmail());
             numGroupMembers++;
             j++;
