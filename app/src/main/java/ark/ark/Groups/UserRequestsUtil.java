@@ -63,7 +63,7 @@ public class UserRequestsUtil {
                             // after getting response, try reading the json
                             CurrentUser mUser = CurrentUser.getInstance();
                             ToastUtils.showToast(response, context);
-                            Log.d("Init Curr User",response);
+                            Log.i("Init Curr User",response);
                             try {
                                 JSONObject res = new JSONObject(response);
 
@@ -72,9 +72,8 @@ public class UserRequestsUtil {
                                         Group g = new Group(res.getJSONArray("groups").getString(i), mUser.getEmail());
                                         mUser.addGroup(g);
                                     }
-                                updateActiveGroupLocations(context);
-                                updateActiveGroupWaypoint(context);
-
+                                    updateActiveGroupLocations(context);
+                                    updateActiveGroupWaypoint(context);
 
                                 } else {
                                     ToastUtils.showToast(res.getString("msg"), context);
@@ -92,6 +91,7 @@ public class UserRequestsUtil {
                 public void onErrorResponse(VolleyError error) {
                     // error handling
                     ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+                    Log.d("CANNOT CONNECT","SERVER THINGO");
                 }
             });
 
@@ -154,6 +154,7 @@ public class UserRequestsUtil {
 
     public static void updateActiveGroupLocations(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
+        Log.d("Updating Active", "test");
 
         if (mUser.getEmail() != null && mUser.getActiveGroup() != null) {
             RequestQueue queue = Volley.newRequestQueue(context);
@@ -249,6 +250,7 @@ public class UserRequestsUtil {
                                     mUser.getActiveGroup().setWaypoint(lat, lng, name);
                                     //ToastUtils.showToast(email, context);
                                     //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
+                                    mUser.setIsInitiated();
 
 
                                 } else {

@@ -209,7 +209,7 @@ public class MapNavDrawer extends AppCompatActivity
         hide_fab();
     }
 
-    public void onload(){
+    private void onload(){
         initiateDrawer();
 
         // Bottom Sheet Initialize
@@ -277,10 +277,14 @@ public class MapNavDrawer extends AppCompatActivity
                 }
             }
         }
+        Log.d("Group", mGroup.toString() + curruser.getActiveGroup().toString());
 
         if (curruser.getActiveGroup().getWaypoint() != null) {
             setWaypoint(curruser.getActiveGroup().getWaypoint());
         }
+         show_fab();
+        isLoaded = true;
+
     }
 
 
@@ -615,6 +619,11 @@ public class MapNavDrawer extends AppCompatActivity
                             location, loc, null);
                 }
 
+            }
+        }
+        else{
+            if (curruser.isInitiated()){
+                onload();
             }
         }
 
