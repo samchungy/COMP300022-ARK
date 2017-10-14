@@ -12,8 +12,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -22,17 +20,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Timer;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Map.MapWaypoint;
 import ark.ark.R;
 import ark.ark.ToastUtils;
-
-import static java.lang.Thread.currentThread;
 
 /**
  * Created by khtin on 22/09/2017.
@@ -44,15 +36,11 @@ import static java.lang.Thread.currentThread;
  */
 public class UserRequestsUtil {
 
-
     /*
     Updates the groups the user is in and then puts locations into the active group
      */
     public static void initialiseCurrentUser(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
-        final Object[] responseHolder = new Object[1];
-
         // logHead is the heading to add to the log for this function
         String logHead = "initialiseCurrentUser";
 
@@ -78,8 +66,6 @@ public class UserRequestsUtil {
                             Log.d("Init Curr User",response);
                             try {
                                 JSONObject res = new JSONObject(response);
-                                responseHolder[0] = response;
-                                countDownLatch.countDown();
 
                                 if (res.getString("success").equals("ok")) {
                                     for (int i = 0; i < res.getJSONArray("groups").length(); i++) {
@@ -88,7 +74,7 @@ public class UserRequestsUtil {
                                     }
                                 updateActiveGroupLocations(context);
                                 updateActiveGroupWaypoint(context);
-                                mUser.setInitialised();
+
 
                                 } else {
                                     ToastUtils.showToast(res.getString("msg"), context);
@@ -102,28 +88,14 @@ public class UserRequestsUtil {
                             }
                         }
                     }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            // error handling
-                            ToastUtils.showToast("Sorry, cannot connect to the server.", context);
-                        }
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // error handling
+                    ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+                }
             });
 
             queue.add(stringRequest);
-
-            try {
-                countDownLatch.await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            if (responseHolder[0] instanceof VolleyError) {
-                final VolleyError volleyError = (VolleyError) responseHolder[0];
-                //TODO: Handle error...
-            } else {
-                final String response = (String) responseHolder[0];
-                //TODO: Handle response...
-            }
-
         } else {
             ToastUtils.showToast("Location doesn't exist", context);
         }

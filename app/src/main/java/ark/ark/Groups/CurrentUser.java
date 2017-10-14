@@ -30,7 +30,6 @@ public class CurrentUser extends Observable{
     private HashMap<String, Group> groups = new HashMap<String, Group>();
     private Group activeGroup;
     private Boolean isUpdating = true;
-    private Boolean isInitialised = false;
 
     public static CurrentUser getInstance() {
         return ourInstance;
@@ -57,18 +56,8 @@ public class CurrentUser extends Observable{
     public void setActiveGroupLocation(String email, Location loc) {
         if(activeGroup.getFriend(email) != null){
             activeGroup.setLocation(email, loc);
-            if(isInitialised) {
-                setChanged();
-                notifyObservers(email);
-            }
-        }
-    }
-
-    public void setActiveGroupWaypoint(Double lat, Double lng, String creator) {
-        activeGroup.setWaypoint(lat, lng, creator);
-        if(isInitialised) {
             setChanged();
-            notifyObservers(activeGroup.getWaypoint());
+            notifyObservers(email);
         }
     }
 
@@ -93,15 +82,5 @@ public class CurrentUser extends Observable{
                 switchActiveGroup(group.getId());
             }
         }
-    }
-
-    public void setInitialised(){
-        isInitialised = true;
-        setChanged();
-        notifyObservers(this);
-    }
-
-    public boolean getIsInitialised() {
-        return isInitialised;
     }
 }
