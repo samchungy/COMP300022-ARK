@@ -57,8 +57,18 @@ public class CurrentUser extends Observable{
     public void setActiveGroupLocation(String email, Location loc) {
         if(activeGroup.getFriend(email) != null){
             activeGroup.setLocation(email, loc);
+            if(isInitialised) {
+                setChanged();
+                notifyObservers(email);
+            }
+        }
+    }
+
+    public void setActiveGroupWaypoint(Double lat, Double lng, String creator) {
+        activeGroup.setWaypoint(lat, lng, creator);
+        if(isInitialised) {
             setChanged();
-            notifyObservers(email);
+            notifyObservers(activeGroup.getWaypoint());
         }
     }
 
