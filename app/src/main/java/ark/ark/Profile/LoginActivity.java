@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
 
         String requestURL = "http://" + server + path +"email="+email+"&password_salted="+password;
 
-        showToast(requestURL);
+        //showToast(requestURL);
 
         // Request a string response from the requestURL.
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,

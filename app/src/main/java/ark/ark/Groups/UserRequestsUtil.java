@@ -46,7 +46,7 @@ public class UserRequestsUtil {
 
             String path = "/group/show?";
             String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
-            ToastUtils.showToast(requestURL, context);
+            //ToastUtils.showToast(requestURL, context);
 
             StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
                     new Response.Listener<String>() {
@@ -55,7 +55,7 @@ public class UserRequestsUtil {
                         public void onResponse(String response) {
                             // after getting response, try reading the json
                             CurrentUser mUser = CurrentUser.getInstance();
-                            ToastUtils.showToast(response, context);
+                            //ToastUtils.showToast(response, context);
                             try {
                                 JSONObject res = new JSONObject(response);
 
@@ -63,6 +63,7 @@ public class UserRequestsUtil {
                                     for (int i = 0; i < res.getJSONArray("groups").length(); i++) {
                                         Group g = new Group(res.getJSONArray("groups").getString(i), mUser.getEmail());
                                         mUser.addGroup(g);
+                                        updateCurrentUserGroupName(g.getId(),context);
                                     }
                                 updateActiveGroupLocations(context);
 
@@ -100,7 +101,7 @@ public class UserRequestsUtil {
 
             String path = "/group/show?";
             String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
-            ToastUtils.showToast(requestURL, context);
+            //ToastUtils.showToast(requestURL, context);
 
             StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
                     new Response.Listener<String>() {
@@ -109,7 +110,7 @@ public class UserRequestsUtil {
                         public void onResponse(String response) {
                             // after getting response, try reading the json
                             CurrentUser mUser = CurrentUser.getInstance();
-                            ToastUtils.showToast(response, context);
+                            //ToastUtils.showToast(response, context);
                             try {
                                 JSONObject res = new JSONObject(response);
 
@@ -151,7 +152,7 @@ public class UserRequestsUtil {
 
             String path = "/group/locations?";
             String requestURL = "http://" + server + path +"group_id="+ mUser.getActiveGroup().getId();
-            ToastUtils.showToast(requestURL, context);
+            //ToastUtils.showToast(requestURL, context);
 
             StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
                     new Response.Listener<String>() {
@@ -216,7 +217,8 @@ public class UserRequestsUtil {
         String server ="52.65.97.117";
         String path = "/group/create?";
 
-        String requestURL = "http://" + server + path +"email="+email;
+        String requestURL = "http://" + server + path +"email="+email+"&group_name="+gName;
+        //ToastUtils.showToast(requestURL,context);
 
 
         // Request a string response from the requestURL.
@@ -234,8 +236,7 @@ public class UserRequestsUtil {
                                 String groupID = res.getString("group_id");
 
                                 //store data in groups
-                                Group group = new Group(groupID,CurrentUser.getInstance().getEmail());
-                                CurrentUser.getInstance().addGroup(group);
+                                updateGroups(context);
 
                                 //goToGroups();
 
@@ -285,6 +286,62 @@ public class UserRequestsUtil {
 
                                 //get data from res object
                                 ToastUtils.showToast("successfully joined group", context);
+                                updateGroups(context);
+
+
+                            } else {
+                                ToastUtils.showToast(res.getString("msg"),context);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            ToastUtils.showToast("exception",context);
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // error handling
+                ToastUtils.showToast("Sorry, cannot connect to the server.",context);
+            }
+        });
+
+        queue.add(stringRequest);
+
+
+    }
+
+    public static void updateCurrentUserGroupName(String gID, final Context context){
+        String groupID = gID;
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        String server ="52.65.97.117";
+        String path = "/groupProfile/show?";
+
+        String requestURL = "http://" + server + path +"group_id="+groupID;
+
+
+        // Request a string response from the requestURL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // after getting response, try reading the json
+                        try {
+                            JSONObject res = new JSONObject(response);
+                            if (res.getString("success").equals("ok")) {
+
+                                //get data from res object
+
+                                String group_name = res.getJSONObject("profile").getString("group_name");
+                                String group_id = res.getJSONObject("profile").getString("group_id");
+
+                                //ToastUtils.showToast(group_name, context);
+
+                                if(CurrentUser.getInstance().getAllGroups().containsKey(group_id)){
+                                    CurrentUser.getInstance().getAllGroups().get(group_id).setName(group_name);
+                                }
 
                             } else {
                                 ToastUtils.showToast(res.getString("msg"),context);

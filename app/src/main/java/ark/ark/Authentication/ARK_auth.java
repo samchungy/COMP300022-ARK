@@ -61,6 +61,11 @@ public class ARK_auth extends Activity {
     }
 
     public static void clearUserData(Context context) {
+
+        //clear groups data
+        CurrentUser.getInstance().logOut();
+
+        //clear cache
         String preferenceName = "system_cache";
         SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
         SharedPreferences.Editor cacheEditor = systemCache.edit();

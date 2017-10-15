@@ -40,6 +40,12 @@ public class CurrentUser extends Observable{
         this.email = ARK_auth.fetchUserEmail(context);
     }
 
+    public void logOut(){
+        this.email = null;
+        this.groups.clear();
+        this.activeGroup = null;
+    }
+
     public String getEmail() {
         return email;
     }

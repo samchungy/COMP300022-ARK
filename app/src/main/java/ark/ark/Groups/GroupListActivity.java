@@ -29,7 +29,7 @@ import ark.ark.ToastUtils;
 public class GroupListActivity extends AppCompatActivity {
 
     ListView listView ;
-    private GroupListAdapter ListAdapter;
+    private GroupProfileAdapter ListAdapter;
     private ArrayList<Group> dataList;
 
     @Override
@@ -40,7 +40,7 @@ public class GroupListActivity extends AppCompatActivity {
         // Get ListView object from xml
         listView = (ListView) findViewById(R.id.list);
         dataList = new ArrayList<Group>(CurrentUser.getInstance().getAllGroups().values());
-        ListAdapter = new GroupListAdapter(this, dataList);
+        ListAdapter = new GroupProfileAdapter(this, dataList);
         listView.setAdapter(ListAdapter);
 
 
@@ -51,15 +51,10 @@ public class GroupListActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
 
-                ToastUtils.showToast("position: "+position, getApplicationContext());
-                ToastUtils.showToast(dataList.get(position).getOwner(),getApplicationContext());
-                ToastUtils.showToast(dataList.get(position).getId(),getApplicationContext());
-                ToastUtils.showToast(dataList.get(position).getFriends().size()+" friends",getApplicationContext());
+                ToastUtils.showToast(dataList.get(position).getName(),getApplicationContext());
             }
         });
 
-        ToastUtils.showToast("count: " + ListAdapter.getCount(),getApplicationContext());
-        ToastUtils.showToast(getGroups()+" groups",getApplicationContext());
 
     }
 
