@@ -2,6 +2,7 @@ package ark.ark.Map;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -14,8 +15,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.BounceInterpolator;
+import android.support.v7.app.AlertDialog;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.support.design.widget.BottomSheetBehavior;
@@ -29,17 +29,13 @@ import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -48,6 +44,7 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -61,9 +58,6 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -74,10 +68,10 @@ import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
 import ark.ark.Groups.Group;
+import ark.ark.Groups.GroupListActivity;
 import ark.ark.Groups.GroupLocationUpdateService;
 import ark.ark.Groups.UserRequestsUtil;
 import ark.ark.HomeActivity;
-import ark.ark.PermissionUtils;
 import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.UserLocation.LocationSingleton;
@@ -122,6 +116,7 @@ public class MapNavDrawer extends AppCompatActivity
     private CurrentUser curruser;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     // Stuff for Zengster for navigation drawer
     private ImageView profilePicture, headerImage;
@@ -143,29 +138,40 @@ public class MapNavDrawer extends AppCompatActivity
             startActivity(myIntent2);
             this.finish();
         }
+        else if(ARK_auth.fetchGroup(getApplicationContext()) == null) {
+            Intent myIntent2 = new Intent(this, GroupListActivity.class);
+            startActivity(myIntent2);
+            this.finish();
+        }
 
         //Get User
         curruser = CurrentUser.getInstance();
         curruser.addObserver(this);
 
-        mLocUpdateService = new Intent(this, LocationUpdateService.class);
-        mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
-
         curruser.logOn(this);
         UserRequestsUtil.initialiseCurrentUser(this);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Check Permissions Now
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION);
-        } else {
-            startService(mLocUpdateService);
-        }
-        startService(mGroupLocUpdateService);
+        mLocUpdateService = new Intent(this, LocationUpdateService.class);
+        mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
+        mCurrentLocation = LocationSingleton.getInstance();
+        MapsInitializer.initialize(getApplicationContext());
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-//
+        if (checkLocationPermission()) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+
+                //Request location updates:
+                startService(mLocUpdateService);
+                startService(mGroupLocUpdateService);
+                mCurrentLocation.addObserver(this);
+                if (mMap != null){
+                    enableMyLocation();
+                }
+            }
+        }
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -195,12 +201,6 @@ public class MapNavDrawer extends AppCompatActivity
         mGeoDataClient = Places.getGeoDataClient(this, null);
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
-
-        mCurrentLocation = LocationSingleton.getInstance();
-        mCurrentLocation.addObserver(this);
-
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
         hide_fab();
     }
 
@@ -415,9 +415,7 @@ public class MapNavDrawer extends AppCompatActivity
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Permission to access the location is missing.
-            PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
-                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+
         } else if (mMap != null) {
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
@@ -641,6 +639,7 @@ public class MapNavDrawer extends AppCompatActivity
             }
         }
         else{
+            Log.d("NOT initialised", "boourns");
             if (curruser.isInitiated()){
                 onload();
             }
@@ -650,13 +649,10 @@ public class MapNavDrawer extends AppCompatActivity
 
     private void update_position(LatLng l, String email){
         if(!(mGroup.get(email).getPosition().equals(l))){
-            Log.d("LOK B4", mGroup.get(email).getPosition().toString());
             animateMarker(mGroup.get(email),l, false);
             mGroup.get(email).setPosition(l);
             if (bs.is_user_mode() && email.equals(bs.get_active_user())){
                 if (mWaypoint != null){
-                    Log.d("NONO","HEHE");
-                    Log.d("LOK AFTER", mGroup.get(email).getPosition().toString());
                     bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
                             (MapWaypoint) mWaypoint.getTag(),(String) mGroup.get(email).getTag());
                 }
@@ -813,4 +809,97 @@ public class MapNavDrawer extends AppCompatActivity
                 }
             });
         }
+
+    public boolean checkLocationPermission() {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                    // Show an explanation to the user *asynchronously* -- don't block
+                    // this thread waiting for the user's response! After the user
+                    // sees the explanation, try again to request the permission.
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.title_location_permission)
+                            .setMessage(R.string.text_location_permission)
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    //Prompt the user once explanation has been shown
+                                    ActivityCompat.requestPermissions(MapNavDrawer.this,
+                                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                            MY_PERMISSIONS_REQUEST_LOCATION);
+                                }
+                            })
+                            .create()
+                            .show();
+
+
+                } else {
+                    // No explanation needed, we can request the permission.
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            MY_PERMISSIONS_REQUEST_LOCATION);
+                }
+                return false;
+            } else {
+                return true;
+            }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+
+                        //Request location updates:
+                        startService(mLocUpdateService);
+                        startService(mGroupLocUpdateService);
+                        mCurrentLocation.addObserver(this);
+                        enableMyLocation();
+                        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+                    }
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+
+                }
+                return;
+            }
+
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (checkLocationPermission()) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+
+                //Request location updates:
+                startService(mLocUpdateService);
+                startService(mGroupLocUpdateService);
+                mCurrentLocation.addObserver(this);
+                mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            }
+        }
+
+    }
 }

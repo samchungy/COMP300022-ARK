@@ -30,7 +30,6 @@
     <string name="nickname_prompt">Enter your nickname</string>
     <string name="title_activity_login">Log in</string>
 
-
     <string name="map_removewaypoint">Remove</string>
     <string name="map_editwaypoint">Edit</string>
     <string name="map_sharewaypoint">Share</string>
@@ -46,6 +45,9 @@
 
     <string name="sign_up_prompt">Don\'t have an account? &#13;&#10;Click here to register!</string>
     <string name="group_name_prompt">Enter group name (no spaces)</string>
+    <string name="title_location_permission">Location Needed!</string>
+    <string name="text_location_permission">We need your location for this app to work!</string>
+    <string name="ok">Okay</string>
 
 
 </resources>

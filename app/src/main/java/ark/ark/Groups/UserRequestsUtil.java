@@ -23,6 +23,7 @@ import java.util.Timer;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Map.MapWaypoint;
+import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.ToastUtils;
 
@@ -102,59 +103,10 @@ public class UserRequestsUtil {
         }
     }
 
-    public static void updateGroups(final Context context) {
-        CurrentUser mUser = CurrentUser.getInstance();
-
-        if (mUser.getEmail() != null) {
-            RequestQueue queue = Volley.newRequestQueue(context);
-            String server = "52.65.97.117";
-
-            String path = "/group/show?";
-            String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
-            //ToastUtils.showToast(requestURL, context);
-
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
-                    new Response.Listener<String>() {
-
-                        @Override
-                        public void onResponse(String response) {
-                            // after getting response, try reading the json
-                            CurrentUser mUser = CurrentUser.getInstance();
-                            //ToastUtils.showToast(response, context);
-                            try {
-                                JSONObject res = new JSONObject(response);
-
-                                if (res.getString("success").equals("ok")) {
-                                    for (int i = 0; i < res.getJSONArray("groups").length(); i++) {
-                                        Group g = new Group(res.getJSONArray("groups").getString(i), mUser.getEmail());
-                                        mUser.addGroup(g);
-                                    }
-
-                                } else {
-                                    ToastUtils.showToast(res.getString("msg"), context);
-                                }
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                ToastUtils.showToast("exception", context);
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    // error handling
-                    ToastUtils.showToast("Sorry, cannot connect to the server.", context);
-                }
-            });
-
-            queue.add(stringRequest);
-        } else {
-            ToastUtils.showToast("Location doesn't exist", context);
-        }
-    }
-
     public static void updateActiveGroupLocations(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
+        final Double defaultlat = -37.797044;
+        final Double defaultlong = 144.961212;
 
         if (mUser.getEmail() != null && mUser.getActiveGroup() != null) {
             RequestQueue queue = Volley.newRequestQueue(context);
@@ -180,8 +132,16 @@ public class UserRequestsUtil {
                                     for (int i = 0; i < friendList.length(); i++) {
                                         JSONObject friend = friendList.getJSONObject(i);
                                         String email = friend.getString("email");
-                                        Double lat = friend.getJSONObject("location").getDouble("lat");
-                                        Double lng = friend.getJSONObject("location").getDouble("lng");
+                                        Double lat, lng;
+                                        if(!friend.isNull("location")){
+                                            lat = friend.getJSONObject("location").getDouble("lat");
+                                            lng = friend.getJSONObject("location").getDouble("lng");
+                                        }
+                                        else{
+                                            lat = defaultlat;
+                                            lng = defaultlong;
+                                        }
+
 
                                         Location loc = new Location("Server");
                                         loc.setLatitude(lat);
@@ -254,7 +214,6 @@ public class UserRequestsUtil {
                                             placeaddress, active);
                                     //ToastUtils.showToast(email, context);
                                     //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
-                                    mUser.setIsInitiated();
 
 
                                 } else {
@@ -265,6 +224,7 @@ public class UserRequestsUtil {
                                 e.printStackTrace();
                                 ToastUtils.showToast(e.getMessage(), context);
                             }
+                            mUser.setIsInitiated();
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -345,109 +305,6 @@ public class UserRequestsUtil {
 
     }
 
-    public static void postGroupCreation(String groupName, final Context context){
-        String email = CurrentUser.getInstance().getEmail();
-        String gName = groupName;
-
-        RequestQueue queue = Volley.newRequestQueue(context);
-
-        String server ="52.65.97.117";
-        String path = "/group/create?";
-
-        String requestURL = "http://" + server + path +"email="+email+"&group_name="+gName;
-        //ToastUtils.showToast(requestURL,context);
-
-
-        // Request a string response from the requestURL.
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // after getting response, try reading the json
-                        try {
-                            JSONObject res = new JSONObject(response);
-                            if (res.getString("success").equals("ok")) {
-
-                                //get data from res object
-                                ToastUtils.showToast("Congratulations! You created a group :)", context);
-                                String groupID = res.getString("group_id");
-
-                                //store data in groups
-                                updateGroups(context);
-
-                                //goToGroups();
-
-                            } else {
-                                ToastUtils.showToast(res.getString("msg"),context);
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            ToastUtils.showToast("exception",context);
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // error handling
-                ToastUtils.showToast("Sorry, cannot connect to the server.",context);
-            }
-        });
-
-        queue.add(stringRequest);
-
-
-    }
-
-    public static void postAddUserToGroup(String userEmail, String gID, final Context context){
-        String email = userEmail;
-        String groupID = gID;
-
-        RequestQueue queue = Volley.newRequestQueue(context);
-
-        String server ="52.65.97.117";
-        String path = "/group/add?";
-
-        String requestURL = "http://" + server + path +"email="+email+"&group_id="+groupID;
-
-
-        // Request a string response from the requestURL.
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // after getting response, try reading the json
-                        try {
-                            JSONObject res = new JSONObject(response);
-                            if (res.getString("success").equals("ok")) {
-
-                                //get data from res object
-                                ToastUtils.showToast("successfully joined group", context);
-//                                updateGroups(context);
-
-
-
-                            } else {
-                                ToastUtils.showToast(res.getString("msg"),context);
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            ToastUtils.showToast("exception",context);
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // error handling
-                ToastUtils.showToast("Sorry, cannot connect to the server.",context);
-            }
-        });
-
-        queue.add(stringRequest);
-
-
-    }
 
     public static void updateCurrentUserGroupName(String gID, final Context context){
         String groupID = gID;

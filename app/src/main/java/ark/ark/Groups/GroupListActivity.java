@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import ark.ark.Authentication.ARK_auth;
 import ark.ark.HomeActivity;
 import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
@@ -76,11 +77,13 @@ public class GroupListActivity extends AppCompatActivity {
     public void goToAddGroup(View v){
         Intent myIntent = new Intent(GroupListActivity.this, GroupCreationActivity.class);
         startActivity(myIntent);
+        this.finish();
     }
 
     public void goToJoinGroup(View v){
         Intent myIntent = new Intent(GroupListActivity.this, JoinGroupActivity.class);
         startActivity(myIntent);
+        this.finish();
     }
 
 

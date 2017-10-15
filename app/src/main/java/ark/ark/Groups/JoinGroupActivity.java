@@ -1,6 +1,7 @@
 package ark.ark.Groups;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import ark.ark.Authentication.ARK_auth;
 import ark.ark.HomeActivity;
 import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
@@ -59,9 +61,8 @@ public class JoinGroupActivity extends AppCompatActivity {
                 //Join the group
 
                 String email = CurrentUser.getInstance().getEmail();
-                UserRequestsUtil.postAddUserToGroup(email, dataList.get(position).getId(), getApplicationContext());
-                finish_activities();
-
+                ARK_auth.storeGroup(dataList.get(position).getId(),getApplicationContext());
+                postAddUserToGroup(email, dataList.get(position).getId(), getApplicationContext());
             }
         });
 
@@ -72,13 +73,59 @@ public class JoinGroupActivity extends AppCompatActivity {
 
     }
     private void finish_activities(){
-
-        Intent intent = new Intent(JoinGroupActivity.this, MapNavDrawer.class);
-        startActivity(intent);
-        this.getParent().finish();
-
+        Intent myIntent = new Intent(JoinGroupActivity.this, MapNavDrawer.class);
+        startActivity(myIntent);
         this.finish();
     }
+
+    public void postAddUserToGroup(String userEmail, final String gID, final Context context) {
+        String email = userEmail;
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        String server = "52.65.97.117";
+        String path = "/group/add?";
+
+        String requestURL = "http://" + server + path + "email=" + email + "&group_id=" + gID;
+
+
+        // Request a string response from the requestURL.
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // after getting response, try reading the json
+                        try {
+                            JSONObject res = new JSONObject(response);
+                            if (res.getString("success").equals("ok")) {
+
+                                //get data from res object
+                                ToastUtils.showToast("successfully joined group", context);
+                                ARK_auth.storeGroup(gID, context);
+//                                updateGroups(context);
+                                finish_activities();
+
+                            } else {
+                                ToastUtils.showToast(res.getString("msg"), context);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            ToastUtils.showToast("exception", context);
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // error handling
+                ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+            }
+        });
+
+        queue.add(stringRequest);
+    }
+
+
 
 
     private void getSearchGroup(String gName) {

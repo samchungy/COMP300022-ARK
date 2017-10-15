@@ -33,6 +33,7 @@ public class CurrentUser extends Observable{
     private Group activeGroup;
     private Boolean isUpdating = true;
     private Boolean isInitiated = false;
+    private int groupIsInitiated = 0;
 
     public static CurrentUser getInstance() {
         return ourInstance;
@@ -99,7 +100,6 @@ public class CurrentUser extends Observable{
 
     public void setIsInitiated(){
         isInitiated = true;
-        Log.d("FUCKING INITIATED","LOL");
-        Log.d("LOLD",this.getInstance().getActiveGroup().toString());
+        notifyObservers();
     }
 }
