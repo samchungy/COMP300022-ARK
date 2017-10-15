@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
 import ark.ark.ToastUtils;
 
@@ -76,6 +77,8 @@ public class GroupCreationActivity extends AppCompatActivity {
         ToastUtils.showToast("adding group...",getApplicationContext());
         EditText groupNameTextField = (EditText) findViewById(R.id.gName);
         UserRequestsUtil.postGroupCreation(groupNameTextField.getText().toString(),getApplicationContext());
+        Intent intent = new Intent(GroupCreationActivity.this, MapNavDrawer.class);
+        startActivity(intent);
         this.finish();
     }
 

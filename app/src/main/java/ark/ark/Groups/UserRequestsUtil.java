@@ -423,7 +423,8 @@ public class UserRequestsUtil {
 
                                 //get data from res object
                                 ToastUtils.showToast("successfully joined group", context);
-                                updateGroups(context);
+//                                updateGroups(context);
+
 
 
                             } else {

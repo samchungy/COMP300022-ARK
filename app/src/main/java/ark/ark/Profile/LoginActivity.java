@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-    private void postUserLogin(final String email, String password) {
+    public void postUserLogin(final String email, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
         String server ="52.65.97.117";
@@ -131,4 +131,5 @@ public class LoginActivity extends AppCompatActivity {
 //        isDev=true;
         goToHome();
     }
+
 }

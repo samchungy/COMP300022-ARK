@@ -16,9 +16,9 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mindrot.jbcrypt.BCrypt;
 
-import ark.ark.HomeActivity;
+import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.GroupListActivity;
 import ark.ark.R;
 
 public class ProfileCreationActivity extends AppCompatActivity {
@@ -45,8 +45,8 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
     }
 
-    private void goToLogin(){
-        Intent myIntent = new Intent(ProfileCreationActivity.this, LoginActivity.class);
+    private void goToGroup(){
+        Intent myIntent = new Intent(ProfileCreationActivity.this, GroupListActivity.class);
         startActivity(myIntent);
         this.finish();
     }
@@ -54,7 +54,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
     //connecting to server
 
-    private void postUserCreation(String nickname, String email, String password) {
+    private void postUserCreation(String nickname, final String email, final String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
         String server ="52.65.97.117";
@@ -76,7 +76,57 @@ public class ProfileCreationActivity extends AppCompatActivity {
                                 // iterate through the direct list to populate the convo list
 
                                 showToast("Congratulations! Your account has been created!");
-                                goToLogin();
+                                postUserLogin(email,password);
+
+                            } else {
+                                showToast(res.getString("msg"));
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            showToast("exception");
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // error handling
+                showToast("Sorry, cannot connect to the server.");
+            }
+        });
+
+        queue.add(stringRequest);
+
+    }
+
+    public void postUserLogin(final String email, String password) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        String server ="52.65.97.117";
+        String path = "/users/login?";
+
+        String requestURL = "http://" + server + path +"email="+email+"&password_salted="+password;
+
+        //showToast(requestURL);
+
+        // Request a string response from the requestURL.
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // after getting response, try reading the json
+                        try {
+                            JSONObject res = new JSONObject(response);
+                            if (res.getString("success").equals("ok")) {
+
+                                //get data from res object
+                                showToast("Congratulations! You have logged in :)");
+                                String sessionID = res.getString("session_id");
+
+                                ARK_auth.storeUserEmail(email,getApplicationContext());
+                                ARK_auth.storeSessionId(sessionID,getApplicationContext());
+                                goToGroup();
+
 
                             } else {
                                 showToast(res.getString("msg"));

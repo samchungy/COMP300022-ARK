@@ -38,22 +38,22 @@ public class GroupListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_group_list);
 
         // Get ListView object from xml
-        listView = (ListView) findViewById(R.id.list);
-        dataList = new ArrayList<Group>(CurrentUser.getInstance().getAllGroups().values());
-        ListAdapter = new GroupProfileAdapter(this, dataList);
-        listView.setAdapter(ListAdapter);
-
-
-        // ListView Item Click Listener
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-
-                ToastUtils.showToast(dataList.get(position).getName(),getApplicationContext());
-            }
-        });
+//        listView = (ListView) findViewById(R.id.list);
+//        dataList = new ArrayList<Group>(CurrentUser.getInstance().getAllGroups().values());
+//        ListAdapter = new GroupProfileAdapter(this, dataList);
+//        listView.setAdapter(ListAdapter);
+//
+//
+//        // ListView Item Click Listener
+//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view,
+//                                    int position, long id) {
+//
+//                ToastUtils.showToast(dataList.get(position).getName(),getApplicationContext());
+//            }
+//        });
 
 
     }

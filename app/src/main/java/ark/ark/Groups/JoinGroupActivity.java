@@ -1,5 +1,7 @@
 package ark.ark.Groups;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -21,6 +23,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import ark.ark.HomeActivity;
+import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
 import ark.ark.ToastUtils;
 
@@ -56,6 +60,7 @@ public class JoinGroupActivity extends AppCompatActivity {
 
                 String email = CurrentUser.getInstance().getEmail();
                 UserRequestsUtil.postAddUserToGroup(email, dataList.get(position).getId(), getApplicationContext());
+                finish_activities();
 
             }
         });
@@ -66,7 +71,14 @@ public class JoinGroupActivity extends AppCompatActivity {
 
 
     }
+    private void finish_activities(){
 
+        Intent intent = new Intent(JoinGroupActivity.this, MapNavDrawer.class);
+        startActivity(intent);
+        this.getParent().finish();
+
+        this.finish();
+    }
 
 
     private void getSearchGroup(String gName) {
