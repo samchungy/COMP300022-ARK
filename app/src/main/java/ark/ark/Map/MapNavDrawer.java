@@ -322,11 +322,14 @@ public class MapNavDrawer extends AppCompatActivity
 
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
             TextDrawable tempIcon = TextDrawable.builder().buildRound(
-                    tempFriend.getEmail().substring(0, 1), Color.BLUE);
+                    "A", Color.RED);
+            /*
             LinearLayout accessXML =
                     (LinearLayout) ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-                            .inflate(R.layout.custom_user_icon, null);
-            ImageView tempImgView = (ImageView) accessXML.findViewById(R.id.letterPic);
+                            .inflate(R.layout.custom_user_icon, null); */
+            LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+            View customUserIconXML = inflater.inflate(R.layout.custom_user_icon, null);
+            ImageView tempImgView = (ImageView) customUserIconXML.findViewById(R.id.letterPic);
             tempImgView.setImageDrawable(tempIcon);
             menu.add(0, j, 0, tempFriend.getEmail()).setIcon(tempImgView.getDrawable());
             idToEmail.put(j, tempFriend.getEmail());
