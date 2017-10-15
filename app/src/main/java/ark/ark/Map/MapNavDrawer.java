@@ -82,6 +82,7 @@ import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.UserLocation.LocationSingleton;
 import ark.ark.UserLocation.LocationUpdateService;
+import com.google.maps.android.ui.IconGenerator;
 
 /**
  * Map + Nav Drawer Class
@@ -451,6 +452,7 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker) {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
 
         if (marker.getTag() instanceof MapWaypoint) {
             bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) marker.getTag(),
@@ -500,7 +502,7 @@ public class MapNavDrawer extends AppCompatActivity
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
-                updateWaypoint(new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
+                updateWaypoint(new MapWaypoint(useremail + "'s Waypoint.", place.getLatLng(),
                         place.getName().toString(), place.getAddress().toString()));
             }
         }
@@ -580,12 +582,14 @@ public class MapNavDrawer extends AppCompatActivity
 
 
     public void set_person_marker(LatLng lat, String name) {
+        IconGenerator iconFactory = new IconGenerator(this);
         Marker mPerson;
         Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         mPerson = mMap.addMarker(new MarkerOptions()
                 .position(lat)
                 .title(name +  "'s Location.")
-                .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
+                .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon((""+name.charAt(0)).
+                        toUpperCase())))
         );
         mPerson.setTag(name);
         mGroup.put(name,mPerson);
