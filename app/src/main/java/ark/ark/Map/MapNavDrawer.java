@@ -151,8 +151,7 @@ public class MapNavDrawer extends AppCompatActivity
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
         mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
 
-        Log.d("TEST",ARK_auth.fetchUserEmail(this));
-        curruser.logOn(ARK_auth.fetchUserEmail(this));
+        curruser.logOn(this);
         UserRequestsUtil.initialiseCurrentUser(this);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)

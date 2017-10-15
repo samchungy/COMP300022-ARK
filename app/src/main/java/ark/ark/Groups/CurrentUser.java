@@ -1,5 +1,6 @@
 package ark.ark.Groups;
 
+import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
@@ -37,8 +38,14 @@ public class CurrentUser extends Observable{
         return ourInstance;
     }
 
-    public void logOn(String email) {
-        this.email = email;
+    public void logOn(Context context) {
+        this.email = ARK_auth.fetchUserEmail(context);
+    }
+
+    public void logOut(){
+        this.email = null;
+        this.groups.clear();
+        this.activeGroup = null;
     }
 
     public String getEmail() {

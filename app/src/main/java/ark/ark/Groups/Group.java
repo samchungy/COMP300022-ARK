@@ -30,7 +30,7 @@ public class Group {
 
     public Group(String id, String ownerEmail) {
         nGroups += 1;
-        groupName = "Group " + nGroups;
+        groupName = "";
         groupID = id;
         this.ownerEmail = ownerEmail;
     }
@@ -46,6 +46,10 @@ public class Group {
     }
 
     public String getName() { return groupName; }
+
+    public void setName(String name){
+        this.groupName = name;
+    }
 
     public String getOwner() { return ownerEmail; }
 

@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.media.audiofx.PresetReverb;
 
 import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.UserRequestsUtil;
 
 public class ARK_auth extends Activity {
     public static void storeSessionId(String sessionId, Context context) {
@@ -22,7 +23,6 @@ public class ARK_auth extends Activity {
     }
 
     public static void storeUserEmail(String userEmail, Context context) {
-        CurrentUser.getInstance().logOn(userEmail);
 
         String preferenceName = "system_cache";
         SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
@@ -31,6 +31,9 @@ public class ARK_auth extends Activity {
 
         // commit
         cacheEditor.commit();
+
+        CurrentUser.getInstance().logOn(context);
+//        UserRequestsUtil.initialiseCurrentUser(context);
 
     }
 
@@ -58,6 +61,11 @@ public class ARK_auth extends Activity {
     }
 
     public static void clearUserData(Context context) {
+
+        //clear groups data
+        CurrentUser.getInstance().logOut();
+
+        //clear cache
         String preferenceName = "system_cache";
         SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
         SharedPreferences.Editor cacheEditor = systemCache.edit();

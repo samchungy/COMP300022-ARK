@@ -39,21 +39,6 @@ public class ProfileCreationActivity extends AppCompatActivity {
         EditText password = (EditText) findViewById(R.id.login_password);
         EditText email = (EditText) findViewById(R.id.login_email);
 
-        /**Password hashing via BCrpyt**/
-        /*String parse = password.getText().toString();
-        String hashed;
-        hashed = BCrypt.hashpw(parse, BCrypt.gensalt(10));
-
-        postUserCreation(nickname.getText().toString(), email.getText().toString(),
-                hashed);*/
-
-        /*
-        For verification just use:
-
-        if(BCrypt.checkpw(password user typed, hashed actual password)) {...}
-
-        You can put it in the right place.
-         */
 
 
         postUserCreation(nickname.getText().toString(), email.getText().toString(), password.getText().toString());
@@ -74,7 +59,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
         String server ="52.65.97.117";
         String path = "/users/create?";
-        String description = "creating a new user from ARK app with android studio and volley";
+        String description = "creatingNewUserFromARK";
 
         String requestURL = "http://" + server + path +"email="+email+"&nick_name="+nickname+
                 "&password_salted="+password+"&description="+description;
@@ -113,57 +98,6 @@ public class ProfileCreationActivity extends AppCompatActivity {
         queue.add(stringRequest);
 
     }
-
-
-    //GET request example
-
-    private void getRequestExample() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        showToast("creating user...");
-
-        String server ="52.65.97.117";
-        String userEmail = "user1@user1.com";
-        String testUserID = "62390ede67dbbec5b650dfd1b0f33d15";
-        String requestURL = "http://" + server + "/direct/show?email=" + userEmail;
-
-        requestURL = "http://" + server + "/users/show?user_id=" + testUserID;
-
-        // Request a string response from the requestURL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // after getting response, try reading the json
-                        try {
-                            JSONObject res = new JSONObject(response);
-                            if (res.getString("success").equals("ok")) {
-                                // iterate through the direct list to populate the convo list
-
-                                showToast("data GET!");
-                                showToast(res.getString("user_info"));
-                                showToast(res.getJSONObject("user_info").getString("email"));
-
-                            } else {
-                                showToast(res.getString("msg"));
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            showToast("exception");
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // error handling
-                showToast("Sorry, cannot connect to the server.");
-            }
-        });
-
-        queue.add(stringRequest);
-    }
-
 
 
     private void showToast(String message) {

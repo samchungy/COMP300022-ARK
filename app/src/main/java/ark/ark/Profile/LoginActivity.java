@@ -65,8 +65,10 @@ public class LoginActivity extends AppCompatActivity {
     private void goToHome(){
         Intent myIntent = new Intent(LoginActivity.this, MapNavDrawer.class);
         startActivity(myIntent);
+
         this.finish();
     }
+
 
     private void postUserLogin(final String email, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -75,6 +77,8 @@ public class LoginActivity extends AppCompatActivity {
         String path = "/users/login?";
 
         String requestURL = "http://" + server + path +"email="+email+"&password_salted="+password;
+
+        //showToast(requestURL);
 
         // Request a string response from the requestURL.
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
@@ -122,6 +126,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void LoginAsGuest(View v){
-        postUserLogin("user1@user1.com","user1");
+        ARK_auth.storeSessionId("guest",getApplicationContext());
+        ARK_auth.storeUserEmail("user1@user1.com",getApplicationContext());
+//        isDev=true;
+        goToHome();
     }
 }
