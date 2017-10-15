@@ -1,6 +1,7 @@
 package ark.ark.Groups;
 
 import android.location.Location;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,6 +31,7 @@ public class CurrentUser extends Observable{
     private HashMap<String, Group> groups = new HashMap<String, Group>();
     private Group activeGroup;
     private Boolean isUpdating = true;
+    private Boolean isInitiated = false;
 
     public static CurrentUser getInstance() {
         return ourInstance;
@@ -82,5 +84,15 @@ public class CurrentUser extends Observable{
                 switchActiveGroup(group.getId());
             }
         }
+    }
+
+    public boolean isInitiated(){
+        return isInitiated;
+    }
+
+    public void setIsInitiated(){
+        isInitiated = true;
+        Log.d("FUCKING INITIATED","LOL");
+        Log.d("LOLD",this.getInstance().getActiveGroup().toString());
     }
 }

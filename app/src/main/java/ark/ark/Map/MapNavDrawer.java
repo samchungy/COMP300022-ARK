@@ -6,17 +6,25 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -41,6 +49,7 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -60,13 +69,19 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import ark.ark.ArActivity;
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
 import ark.ark.Groups.Group;
+import ark.ark.Groups.GroupLocationUpdateService;
+import ark.ark.Groups.UserRequestsUtil;
+import ark.ark.HomeActivity;
 import ark.ark.PermissionUtils;
+import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.UserLocation.LocationSingleton;
+import ark.ark.UserLocation.LocationUpdateService;
 
 /**
  * Map + Nav Drawer Class
@@ -79,15 +94,23 @@ public class MapNavDrawer extends AppCompatActivity
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMarkerClickListener,
-        Observer {
+        Observer,
+        DrawerLayout.DrawerListener{
 
+    private static final int REQUEST_LOCATION = 2;
+    private static final MapNavDrawer ourInstance = new MapNavDrawer();
+
+    //Services
+    Intent mLocUpdateService;
+    Intent mGroupLocUpdateService;
+
+    //Map Stuff
     private GoogleMap mMap;
     private UiSettings uiSettings;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Marker mWaypoint = null;
     private Geocoder geocoder;
     private MapWaypoint undobk;
-    String otheremail;
     private String useremail;
     private LocationSingleton mCurrentLocation;
     private BottomSheet bs;
@@ -103,6 +126,7 @@ public class MapNavDrawer extends AppCompatActivity
     private ImageView profilePicture, headerImage;
     private TextView currentUserName, currentUserGroup;
     private View drawerHeader;
+    boolean isLoaded = false;
     boolean isPopulated;
     int numGroupMembers = 0;
 
@@ -110,20 +134,38 @@ public class MapNavDrawer extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_nav_drawer);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-            @Override
-            public void onDrawerClosed(View view) {
-                initiateDrawer();
-            }
-        };
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        //showToast(ARK_auth.fetchSessionId(getApplicationContext()));
+        if(ARK_auth.fetchSessionId(getApplicationContext()).equals("no session id")) {
+            Intent myIntent2 = new Intent(this, LoginActivity.class);
+            //Intent myIntent2 = new Intent(HomeActivity.this, ProfileCreationActivity.class);
+            startActivity(myIntent2);
+            this.finish();
+        }
 
+        //Get User
+        curruser = CurrentUser.getInstance();
+        curruser.addObserver(this);
+
+        mLocUpdateService = new Intent(this, LocationUpdateService.class);
+        mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
+
+        Log.d("TEST",ARK_auth.fetchUserEmail(this));
+        curruser.logOn(ARK_auth.fetchUserEmail(this));
+        UserRequestsUtil.initialiseCurrentUser(this);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Check Permissions Now
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION);
+        } else {
+            startService(mLocUpdateService);
+        }
+        startService(mGroupLocUpdateService);
+
+//
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -132,11 +174,38 @@ public class MapNavDrawer extends AppCompatActivity
         currentUserName = (TextView) drawerHeader.findViewById(R.id.userEmail);
         currentUserGroup = (TextView) drawerHeader.findViewById(R.id.activeGroup);
         profilePicture = (ImageView) drawerHeader.findViewById(R.id.profileImg);
-        initiateDrawer();
 
 
         // Geocoder
         geocoder = new Geocoder(this);
+
+        //Bottom Sheet Initiate
+        View bs_view = findViewById(R.id.bottom_sheet);
+        bs = new BottomSheet(bs_view, geocoder);
+        bs.set_hidden();
+
+
+        // Map Initiate
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        //Google Places Initialise
+        // Construct a GeoDataClient.
+        mGeoDataClient = Places.getGeoDataClient(this, null);
+        // Construct a PlaceDetectionClient.
+        mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
+
+        mCurrentLocation = LocationSingleton.getInstance();
+        mCurrentLocation.addObserver(this);
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        hide_fab();
+    }
+
+    private void onload(){
+        initiateDrawer();
 
         // Bottom Sheet Initialize
         View bs_view = findViewById(R.id.bottom_sheet);
@@ -168,11 +237,6 @@ public class MapNavDrawer extends AppCompatActivity
             }
         });
 
-        // Map Initiate
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
         // FAB
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -183,6 +247,7 @@ public class MapNavDrawer extends AppCompatActivity
                 } else if (mWaypoint != null) {
                     bs.set_place_mode(findViewById(android.R.id.content),
                             (MapWaypoint) mWaypoint.getTag(), get_location());
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mWaypoint.getPosition(), 15));
                     bs.set_collapsed();
                 } else {
                     selectPlace(view);
@@ -190,15 +255,28 @@ public class MapNavDrawer extends AppCompatActivity
             }
         });
 
-        //Google Places Initialise
-        // Construct a GeoDataClient.
-        mGeoDataClient = Places.getGeoDataClient(this, null);
-        // Construct a PlaceDetectionClient.
-        mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
+        // FAB
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO OPEN CHAT ACTIVITY
+                Intent myIntent2 = new Intent(MapNavDrawer.this, HomeActivity.class);
+                startActivity(myIntent2);
+            }
+        });
 
-        //Get User
-        curruser = CurrentUser.getInstance();
-        curruser.addObserver(this);
+        // FAB
+        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        fab3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent2 = new Intent(MapNavDrawer.this, ArActivity.class);
+                startActivity(myIntent2);
+            }
+        });
+
+        hide_fab();
 
         final TextView mTextView = (TextView) findViewById(R.id.textView2);
         useremail = curruser.getEmail();
@@ -206,16 +284,30 @@ public class MapNavDrawer extends AppCompatActivity
 
         mGroup = new HashMap<>();
 
-        mCurrentLocation = LocationSingleton.getInstance();
-        mCurrentLocation.addObserver(this);
+        Group group = curruser.getActiveGroup();
+        if (group != null){
+            if (group.getFriends() != null){
+                for(Map.Entry<String, Friend> entry : group.getFriends().entrySet()){
+                    LatLng loc = new LatLng(entry.getValue().getLocation().getLatitude(),
+                            entry.getValue().getLocation().getLongitude());
+                    set_person_marker(loc,entry.getValue().getEmail());
+                }
+            }
+        }
+        Log.d("Group", mGroup.toString() + curruser.getActiveGroup().toString());
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (curruser.getActiveGroup().getWaypoint() != null) {
+            setWaypoint(curruser.getActiveGroup().getWaypoint());
+        }
+         show_fab();
+        isLoaded = true;
+
     }
 
 
     private void initiateDrawer() {
-        currentUserName.setText(CurrentUser.getInstance().getEmail());
-        currentUserGroup.setText(CurrentUser.getInstance().getActiveGroup().getName());
+        currentUserName.setText(curruser.getEmail());
+        currentUserGroup.setText(curruser.getActiveGroup().getName());
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
@@ -261,32 +353,6 @@ public class MapNavDrawer extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.map_nav_drawer, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        Context context = getApplicationContext();
-        CharSequence text = "Hello toast!";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-
-        //noinspection SimplifiableIfStatement
-
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -307,6 +373,20 @@ public class MapNavDrawer extends AppCompatActivity
                         mGroup.get(idToEmail.get(id)).getPosition().longitude
                 );
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera, 15));
+
+                if (mWaypoint != null){
+                    bs.set_person_mode(findViewById(android.R.id.content),
+                            mGroup.get(idToEmail.get(id)).getPosition(), get_location(),
+                            (MapWaypoint) mWaypoint.getTag(),idToEmail.get(id));
+                }
+                else{
+                    bs.set_person_mode(findViewById(android.R.id.content),
+                            mGroup.get(idToEmail.get(id)).getPosition(), get_location(),
+                            null, idToEmail.get(id));
+                }
+                FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+                changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
+                bs.set_expanded();
             }
         }
 
@@ -325,21 +405,8 @@ public class MapNavDrawer extends AppCompatActivity
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerClickListener(this);
         enableMyLocation();
+        mMap.setPadding(0,0,0,0);
 
-        Group group = curruser.getActiveGroup();
-        if (group != null){
-            if (group.getFriends() != null){
-                for(Map.Entry<String, Friend> entry : group.getFriends().entrySet()){
-                    LatLng loc = new LatLng(entry.getValue().getLocation().getLatitude(),
-                            entry.getValue().getLocation().getLongitude());
-                    set_person_marker(loc,entry.getValue().getEmail());
-                }
-            }
-        }
-
-        if (curruser.getActiveGroup().getWaypoint() != null) {
-            setWaypoint(curruser.getActiveGroup().getWaypoint());
-        }
     }
 
     /**
@@ -391,11 +458,11 @@ public class MapNavDrawer extends AppCompatActivity
             changeFAB(fab, R.drawable.map_marker_radius, R.color.colorPrimaryDark);
         } else {
             if (mWaypoint != null){
-                bs.set_person_mode(findViewById(android.R.id.content), marker, get_location(),
+                bs.set_person_mode(findViewById(android.R.id.content), marker.getPosition(), get_location(),
                         (MapWaypoint) mWaypoint.getTag(),(String) marker.getTag());
             }
             else{
-                bs.set_person_mode(findViewById(android.R.id.content), marker, get_location(),
+                bs.set_person_mode(findViewById(android.R.id.content), marker.getPosition(), get_location(),
                         null, (String) marker.getTag());
             }
 
@@ -433,7 +500,7 @@ public class MapNavDrawer extends AppCompatActivity
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
-                setWaypoint(new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
+                updateWaypoint(new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
                         place.getName().toString(), place.getAddress().toString()));
             }
         }
@@ -445,17 +512,23 @@ public class MapNavDrawer extends AppCompatActivity
      */
     public void setWaypoint(MapWaypoint wp) {
 
+        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
+        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
+                wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
+        bs.set_collapsed();
+    }
+
+    public void updateWaypoint(MapWaypoint wp){
         if (mWaypoint != null) {
             mWaypoint.remove();
             mWaypoint = null;
         }
 
-        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
-        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
-                wp.getLocation().longitude, useremail);
+        setWaypoint(wp);
+        UserRequestsUtil.sendActiveWaypointToServer(this);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
-        bs.set_collapsed();
     }
 
     public void add_waypoint_marker(LatLng pos, String title, MapWaypoint mw) {
@@ -494,10 +567,15 @@ public class MapNavDrawer extends AppCompatActivity
             @Override
             public void onDismissed(Snackbar mySnackbar, int event) {
                 show_fab();
-//                TODO curruser.getActiveGroup().setWaypoint(null);
+                remove_waypoint_server();
             }
         });
         mySnackbar.show();
+    }
+
+    public void remove_waypoint_server(){
+        curruser.getActiveGroup().deleteWaypoint();
+        UserRequestsUtil.sendActiveWaypointToServer(this);
     }
 
 
@@ -519,62 +597,71 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public void update(Observable o, Object data) {
-        HashMap<String, Friend> friendslist = null;
-        Location location = get_location();
-        MapWaypoint mw = null;
 
-        if (o == curruser){
-            String email = (String)data;
-            Location loc = curruser.getActiveGroup().getFriend(email).getLocation();
+        if (isLoaded){
+            HashMap<String, Friend> friendslist = null;
+            Location location = get_location();
+            MapWaypoint mw = null;
 
-            if (loc != null){
-                LatLng l = new LatLng(loc.getLatitude(),loc.getLongitude());
-                update_position(l, email);
+            if (o == curruser){
+                String email = (String)data;
+                Location loc = curruser.getActiveGroup().getFriend(email).getLocation();
+
+                if (loc != null){
+                    LatLng l = new LatLng(loc.getLatitude(),loc.getLongitude());
+                    update_position(l, email);
+                }
+
+            }
+            if (o == mCurrentLocation){
+                if (bs.is_place_mode()) {
+                    if (location != null && mWaypoint != null){
+                        bs.set_distance_waypoint(findViewById(android.R.id.content),location,
+                                mWaypoint.getPosition()
+                        );
+                    }
+                }
             }
 
+            if(bs.is_user_mode()){
+                if (mWaypoint != null){
+                    bs.set_distance_person(findViewById(android.R.id.content),
+                            location, curruser.getActiveGroup().getFriends().get(bs.get_active_user())
+                                    .getLocation(), (MapWaypoint) mWaypoint.getTag());
+                }
+                else{
+                    bs.set_distance_person(findViewById(android.R.id.content),
+                            location, curruser.getActiveGroup().getFriends().get(bs.get_active_user())
+                                    .getLocation(), null);
+                }
+
+            }
         }
-        if (o == mCurrentLocation){
-            if (bs.is_place_mode()) {
-                bs.set_distance_waypoint(findViewById(android.R.id.content),
-                        new LatLng(location.getLatitude(), location.getLongitude()),
-                        mWaypoint.getPosition()
-                );
+        else{
+            if (curruser.isInitiated()){
+                onload();
             }
         }
-
-        if(bs.is_user_mode()){
-            LatLng loc = null;
-            loc = new LatLng(curruser.getActiveGroup().getFriends().get(bs.get_active_user())
-                    .getLocation().getLatitude(), curruser.getActiveGroup().getFriends().get(bs.get_active_user())
-                    .getLocation().getLongitude());
-            if (mWaypoint != null){
-                bs.set_distance_person(findViewById(android.R.id.content),
-                        location, loc, (MapWaypoint) mWaypoint.getTag());
-            }
-            else{
-                bs.set_distance_person(findViewById(android.R.id.content),
-                        location, loc, null);
-            }
-
-        }
-
-
-
 
     }
 
     private void update_position(LatLng l, String email){
-        Marker mPerson;
-        Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         if(!(mGroup.get(email).getPosition().equals(l))){
-            mGroup.get(email).remove();
-            mPerson = mMap.addMarker(new MarkerOptions()
-                    .position(l)
-                    .title(mGroup.get(email).getTitle())
-                    .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
-            );
-            mPerson.setTag(null);
-            mGroup.put(email,mPerson);
+            Log.d("LOK B4", mGroup.get(email).getPosition().toString());
+            animateMarker(mGroup.get(email),l, false);
+            mGroup.get(email).setPosition(l);
+            if (bs.is_user_mode() && email.equals(bs.get_active_user())){
+                if (mWaypoint != null){
+                    Log.d("NONO","HEHE");
+                    Log.d("LOK AFTER", mGroup.get(email).getPosition().toString());
+                    bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
+                            (MapWaypoint) mWaypoint.getTag(),(String) mGroup.get(email).getTag());
+                }
+                else{
+                    bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
+                            null, (String) mGroup.get(email).getTag());
+                }
+            }
         }
     }
 
@@ -620,11 +707,107 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void hide_fab(){
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
         fab.setVisibility(View.GONE);
+        fab2.setVisibility(View.GONE);
+        fab3.setVisibility(View.GONE);
     }
 
     public void show_fab(){
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
         fab.setVisibility(View.VISIBLE);
+        fab2.setVisibility(View.VISIBLE);
+        fab3.setVisibility(View.VISIBLE);
     }
+
+    public static MapNavDrawer getInstance(){
+        return ourInstance;
+    }
+
+    public void open_drawer(View view){
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.openDrawer(Gravity.LEFT);
+    }
+
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        isLoaded = false;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        UserRequestsUtil.initialiseCurrentUser(this);
+    }
+
+    @Override
+    public void onDrawerSlide(View view, float v) {
+
+    }
+
+    @Override
+    public void onDrawerOpened(View view) {
+
+    }
+
+    @Override
+    public void onDrawerClosed(View view) {
+        if(isLoaded){
+            initiateDrawer();
+        }
+    }
+
+    @Override
+    public void onDrawerStateChanged(int i) {
+
+    }
+
+    /**
+     * Smooth Animation of Marker taken from: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/MarkerDemoActivity.java
+     * @param marker
+     * @param toPosition
+     * @param hideMarker
+     */
+    public void animateMarker(final Marker marker, final LatLng toPosition,
+        final boolean hideMarker) {
+
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            Projection proj = mMap.getProjection();
+            Point startPoint = proj.toScreenLocation(marker.getPosition());
+            final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+            final long duration = 500;
+
+            final Interpolator interpolator = new LinearInterpolator();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed
+                            / duration);
+                    double lng = t * toPosition.longitude + (1 - t)
+                            * startLatLng.longitude;
+                    double lat = t * toPosition.latitude + (1 - t)
+                            * startLatLng.latitude;
+                    marker.setPosition(new LatLng(lat, lng));
+
+                    if (t < 1.0) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 16);
+                    } else {
+                        if (hideMarker) {
+                            marker.setVisible(false);
+                        } else {
+                            marker.setVisible(true);
+                        }
+                    }
+                }
+            });
+        }
 }
