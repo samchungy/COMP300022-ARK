@@ -20,6 +20,7 @@ import java.util.Observable;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.ToastUtils;
+import ark.ark.UserLocation.LocationSingleton;
 
 /**
  * Created by khtin on 21/09/2017.
@@ -100,6 +101,6 @@ public class CurrentUser extends Observable{
 
     public void setIsInitiated(){
         isInitiated = true;
-        notifyObservers();
+        LocationSingleton.getInstance().notifyObservers();
     }
 }
