@@ -14,8 +14,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.support.design.widget.BottomSheetBehavior;
@@ -29,17 +27,13 @@ import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -60,9 +54,8 @@ import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.tasks.OnSuccessListener;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.ui.IconGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -119,6 +112,7 @@ public class MapNavDrawer extends AppCompatActivity
     private HashMap<String, Marker> mGroup;
     private HashMap<Integer, String> idToEmail = new HashMap<>();
     private CurrentUser curruser;
+    private ClusterManager<ItemCluster> mClusterManager;
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
 
@@ -300,8 +294,8 @@ public class MapNavDrawer extends AppCompatActivity
             setWaypoint(curruser.getActiveGroup().getWaypoint());
         }
          show_fab();
+        setUpClusterer();
         isLoaded = true;
-
     }
 
 
@@ -451,6 +445,7 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker) {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
 
         if (marker.getTag() instanceof MapWaypoint) {
             bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) marker.getTag(),
@@ -500,7 +495,7 @@ public class MapNavDrawer extends AppCompatActivity
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
-                updateWaypoint(new MapWaypoint(useremail + "'s Hotspot", place.getLatLng(),
+                updateWaypoint(new MapWaypoint(useremail + "'s Waypoint.", place.getLatLng(),
                         place.getName().toString(), place.getAddress().toString()));
             }
         }
@@ -580,12 +575,14 @@ public class MapNavDrawer extends AppCompatActivity
 
 
     public void set_person_marker(LatLng lat, String name) {
+        IconGenerator iconFactory = new IconGenerator(this);
         Marker mPerson;
         Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
         mPerson = mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon((""+name.charAt(0))
+                        .toUpperCase())))
                 .position(lat)
                 .title(name +  "'s Location.")
-                .icon(BitmapDescriptorFactory.fromBitmap(drawableToBitmap(d)))
         );
         mPerson.setTag(name);
         mGroup.put(name,mPerson);
@@ -809,5 +806,57 @@ public class MapNavDrawer extends AppCompatActivity
                     }
                 }
             });
+    }
+
+    private void setUpClusterer() {
+        // Position the map.
+        if (mWaypoint!=null){
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mWaypoint.getPosition(), 10));
         }
+        else{
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-37.8136,144.9631), 10));
+        }
+
+
+        // Initialize the manager with the context and the map.
+        // (Activity extends context, so we can pass 'this' in the constructor.)
+        mClusterManager = new ClusterManager<ItemCluster>(this, mMap);
+
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+
+        // Add cluster items (markers) to the cluster manager.
+        addItems();
+    }
+
+    private void addItems() {
+
+        if (mGroup != null){
+                for(Map.Entry<String, Marker> entry : mGroup.entrySet()){
+                    ItemCluster offsetItem = new ItemCluster(lat, lng, "Test", "Test2");
+                    mClusterManager.addItem(offsetItem);
+
+                    LatLng loc = new LatLng(entry.getValue().getLocation().getLatitude(),
+                            entry.getValue().getLocation().getLongitude());
+                    set_person_marker(loc,entry.getValue().getEmail());
+                }
+        }
+
+
+
+        // Set some lat/lng coordinates to start with.
+        double lat = 51.5145160;
+        double lng = -0.1270060;
+
+        // Add ten cluster items in close proximity, for purposes of this example.
+        for (int i = 0; i < 10; i++) {
+            double offset = i / 60d;
+            lat = lat + offset;
+            lng = lng + offset;
+            ItemCluster offsetItem = new ItemCluster(lat, lng, "Test", "Test2");
+            mClusterManager.addItem(offsetItem);
+        }
+    }
 }
