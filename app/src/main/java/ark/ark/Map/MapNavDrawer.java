@@ -766,6 +766,10 @@ public class MapNavDrawer extends AppCompatActivity
         }
     }
 
+    public void copyText(View view){
+
+    }
+
     @Override
     public void onDrawerStateChanged(int i) {
 
