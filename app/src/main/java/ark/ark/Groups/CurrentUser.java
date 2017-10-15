@@ -26,7 +26,7 @@ import ark.ark.ToastUtils;
 
 public class CurrentUser extends Observable{
     private static final CurrentUser ourInstance = new CurrentUser();
-    //private String nickname;
+    private String nickname;
     private String email;
     private HashMap<String, Group> groups = new HashMap<String, Group>();
     private Group activeGroup;
@@ -44,6 +44,8 @@ public class CurrentUser extends Observable{
     public String getEmail() {
         return email;
     }
+
+    public String getNickname() {return nickname; }
 
     public void switchActiveGroup(String groupID) {
         if(groups.containsKey(groupID)) {

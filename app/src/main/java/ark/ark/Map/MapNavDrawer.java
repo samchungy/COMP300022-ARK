@@ -185,7 +185,7 @@ public class MapNavDrawer extends AppCompatActivity
 
         // Picture processing uses library from https://github.com/amulyakhare/TextDrawable
         TextDrawable drawable = TextDrawable.builder().buildRound(
-                curruser.getEmail().substring(0, 1), Color.BLUE);
+                curruser.getEmail().substring(0, 1).toUpperCase(), Color.rgb(48, 63, 159));
         profilePicture = (ImageView) drawerHeader.findViewById(R.id.profileImg);
         profilePicture.setImageDrawable(drawable);
 
@@ -298,7 +298,7 @@ public class MapNavDrawer extends AppCompatActivity
 
 
     private void initiateDrawer() {
-        currentUserName.setText(curruser.getEmail());
+        currentUserName.setText(curruser.getNickname() + ", " + curruser.getEmail());
         currentUserGroup.setText(curruser.getActiveGroup().getName());
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -321,17 +321,20 @@ public class MapNavDrawer extends AppCompatActivity
         }
 
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
-            TextDrawable tempIcon = TextDrawable.builder().buildRound(
-                    "A", Color.RED);
+
             /*
+            TextDrawable tempIcon = TextDrawable.builder().buildRound(
+                    tempFriend.getEmail().substring(0, 1).toUpperCase(), Color.rgb(48, 63, 159));
+
             LinearLayout accessXML =
                     (LinearLayout) ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-                            .inflate(R.layout.custom_user_icon, null); */
+                            .inflate(R.layout.custom_user_icon, null);
             LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
             View customUserIconXML = inflater.inflate(R.layout.custom_user_icon, null);
             ImageView tempImgView = (ImageView) customUserIconXML.findViewById(R.id.letterPic);
             tempImgView.setImageDrawable(tempIcon);
-            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(tempImgView.getDrawable());
+            */
+            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
             idToEmail.put(j, tempFriend.getEmail());
             numGroupMembers++;
             j++;
@@ -439,7 +442,7 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Travelling to your current location...", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
