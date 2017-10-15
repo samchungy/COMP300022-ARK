@@ -1,6 +1,7 @@
 package ark.ark.Groups;
 
 import android.location.Location;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -96,6 +97,7 @@ public class Group {
     }
 
     public void deleteWaypoint(){
+        Log.d("Waypointdeleted", "waypointnulled");
         waypoint = null;
     }
 
