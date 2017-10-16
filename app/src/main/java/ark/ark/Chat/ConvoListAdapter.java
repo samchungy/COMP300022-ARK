@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,10 +71,15 @@ public class ConvoListAdapter extends BaseAdapter {
         TextView lastUpdated = (TextView) cell.findViewById(R.id.austin_ChatListCell_lastUpdated);
 
         userName.setText(convoList.get(position).userName);
-        firstMessage.setText(convoList.get(position).firstMessage);
+        firstMessage.setText(decryptMessageBody(convoList.get(position).firstMessage));
 
-        String time = convoList.get(position).lastUpdated.substring(11, 19);
-        lastUpdated.setText(time);
+        try {
+            String time = convoList.get(position).lastUpdated.substring(11, 19);
+            lastUpdated.setText(time);
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
+            lastUpdated.setText("");
+        }
 
 
         return cell;
@@ -82,12 +88,26 @@ public class ConvoListAdapter extends BaseAdapter {
 
 
 
+    private String decryptMessageBody(String messageBody) {
+        String msg = "";
+        try {
+            msg = new String(hexStringToByteArray(messageBody), Charset.forName("UTF-8"));
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
 
-
-    private void showToast(String message) {
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(mContext, message, duration);
-        toast.show();
+        return msg;
     }
 
+
+
+    private byte[] hexStringToByteArray(String hex) {
+        int l = hex.length();
+        byte[] data = new byte[l/2];
+        for (int i = 0; i < l; i += 2) {
+            data[i/2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+                    + Character.digit(hex.charAt(i+1), 16));
+        }
+        return data;
+    }
 }
