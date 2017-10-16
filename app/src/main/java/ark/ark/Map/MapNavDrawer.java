@@ -22,6 +22,9 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
@@ -34,6 +37,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +76,7 @@ import java.util.Observer;
 
 import ark.ark.ArActivity;
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Debugging;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
 import ark.ark.Groups.Group;
@@ -81,6 +87,7 @@ import ark.ark.PermissionUtils;
 import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.UserLocation.LocationSingleton;
+import layout.HomeFragment;
 import ark.ark.UserLocation.LocationUpdateService;
 import com.google.maps.android.ui.IconGenerator;
 
@@ -169,6 +176,11 @@ public class MapNavDrawer extends AppCompatActivity
 //
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //Get User
+        curruser = CurrentUser.getInstance();
+        curruser.addObserver(this);
+
 
         // Assorted drawer code
         drawerHeader = navigationView.getHeaderView(0);
@@ -322,22 +334,49 @@ public class MapNavDrawer extends AppCompatActivity
 
         Toast toast = Toast.makeText(context, text, duration);
 
+
+        if(curruser != null) {
+            currentUserName.setText(curruser.getEmail());
+            currentUserGroup.setText(curruser.getActiveGroup().getName());
+        } else {
+            currentUserName.setText("Not set");
+            currentUserGroup.setText("Not set");
+        }
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        final Menu menu = navigationView.getMenu();
+
         if(isPopulated == true) {
+            invalidateOptionsMenu();
+            menu.removeItem(0);
             for(int key: idToEmail.keySet()) {
                 menu.removeItem(key);
             }
             toast.show();
         }
 
-        for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
-            menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
-            idToEmail.put(j, tempFriend.getEmail());
-            numGroupMembers++;
-            j++;
-            isPopulated = true;
+        numGroupMembers = 0;
+        int j = 1;
+        menu.add(0, 0, 0, "Debugging");
+
+
+
+
+
+        if(curruser != null) {
+            for(Friend tempFriend: curruser.getActiveGroup().getFriends().values()) {
+                menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
+                idToEmail.put(j, tempFriend.getEmail());
+                numGroupMembers++;
+                j++;
+                isPopulated = true;
+            }
         }
 
-        j = 0;
+
+
+
     }
 
     @Override
@@ -365,6 +404,13 @@ public class MapNavDrawer extends AppCompatActivity
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
+        Intent intent = null;
+
+        if(id == 0) {
+            intent = new Intent(this, Debugging.class);
+            startActivity(intent);
+            return true;
+        }
 
         //noinspection SimplifiableIfStatement
         for(int friendID: idToEmail.keySet()) {
