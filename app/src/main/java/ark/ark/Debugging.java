@@ -68,7 +68,7 @@ public class Debugging extends AppCompatActivity {
 
         showToast(ARK_auth.fetchUserEmail(this));
         */
-        mCurrentUser.logOn("user1@user1.com");
+//        mCurrentUser.logOn("user1@user1.com");
         UserRequestsUtil.initialiseCurrentUser(this);
 
 
@@ -78,7 +78,7 @@ public class Debugging extends AppCompatActivity {
 
     public void austinTest_switchToUser2(View v) {
 
-        mCurrentUser.logOn("user2@user2.com");
+//        mCurrentUser.logOn("user2@user2.com");
         UserRequestsUtil.initialiseCurrentUser(this);
         //UserRequestsUtil.updateActiveGroupLocations(this);
     }
