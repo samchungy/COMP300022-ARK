@@ -335,7 +335,7 @@ public class MapNavDrawer extends AppCompatActivity
 
         final Menu menu = navigationView.getMenu();
         numGroupMembers = 0;
-        int j = 0;
+        int j = 1;
 
         Context context = getApplicationContext();
         CharSequence text = "Group member list refreshed!";
@@ -360,6 +360,8 @@ public class MapNavDrawer extends AppCompatActivity
             }
             toast.show();
         }
+
+        menu.add(0, 0, 0, "Debugging").setIcon(R.drawable.ic_settings_black_24dp);
 
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
 
@@ -407,11 +409,13 @@ public class MapNavDrawer extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        /*
         Context context = getApplicationContext();
         CharSequence text = "HashMap search successful.";
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
+        */
         Intent intent = null;
 
         if(id == 0) {
