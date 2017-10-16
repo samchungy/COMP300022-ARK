@@ -131,6 +131,7 @@ public class MapNavDrawer extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_nav_drawer);
         isLoaded = false;
+        Log.d("CREATED","BOO");
 
         //showToast(ARK_auth.fetchSessionId(getApplicationContext()));
         if(ARK_auth.fetchSessionId(getApplicationContext()).equals("no session id")) {
@@ -738,11 +739,6 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        UserRequestsUtil.initialiseCurrentUser(this);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();  // Always call the superclass method first
         isLoaded = false;
@@ -903,7 +899,7 @@ public class MapNavDrawer extends AppCompatActivity
                 mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             }
         }
-        UserRequestsUtil.initialiseCurrentUser(this);
+        isLoaded = false;
 
     }
 
@@ -911,12 +907,11 @@ public class MapNavDrawer extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         isLoaded = false;
-
     }
 
     @Override
-    protected void onStart(){
-        super.onStart();
-        UserRequestsUtil.initialiseCurrentUser(this);
+    protected void onRestart(){
+        super.onRestart();
+        isLoaded = false;
     }
 }
