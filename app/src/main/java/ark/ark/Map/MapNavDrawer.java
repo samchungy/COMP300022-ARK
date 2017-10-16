@@ -352,10 +352,6 @@ public class MapNavDrawer extends AppCompatActivity
             currentUserGroup.setText("Not set");
         }
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
-        final Menu menu = navigationView.getMenu();
-
         if(isPopulated == true) {
             invalidateOptionsMenu();
             menu.removeItem(0);
