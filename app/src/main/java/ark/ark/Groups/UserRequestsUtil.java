@@ -246,8 +246,12 @@ public class UserRequestsUtil {
                                     String name = res.getJSONObject("waypoint").getString("creator_nickname");
                                     Double lat = waypoint.getDouble("lat");
                                     Double lng = waypoint.getDouble("lng");
+                                    String placename = waypoint.getString("place_name");
+                                    String placeaddress = waypoint.getString("place_address");
+                                    Boolean active = waypoint.getBoolean("active");
 
-                                    mUser.getActiveGroup().setWaypoint(lat, lng, name);
+                                    mUser.getActiveGroup().setWaypoint(lat, lng, name, placename,
+                                            placeaddress, active);
                                     //ToastUtils.showToast(email, context);
                                     //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
                                     mUser.setIsInitiated();
@@ -280,18 +284,32 @@ public class UserRequestsUtil {
 
     public static void sendActiveWaypointToServer(final Context context){
         CurrentUser mUser = CurrentUser.getInstance();
-        if (mUser.getActiveGroup().getWaypoint() != null) {
-            RequestQueue queue = Volley.newRequestQueue(context);
-            MapWaypoint waypoint = mUser.getActiveGroup().getWaypoint();
-            String server = "52.65.97.117";
-            String path = "/waypoint/create?";
-            String requestURL = "http://" + server + path +"email="+ mUser.getEmail()
+        RequestQueue queue = Volley.newRequestQueue(context);
+        MapWaypoint waypoint = mUser.getActiveGroup().getWaypoint();
+        String server = "52.65.97.117";
+        String path = "/waypoint/create?";
+        String requestURL;
+        if (waypoint != null){
+            requestURL = "http://" + server + path +"email="+ mUser.getEmail()
                     +"&lat="+waypoint.getLocation().latitude+
                     "&lng="+waypoint.getLocation().longitude+
-                    "&group_id="+mUser.getActiveGroup().getId();
-            //ToastUtils.showToast(requestURL, context);
+                    "&group_id="+mUser.getActiveGroup().getId()+
+                    "&place_name="+waypoint.getNam()+
+                    "&place_address="+waypoint.getDetails()+
+                    "&active=true";
+        }
+        else{
+            requestURL = "http://" + server + path +"email="+ mUser.getEmail()
+                    +"&lat=0"+
+                    "&lng=0"+
+                    "&group_id="+mUser.getActiveGroup().getId()+
+                    "&place_name=0"+
+                    "&place_address=0"+
+                    "&active=false";
+        }
+        //ToastUtils.showToast(requestURL, context);
 
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -318,16 +336,9 @@ public class UserRequestsUtil {
                     // error handling
                     ToastUtils.showToast("Sorry, cannot connect to the server.", context);
                 }
-            });
+        });
 
-            queue.add(stringRequest);
-        } else {
-            ToastUtils.showToast("Location doesn't exist", context);
-        }
-
-
-
-
+        queue.add(stringRequest);
 
         // Request a string response from the requestURL.
 
