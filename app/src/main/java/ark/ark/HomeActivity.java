@@ -108,6 +108,7 @@ public class HomeActivity extends AppCompatActivity {
 
         //TODO
 
+
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
         mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
 
@@ -125,8 +126,6 @@ public class HomeActivity extends AppCompatActivity {
         }else {
             switchTo("Home");
         }
-
-
 
     }
 
@@ -212,15 +211,15 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void allowUpdateLocation(View v){
-        currentLocation.getInstance().allowServerUpdates();
+        LocationSingleton.getInstance().allowServerUpdates();
     }
 
     public void stopUpdateLocation(View v){
-        currentLocation.getInstance().stopServerUpdates();
+        LocationSingleton.getInstance().stopServerUpdates();
     }
 
     public void getLocationDetails(View v){
-        showToast(currentLocation.getInstance().getLocation().toString() + "\n" + "allowupdates " + currentLocation.getInstance().isAllowingUpdates());
+        showToast(LocationSingleton.getInstance().getLocation().toString() + "\n" + "allowupdates " + LocationSingleton.getInstance().isAllowingUpdates());
     }
 
 

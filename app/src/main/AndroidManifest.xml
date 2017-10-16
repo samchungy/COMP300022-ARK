@@ -88,6 +88,10 @@
         <activity android:name=".Groups.GroupCreationActivity" />
         <activity android:name=".Groups.GroupListActivity" />
         <activity android:name=".Groups.JoinGroupActivity"></activity>
+        <activity
+            android:name=".Debugging"
+            android:label="@string/title_activity_debugging"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,9 +23,13 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -32,10 +37,16 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -65,6 +76,7 @@ import java.util.Observer;
 
 import ark.ark.ArActivity;
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Debugging;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
 import ark.ark.Groups.Group;
@@ -75,6 +87,7 @@ import ark.ark.HomeActivity;
 import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.UserLocation.LocationSingleton;
+import layout.HomeFragment;
 import ark.ark.UserLocation.LocationUpdateService;
 import com.google.maps.android.ui.IconGenerator;
 
@@ -119,7 +132,7 @@ public class MapNavDrawer extends AppCompatActivity
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     // Stuff for Zengster for navigation drawer
-    private ImageView profilePicture, headerImage;
+    private ImageView profilePicture;
     private TextView currentUserName, currentUserGroup;
     private View drawerHeader;
     boolean isLoaded = false;
@@ -180,11 +193,21 @@ public class MapNavDrawer extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //Get User
+        curruser = CurrentUser.getInstance();
+        curruser.addObserver(this);
+
+
         // Assorted drawer code
         drawerHeader = navigationView.getHeaderView(0);
         currentUserName = (TextView) drawerHeader.findViewById(R.id.userEmail);
         currentUserGroup = (TextView) drawerHeader.findViewById(R.id.activeGroup);
+
+        // Picture processing uses library from https://github.com/amulyakhare/TextDrawable
+        TextDrawable drawable = TextDrawable.builder().buildRound(
+                curruser.getEmail().substring(0, 1).toUpperCase(), Color.rgb(48, 63, 159));
         profilePicture = (ImageView) drawerHeader.findViewById(R.id.profileImg);
+        profilePicture.setImageDrawable(drawable);
 
 
         // Geocoder
@@ -305,7 +328,7 @@ public class MapNavDrawer extends AppCompatActivity
 
 
     private void initiateDrawer() {
-        currentUserName.setText(curruser.getEmail());
+        currentUserName.setText(curruser.getNickname() + ", " + curruser.getEmail());
         currentUserGroup.setText(curruser.getActiveGroup().getName());
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -320,7 +343,22 @@ public class MapNavDrawer extends AppCompatActivity
 
         Toast toast = Toast.makeText(context, text, duration);
 
+
+        if(curruser != null) {
+            currentUserName.setText(curruser.getEmail());
+            currentUserGroup.setText(curruser.getActiveGroup().getName());
+        } else {
+            currentUserName.setText("Not set");
+            currentUserGroup.setText("Not set");
+        }
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        final Menu menu = navigationView.getMenu();
+
         if(isPopulated == true) {
+            invalidateOptionsMenu();
+            menu.removeItem(0);
             for(int key: idToEmail.keySet()) {
                 menu.removeItem(key);
             }
@@ -328,6 +366,19 @@ public class MapNavDrawer extends AppCompatActivity
         }
 
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
+
+            /*
+            TextDrawable tempIcon = TextDrawable.builder().buildRound(
+                    tempFriend.getEmail().substring(0, 1).toUpperCase(), Color.rgb(48, 63, 159));
+
+            LinearLayout accessXML =
+                    (LinearLayout) ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+                            .inflate(R.layout.custom_user_icon, null);
+            LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
+            View customUserIconXML = inflater.inflate(R.layout.custom_user_icon, null);
+            ImageView tempImgView = (ImageView) customUserIconXML.findViewById(R.id.letterPic);
+            tempImgView.setImageDrawable(tempIcon);
+            */
             menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
             idToEmail.put(j, tempFriend.getEmail());
             numGroupMembers++;
@@ -335,7 +386,9 @@ public class MapNavDrawer extends AppCompatActivity
             isPopulated = true;
         }
 
-        j = 0;
+
+
+
     }
 
     @Override
@@ -363,6 +416,13 @@ public class MapNavDrawer extends AppCompatActivity
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(context, text, duration);
+        Intent intent = null;
+
+        if(id == 0) {
+            intent = new Intent(this, Debugging.class);
+            startActivity(intent);
+            return true;
+        }
 
         //noinspection SimplifiableIfStatement
         for(int friendID: idToEmail.keySet()) {
@@ -423,7 +483,7 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Travelling to your current location...", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;

@@ -48,6 +48,7 @@
     <string name="title_location_permission">Location Needed!</string>
     <string name="text_location_permission">We need your location for this app to work!</string>
     <string name="ok">Okay</string>
+    <string name="title_activity_debugging">Debugging</string>
 
 
 </resources>
