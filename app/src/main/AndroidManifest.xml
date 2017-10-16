@@ -87,6 +87,7 @@
 
         <activity android:name=".Groups.GroupCreationActivity" />
         <activity android:name=".Groups.GroupListActivity" />
+        <activity android:name=".Chat.ChatActivity"></activity>
         <activity android:name=".Groups.JoinGroupActivity"></activity>
         <activity
             android:name=".Debugging"

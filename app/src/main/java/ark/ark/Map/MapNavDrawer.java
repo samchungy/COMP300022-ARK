@@ -76,6 +76,8 @@ import java.util.Observer;
 
 import ark.ark.ArActivity;
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Chat.ChatActivity;
+import ark.ark.Chat.ChatLogActivity;
 import ark.ark.Debugging;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
@@ -281,8 +283,7 @@ public class MapNavDrawer extends AppCompatActivity
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO OPEN CHAT ACTIVITY
-                Intent myIntent2 = new Intent(MapNavDrawer.this, HomeActivity.class);
+                Intent myIntent2 = new Intent(MapNavDrawer.this, ChatActivity.class);
                 startActivity(myIntent2);
             }
         });
@@ -469,7 +470,7 @@ public class MapNavDrawer extends AppCompatActivity
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerClickListener(this);
         enableMyLocation();
-        mMap.setPadding(0,0,0,0);
+        mMap.setPadding(0,100,0,0);
 
     }
 
