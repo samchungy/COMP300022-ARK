@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -40,6 +41,10 @@ public class UserRequestsUtil {
      */
     public static void initialiseCurrentUser(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
+        // logHead is the heading to add to the log for this function
+        String logHead = "initialiseCurrentUser";
+
+        Log.d(logHead,"function start");
 
         if (mUser.getEmail() != null) {
             RequestQueue queue = Volley.newRequestQueue(context);
@@ -47,7 +52,8 @@ public class UserRequestsUtil {
 
             String path = "/group/show?";
             String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
-            ToastUtils.showToast(requestURL, context);
+
+            Log.d(logHead,requestURL);
 
             StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
                     new Response.Listener<String>() {
@@ -57,6 +63,7 @@ public class UserRequestsUtil {
                             // after getting response, try reading the json
                             CurrentUser mUser = CurrentUser.getInstance();
                             ToastUtils.showToast(response, context);
+                            Log.i("Init Curr User",response);
                             try {
                                 JSONObject res = new JSONObject(response);
 
@@ -65,9 +72,8 @@ public class UserRequestsUtil {
                                         Group g = new Group(res.getJSONArray("groups").getString(i), mUser.getEmail());
                                         mUser.addGroup(g);
                                     }
-                                updateActiveGroupLocations(context);
-                                updateActiveGroupWaypoint(context);
-
+                                    updateActiveGroupLocations(context);
+                                    updateActiveGroupWaypoint(context);
 
                                 } else {
                                     ToastUtils.showToast(res.getString("msg"), context);
@@ -76,6 +82,8 @@ public class UserRequestsUtil {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 ToastUtils.showToast("exception", context);
+                                Log.d("initcurr", e.getMessage());
+
                             }
                         }
                     }, new Response.ErrorListener() {
@@ -83,6 +91,7 @@ public class UserRequestsUtil {
                 public void onErrorResponse(VolleyError error) {
                     // error handling
                     ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+                    Log.d("CANNOT CONNECT","SERVER THINGO");
                 }
             });
 
@@ -145,6 +154,7 @@ public class UserRequestsUtil {
 
     public static void updateActiveGroupLocations(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
+        Log.d("Updating Active", "test");
 
         if (mUser.getEmail() != null && mUser.getActiveGroup() != null) {
             RequestQueue queue = Volley.newRequestQueue(context);
@@ -236,10 +246,15 @@ public class UserRequestsUtil {
                                     String name = res.getJSONObject("waypoint").getString("creator_nickname");
                                     Double lat = waypoint.getDouble("lat");
                                     Double lng = waypoint.getDouble("lng");
+                                    String placename = waypoint.getString("place_name");
+                                    String placeaddress = waypoint.getString("place_address");
+                                    Boolean active = waypoint.getBoolean("active");
 
-                                    mUser.getActiveGroup().setWaypoint(lat, lng, name);
+                                    mUser.getActiveGroup().setWaypoint(lat, lng, name, placename,
+                                            placeaddress, active);
                                     //ToastUtils.showToast(email, context);
                                     //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
+                                    mUser.setIsInitiated();
 
 
                                 } else {
@@ -269,18 +284,32 @@ public class UserRequestsUtil {
 
     public static void sendActiveWaypointToServer(final Context context){
         CurrentUser mUser = CurrentUser.getInstance();
-        if (mUser.getActiveGroup().getWaypoint() != null) {
-            RequestQueue queue = Volley.newRequestQueue(context);
-            MapWaypoint waypoint = mUser.getActiveGroup().getWaypoint();
-            String server = "52.65.97.117";
-            String path = "/waypoint/create?";
-            String requestURL = "http://" + server + path +"email="+ mUser.getEmail()
+        RequestQueue queue = Volley.newRequestQueue(context);
+        MapWaypoint waypoint = mUser.getActiveGroup().getWaypoint();
+        String server = "52.65.97.117";
+        String path = "/waypoint/create?";
+        String requestURL;
+        if (waypoint != null){
+            requestURL = "http://" + server + path +"email="+ mUser.getEmail()
                     +"&lat="+waypoint.getLocation().latitude+
                     "&lng="+waypoint.getLocation().longitude+
-                    "&group_id="+mUser.getActiveGroup().getId();
-            //ToastUtils.showToast(requestURL, context);
+                    "&group_id="+mUser.getActiveGroup().getId()+
+                    "&place_name="+waypoint.getNam()+
+                    "&place_address="+waypoint.getDetails()+
+                    "&active=true";
+        }
+        else{
+            requestURL = "http://" + server + path +"email="+ mUser.getEmail()
+                    +"&lat=0"+
+                    "&lng=0"+
+                    "&group_id="+mUser.getActiveGroup().getId()+
+                    "&place_name=0"+
+                    "&place_address=0"+
+                    "&active=false";
+        }
+        //ToastUtils.showToast(requestURL, context);
 
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -307,16 +336,9 @@ public class UserRequestsUtil {
                     // error handling
                     ToastUtils.showToast("Sorry, cannot connect to the server.", context);
                 }
-            });
+        });
 
-            queue.add(stringRequest);
-        } else {
-            ToastUtils.showToast("Location doesn't exist", context);
-        }
-
-
-
-
+        queue.add(stringRequest);
 
         // Request a string response from the requestURL.
 

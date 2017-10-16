@@ -19,7 +19,10 @@ import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.UserRequestsUtil;
 import ark.ark.HomeActivity;
+import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
 
 public class LoginActivity extends AppCompatActivity {
@@ -60,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToHome(){
-        Intent myIntent = new Intent(LoginActivity.this, HomeActivity.class);
+        Intent myIntent = new Intent(LoginActivity.this, MapNavDrawer.class);
         startActivity(myIntent);
         this.finish();
     }
@@ -119,7 +122,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void LoginAsGuest(View v){
-        ARK_auth.storeSessionId("guest",getApplicationContext());
-        goToHome();
+        postUserLogin("user1@user1.com","user1");
     }
 }
