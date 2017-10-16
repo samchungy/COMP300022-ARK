@@ -31,7 +31,6 @@ public class BottomSheet extends MapNavDrawer {
     private boolean placemode = false;
     private boolean usermode = false;
     private String activeuser;
-    private ClipboardManager clipboard;
 
     /**
      *

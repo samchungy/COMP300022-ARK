@@ -95,8 +95,9 @@
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_weight="1"
-                android:drawableTop="@drawable/ic_navigation_black_24dp"
-                android:text="@string/map_Navigate" />
+                android:drawableTop="@drawable/ic_content_copy_black_24dp"
+                android:onClick="copyText"
+                android:text="@android:string/copy" />
 
         </LinearLayout>
 
@@ -134,7 +135,8 @@
                 android:layout_height="100dp"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/ic_content_copy_black_24dp"
-                android:text="@string/map_copy" />
+                android:onClick="copyText"
+                android:text="@android:string/copy" />
 
         </LinearLayout>
 
