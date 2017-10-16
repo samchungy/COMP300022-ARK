@@ -900,6 +900,7 @@ public class MapNavDrawer extends AppCompatActivity
             }
         }
         isLoaded = false;
+        UserRequestsUtil.initialiseCurrentUser(this);
 
     }
 
