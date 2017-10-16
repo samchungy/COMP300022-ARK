@@ -16,9 +16,9 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mindrot.jbcrypt.BCrypt;
 
-import ark.ark.HomeActivity;
+import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.GroupListActivity;
 import ark.ark.R;
 
 public class ProfileCreationActivity extends AppCompatActivity {
@@ -39,29 +39,14 @@ public class ProfileCreationActivity extends AppCompatActivity {
         EditText password = (EditText) findViewById(R.id.login_password);
         EditText email = (EditText) findViewById(R.id.login_email);
 
-        /**Password hashing via BCrpyt**/
-        /*String parse = password.getText().toString();
-        String hashed;
-        hashed = BCrypt.hashpw(parse, BCrypt.gensalt(10));
-
-        postUserCreation(nickname.getText().toString(), email.getText().toString(),
-                hashed);*/
-
-        /*
-        For verification just use:
-
-        if(BCrypt.checkpw(password user typed, hashed actual password)) {...}
-
-        You can put it in the right place.
-         */
 
 
         postUserCreation(nickname.getText().toString(), email.getText().toString(), password.getText().toString());
 
     }
 
-    private void goToLogin(){
-        Intent myIntent = new Intent(ProfileCreationActivity.this, LoginActivity.class);
+    private void goToGroup(){
+        Intent myIntent = new Intent(ProfileCreationActivity.this, GroupListActivity.class);
         startActivity(myIntent);
         this.finish();
     }
@@ -69,12 +54,12 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
     //connecting to server
 
-    private void postUserCreation(String nickname, String email, String password) {
+    private void postUserCreation(String nickname, final String email, final String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
         String server ="52.65.97.117";
         String path = "/users/create?";
-        String description = "creating a new user from ARK app with android studio and volley";
+        String description = "creatingNewUserFromARK";
 
         String requestURL = "http://" + server + path +"email="+email+"&nick_name="+nickname+
                 "&password_salted="+password+"&description="+description;
@@ -91,7 +76,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
                                 // iterate through the direct list to populate the convo list
 
                                 showToast("Congratulations! Your account has been created!");
-                                goToLogin();
+                                postUserLogin(email,password);
 
                             } else {
                                 showToast(res.getString("msg"));
@@ -114,23 +99,18 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
     }
 
-
-    //GET request example
-
-    private void getRequestExample() {
+    public void postUserLogin(final String email, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        showToast("creating user...");
-
         String server ="52.65.97.117";
-        String userEmail = "user1@user1.com";
-        String testUserID = "62390ede67dbbec5b650dfd1b0f33d15";
-        String requestURL = "http://" + server + "/direct/show?email=" + userEmail;
+        String path = "/users/login?";
 
-        requestURL = "http://" + server + "/users/show?user_id=" + testUserID;
+        String requestURL = "http://" + server + path +"email="+email+"&password_salted="+password;
+
+        //showToast(requestURL);
 
         // Request a string response from the requestURL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -138,11 +118,15 @@ public class ProfileCreationActivity extends AppCompatActivity {
                         try {
                             JSONObject res = new JSONObject(response);
                             if (res.getString("success").equals("ok")) {
-                                // iterate through the direct list to populate the convo list
 
-                                showToast("data GET!");
-                                showToast(res.getString("user_info"));
-                                showToast(res.getJSONObject("user_info").getString("email"));
+                                //get data from res object
+                                showToast("Congratulations! You have logged in :)");
+                                String sessionID = res.getString("session_id");
+
+                                ARK_auth.storeUserEmail(email,getApplicationContext());
+                                ARK_auth.storeSessionId(sessionID,getApplicationContext());
+                                goToGroup();
+
 
                             } else {
                                 showToast(res.getString("msg"));
@@ -162,8 +146,8 @@ public class ProfileCreationActivity extends AppCompatActivity {
         });
 
         queue.add(stringRequest);
-    }
 
+    }
 
 
     private void showToast(String message) {

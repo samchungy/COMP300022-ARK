@@ -1,5 +1,6 @@
 package ark.ark.Profile;
 
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -20,10 +21,13 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.Group;
+import ark.ark.Groups.GroupListActivity;
 import ark.ark.Groups.UserRequestsUtil;
 import ark.ark.HomeActivity;
 import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
+import ark.ark.ToastUtils;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -59,22 +63,27 @@ public class LoginActivity extends AppCompatActivity {
         showToast("going to Sign Up page...");
         Intent myIntent = new Intent(LoginActivity.this, ProfileCreationActivity.class);
         startActivity(myIntent);
+        this.finish();
 
     }
 
     private void goToHome(){
         Intent myIntent = new Intent(LoginActivity.this, MapNavDrawer.class);
         startActivity(myIntent);
+
         this.finish();
     }
 
-    private void postUserLogin(final String email, String password) {
+
+    public void postUserLogin(final String email, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
         String server ="52.65.97.117";
         String path = "/users/login?";
 
         String requestURL = "http://" + server + path +"email="+email+"&password_salted="+password;
+
+        //showToast(requestURL);
 
         // Request a string response from the requestURL.
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
@@ -92,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                 ARK_auth.storeUserEmail(email,getApplicationContext());
                                 ARK_auth.storeSessionId(sessionID,getApplicationContext());
-                                goToHome();
+                                updateGroups(getApplicationContext());
 
                             } else {
                                 showToast(res.getString("msg"));
@@ -115,6 +124,65 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    public void updateGroups(final Context context) {
+        CurrentUser mUser = CurrentUser.getInstance();
+
+        if (mUser.getEmail() != null) {
+            RequestQueue queue = Volley.newRequestQueue(context);
+            String server = "52.65.97.117";
+
+            String path = "/group/show?";
+            String requestURL = "http://" + server + path +"email="+ mUser.getEmail();
+            //ToastUtils.showToast(requestURL, context);
+
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
+                    new Response.Listener<String>() {
+
+                        @Override
+                        public void onResponse(String response) {
+                            // after getting response, try reading the json
+                            CurrentUser mUser = CurrentUser.getInstance();
+                            //ToastUtils.showToast(response, context);
+                            try {
+                                JSONObject res = new JSONObject(response);
+
+                                if (res.getString("success").equals("ok")) {
+                                    if (res.getJSONArray("groups").length()==0){
+                                        //User made without a group. Go to group joiner interface
+                                        Intent myIntent2 = new Intent(context, GroupListActivity.class);
+                                        startActivity(myIntent2);
+                                    }
+                                    else{
+                                        //Store in cache
+                                        ARK_auth.storeGroup(res.getJSONArray("groups").getString(0)
+                                                ,getApplicationContext());
+                                    }
+                                    goToHome();
+                                }
+                                else {
+                                    ToastUtils.showToast(res.getString("msg"), context);
+                                }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                ToastUtils.showToast("exception", context);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    // error handling
+                    ToastUtils.showToast("Sorry, cannot connect to the server.", context);
+                }
+            });
+
+            queue.add(stringRequest);
+        } else {
+            ToastUtils.showToast("Location doesn't exist", context);
+        }
+    }
+
+
     private void showToast(String message) {
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(this, message, duration);
@@ -122,6 +190,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void LoginAsGuest(View v){
-        postUserLogin("user1@user1.com","user1");
+        ARK_auth.storeSessionId("guest",getApplicationContext());
+        ARK_auth.storeUserEmail("user1@user1.com",getApplicationContext());
+        ARK_auth.storeGroup("group",getApplicationContext());
+//        isDev=true;
+        goToHome();
     }
+
 }

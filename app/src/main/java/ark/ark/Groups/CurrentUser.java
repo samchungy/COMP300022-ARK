@@ -1,5 +1,6 @@
 package ark.ark.Groups;
 
+import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
@@ -19,6 +20,7 @@ import java.util.Observable;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.ToastUtils;
+import ark.ark.UserLocation.LocationSingleton;
 
 /**
  * Created by khtin on 21/09/2017.
@@ -26,24 +28,33 @@ import ark.ark.ToastUtils;
 
 public class CurrentUser extends Observable{
     private static final CurrentUser ourInstance = new CurrentUser();
-    //private String nickname;
+    private String nickname;
     private String email;
     private HashMap<String, Group> groups = new HashMap<String, Group>();
     private Group activeGroup;
     private Boolean isUpdating = true;
     private Boolean isInitiated = false;
+    private int groupIsInitiated = 0;
 
     public static CurrentUser getInstance() {
         return ourInstance;
     }
 
-    public void logOn(String email) {
-        this.email = email;
+    public void logOn(Context context) {
+        this.email = ARK_auth.fetchUserEmail(context);
+    }
+
+    public void logOut(){
+        this.email = null;
+        this.groups.clear();
+        this.activeGroup = null;
     }
 
     public String getEmail() {
         return email;
     }
+
+    public String getNickname() {return nickname; }
 
     public void switchActiveGroup(String groupID) {
         if(groups.containsKey(groupID)) {
@@ -92,7 +103,6 @@ public class CurrentUser extends Observable{
 
     public void setIsInitiated(){
         isInitiated = true;
-        Log.d("FUCKING INITIATED","LOL");
-        Log.d("LOLD",this.getInstance().getActiveGroup().toString());
+        LocationSingleton.getInstance().notifyObservers();
     }
 }

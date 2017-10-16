@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.media.audiofx.PresetReverb;
 
 import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.UserRequestsUtil;
 
 public class ARK_auth extends Activity {
     public static void storeSessionId(String sessionId, Context context) {
@@ -22,7 +23,6 @@ public class ARK_auth extends Activity {
     }
 
     public static void storeUserEmail(String userEmail, Context context) {
-        CurrentUser.getInstance().logOn(userEmail);
 
         String preferenceName = "system_cache";
         SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
@@ -32,6 +32,21 @@ public class ARK_auth extends Activity {
         // commit
         cacheEditor.commit();
 
+        CurrentUser.getInstance().logOn(context);
+//        UserRequestsUtil.initialiseCurrentUser(context);
+
+    }
+
+    public static void storeGroup(String group, Context context){
+        String preferenceName = "system_cache";
+        SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
+        SharedPreferences.Editor cacheEditor = systemCache.edit();
+        cacheEditor.putString("user_group", group);
+
+        // commit
+        cacheEditor.commit();
+
+        CurrentUser.getInstance().logOn(context);
     }
 
 
@@ -57,12 +72,27 @@ public class ARK_auth extends Activity {
         return userEmail;
     }
 
+    public static String fetchGroup(Context context){
+        String preferenceName = "system_cache";
+        SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
+
+        String userEmail = systemCache.getString("user_group",null);
+
+        return userEmail;
+    }
+
     public static void clearUserData(Context context) {
+
+        //clear groups data
+        CurrentUser.getInstance().logOut();
+
+        //clear cache
         String preferenceName = "system_cache";
         SharedPreferences systemCache = context.getSharedPreferences(preferenceName, 0);
         SharedPreferences.Editor cacheEditor = systemCache.edit();
         cacheEditor.putString("session_id", null);
         cacheEditor.putString("user_email",null);
+        cacheEditor.putString("user_group",null);
 
         // commit
         cacheEditor.commit();

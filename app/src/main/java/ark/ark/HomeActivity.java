@@ -14,9 +14,12 @@ import android.view.View;
 
 
 import ark.ark.Groups.CurrentUser;
+import ark.ark.Groups.GroupListActivity;
 import ark.ark.Groups.GroupLocationUpdateService;
 import ark.ark.Groups.UserRequestsUtil;
 
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import ark.ark.Authentication.ARK_auth;
 
@@ -81,8 +84,9 @@ public class HomeActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_profile:
                     switchTo("Profile");
-                    Intent myIntent2 = new Intent(HomeActivity.this, ArActivity.class);
-                    startActivity(myIntent2);
+                    Intent myIntent3 = new Intent(HomeActivity.this, GroupListActivity.class);
+//                    Intent myIntent3 = new Intent(HomeActivity.this, ArActivity.class);
+                    startActivity(myIntent3);
                     return true;
             }
             return false;
@@ -103,6 +107,7 @@ public class HomeActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         //TODO
+
 
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
         mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
@@ -190,7 +195,7 @@ public class HomeActivity extends AppCompatActivity {
 
         showToast(ARK_auth.fetchUserEmail(this));
         */
-        mCurrentUser.logOn("user1@user1.com");
+//        mCurrentUser.logOn("user1@user1.com",this);
         UserRequestsUtil.initialiseCurrentUser(this);
 
 
@@ -200,21 +205,21 @@ public class HomeActivity extends AppCompatActivity {
 
     public void austinTest_switchToUser2(View v) {
 
-        mCurrentUser.logOn("user2@user2.com");
+//        mCurrentUser.logOn("user2@user2.com",this);
         UserRequestsUtil.initialiseCurrentUser(this);
             //UserRequestsUtil.updateActiveGroupLocations(this);
     }
 
     public void allowUpdateLocation(View v){
-        currentLocation.getInstance().allowServerUpdates();
+        LocationSingleton.getInstance().allowServerUpdates();
     }
 
     public void stopUpdateLocation(View v){
-        currentLocation.getInstance().stopServerUpdates();
+        LocationSingleton.getInstance().stopServerUpdates();
     }
 
     public void getLocationDetails(View v){
-        showToast(currentLocation.getInstance().getLocation().toString() + "\n" + "allowupdates " + currentLocation.getInstance().isAllowingUpdates());
+        showToast(LocationSingleton.getInstance().getLocation().toString() + "\n" + "allowupdates " + LocationSingleton.getInstance().isAllowingUpdates());
     }
 
 
