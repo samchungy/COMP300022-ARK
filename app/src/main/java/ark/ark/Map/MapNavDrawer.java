@@ -151,6 +151,11 @@ public class MapNavDrawer extends AppCompatActivity
         curruser.logOn(this);
         UserRequestsUtil.initialiseCurrentUser(this);
 
+        // Map Initiate
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
         mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
         mCurrentLocation = LocationSingleton.getInstance();
@@ -166,9 +171,7 @@ public class MapNavDrawer extends AppCompatActivity
                 startService(mLocUpdateService);
                 startService(mGroupLocUpdateService);
                 mCurrentLocation.addObserver(this);
-                if (mMap != null){
-                    enableMyLocation();
-                }
+                enableMyLocation();
             }
         }
 
@@ -189,12 +192,6 @@ public class MapNavDrawer extends AppCompatActivity
         View bs_view = findViewById(R.id.bottom_sheet);
         bs = new BottomSheet(bs_view, geocoder);
         bs.set_hidden();
-
-
-        // Map Initiate
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
 
         //Google Places Initialise
         // Construct a GeoDataClient.
@@ -745,6 +742,12 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
     @Override
+    public void onPause() {
+        super.onPause();  // Always call the superclass method first
+        isLoaded = false;
+    }
+
+    @Override
     public void onDrawerSlide(View view, float v) {
 
     }
@@ -887,7 +890,6 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-
         if (checkLocationPermission()) {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION)
@@ -900,6 +902,20 @@ public class MapNavDrawer extends AppCompatActivity
                 mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             }
         }
+        UserRequestsUtil.initialiseCurrentUser(this);
 
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isLoaded = false;
+
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        UserRequestsUtil.initialiseCurrentUser(this);
     }
 }
