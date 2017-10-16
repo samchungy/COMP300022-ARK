@@ -166,11 +166,6 @@ public class MapNavDrawer extends AppCompatActivity
         curruser.logOn(this);
         UserRequestsUtil.initialiseCurrentUser(this);
 
-        // Map Initiate
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
         mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
         mCurrentLocation = LocationSingleton.getInstance();
@@ -186,9 +181,13 @@ public class MapNavDrawer extends AppCompatActivity
                 startService(mLocUpdateService);
                 startService(mGroupLocUpdateService);
                 mCurrentLocation.addObserver(this);
-                enableMyLocation();
             }
         }
+
+        // Map Initiate
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -315,8 +314,14 @@ public class MapNavDrawer extends AppCompatActivity
                     set_person_marker(loc,entry.getValue().getEmail());
                 }
             }
+            else{
+                Log.d("Group has no frands","no friends");
+            }
         }
-        Log.d("Group", mGroup.toString() + curruser.getActiveGroup().toString());
+        else{
+            Log.d("Group is null","null");
+        }
+        Log.d("Group", mGroup.toString() + curruser.getActiveGroup().toString() + group.getFriends().toString());
 
         if (curruser.getActiveGroup().getWaypoint() != null) {
             setWaypoint(curruser.getActiveGroup().getWaypoint());
@@ -707,7 +712,10 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
     private void update_position(LatLng l, String email){
-        if(!(mGroup.get(email).getPosition().equals(l))){
+        if(mGroup.get(email) == null){
+            Log.d("group null","null " + email + mGroup.toString());
+        }
+        if((mGroup.get(email) != null && !(mGroup.get(email).getPosition().equals(l)))){
             animateMarker(mGroup.get(email),l, false);
             mGroup.get(email).setPosition(l);
             if (bs.is_user_mode() && email.equals(bs.get_active_user())){
