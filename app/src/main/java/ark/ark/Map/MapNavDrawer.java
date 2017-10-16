@@ -130,6 +130,7 @@ public class MapNavDrawer extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_nav_drawer);
+        isLoaded = false;
 
         //showToast(ARK_auth.fetchSessionId(getApplicationContext()));
         if(ARK_auth.fetchSessionId(getApplicationContext()).equals("no session id")) {
