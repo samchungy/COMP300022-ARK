@@ -188,8 +188,9 @@ public class ChatFragment extends Fragment {
                                     String nickname = res.getJSONArray("directs").getJSONObject(i).getString("other_nickname");
                                     String last_updated = res.getJSONArray("directs").getJSONObject(i).getString("time");
                                     String conversation_id = res.getJSONArray("directs").getJSONObject(i).getString("conversation_id");
+                                    String lastMsg = res.getJSONArray("directs").getJSONObject(i).getString("lastMsg");
 
-                                    ConvoListAdapter.convo item = new ConvoListAdapter.convo(nickname, "hi", last_updated, conversation_id);
+                                    ConvoListAdapter.convo item = new ConvoListAdapter.convo(nickname, lastMsg, last_updated, conversation_id);
 
                                     // pushing the new item into the list
                                     convoList.add(item);
@@ -201,8 +202,9 @@ public class ChatFragment extends Fragment {
                                     String groupName = res.getJSONArray("groups").getJSONObject(i).getString("groupName");
                                     String last_updated = res.getJSONArray("groups").getJSONObject(i).getString("time");
                                     String conversation_id = res.getJSONArray("groups").getJSONObject(i).getString("conversation_id");
+                                    String lastMsg = res.getJSONArray("groups").getJSONObject(i).getString("lastMsg");
 
-                                    ConvoListAdapter.convo item = new ConvoListAdapter.convo(groupName, "hi", last_updated, conversation_id);
+                                    ConvoListAdapter.convo item = new ConvoListAdapter.convo(groupName, lastMsg, last_updated, conversation_id);
 
                                     // pushing the new item into the list
                                     convoList.add(item);

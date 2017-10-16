@@ -23,6 +23,8 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ark.ark.Groups.CurrentUser;
 import ark.ark.R;
@@ -31,6 +33,7 @@ public class ChatLogActivity extends AppCompatActivity {
 
     private MessageListAdapter mAdapter;
     private ArrayList<MessageListAdapter.message> messageList;
+    private int lastTimeMessageNum = 0;
 
 
     @Override
@@ -83,7 +86,13 @@ public class ChatLogActivity extends AppCompatActivity {
         mAdapter = new MessageListAdapter(this, messageList);
         messageListView.setAdapter(mAdapter);
 
-        reloadAllMessages();
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                reloadAllMessages();
+            }
+        }, 1000, 1000);
     }
 
 
@@ -152,7 +161,6 @@ public class ChatLogActivity extends AppCompatActivity {
 
 
     private void reloadAllMessages() {
-        // TODO: load all msgs, add observer
         RequestQueue queue = Volley.newRequestQueue(this);
 
         String server ="52.65.97.117";
@@ -170,6 +178,7 @@ public class ChatLogActivity extends AppCompatActivity {
                             JSONObject res = new JSONObject(response);
                             if (res.getString("success").equals("ok")) {
                                 // iterate thru the direct list to populate the convo list
+                                messageList.clear();
                                 for (int i=0;i<res.getJSONArray("messageList").length();i++) {
                                     // getting attributes from the json
                                     String messageEncrypted = res.getJSONArray("messageList").getJSONObject(i).getString("message_body");
@@ -186,8 +195,11 @@ public class ChatLogActivity extends AppCompatActivity {
                                 showToast(res.getString("msg"));
                             }
                             // after pushing into the list, update
-                            mAdapter.notifyDataSetChanged();
-                            scrollToBottom(true);
+                            if (messageList.size() > lastTimeMessageNum) { // if number of messages are different.
+                                mAdapter.notifyDataSetChanged();
+                                scrollToBottom(false);
+                                lastTimeMessageNum = messageList.size();
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
