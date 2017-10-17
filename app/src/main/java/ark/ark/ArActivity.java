@@ -4,6 +4,7 @@ import android.icu.text.DateFormat;
 import android.location.Location;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -27,6 +28,7 @@ import java.util.Observer;
 
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
+import ark.ark.Map.MapWaypoint;
 import ark.ark.UserLocation.LocationSingleton;
 
 public class ArActivity extends AppCompatActivity implements Observer {
@@ -72,8 +74,13 @@ public class ArActivity extends AppCompatActivity implements Observer {
             if (mUser.getActiveGroup().getFriends().values() != null) {
                 Collection<Friend> friends = mUser.getActiveGroup().getFriends().values();
                 for (Friend f : friends) {
-                    updatePOI(f.getLocation().getLatitude(), f.getLocation().getLatitude(), f.getEmail());
+                    updatePOI(f.getLocation().getLatitude(), f.getLocation().getLatitude(), f.getEmail(), f.getLocation().distanceTo(mCurrentLocation.getInstance().getLocation()));
                 }
+            }
+
+            if (mUser.getActiveGroup().getWaypoint() != null) {
+                updateWaypoint(mUser.getActiveGroup().getWaypoint());
+                Log.d("waypointAR", "set");
             }
 
         } catch (Exception e) {
@@ -97,11 +104,14 @@ public class ArActivity extends AppCompatActivity implements Observer {
 
             }
             showToast("current location changed");
-        } else if (o == CurrentUser.getInstance()) {
+        } else if (o == CurrentUser.getInstance() && data instanceof String) {
             String email = (String)data;
             CurrentUser user = (CurrentUser)o;
             Location loc = user.getActiveGroup().getFriend(email).getLocation();
-            updatePOI(loc.getLatitude(), loc.getLongitude(), email);
+            updatePOI(loc.getLatitude(), loc.getLongitude(), email, mCurrentLocation.getInstance().getLocation().distanceTo(loc));
+        } else if (o == CurrentUser.getInstance() && data instanceof MapWaypoint) {
+            showToast("Waypoint updated");
+            updateWaypoint(CurrentUser.getInstance().getActiveGroup().getWaypoint());
         }
 
     }
@@ -115,7 +125,14 @@ public class ArActivity extends AppCompatActivity implements Observer {
     @Override
     protected void onResume() {
         super.onResume();
+
         architectView.onResume();
+        if (mUser.getActiveGroup().getWaypoint() != null) {
+
+            updateWaypoint(mUser.getActiveGroup().getWaypoint());
+            Log.d("waypointAR", "set");
+        }
+
     }
 
     @Override
@@ -138,26 +155,34 @@ public class ArActivity extends AppCompatActivity implements Observer {
                 null);
     }
     */
-    private void updatePOI(Double lat, Double lng, String user){
-        architectView.callJavascript("updatePOI(" + lat + ", " + lng + ", '" +  user + "');");
+    private void updatePOI(Double lat, Double lng, String user, Float dist){
+        architectView.callJavascript("updatePOI(" + lat + ", " + lng + ", '" +  user + "', " + dist + ");");
         //showToast(user + " updated");
         //showToast("updatePOI(" + lat + ", " + lng + ", '" +  user + "');");
     }
 
+    private void updateWaypoint(MapWaypoint wp) {
+        if(wp.getActive() == true) {
+            architectView.callJavascript("updateWP(" + wp.getLocation().latitude + ", " + wp.getLocation().longitude + ", '" +  "wp" + "');");
+        } else {
+            architectView.callJavascript("deleteWP();");
+        }
+    }
+
     public void initLoc(View v){
         showToast("init");
-        architectView.callJavascript("updatePOI(-37.8002403, 144.9590976, 'user1');");
+        architectView.callJavascript("deleteWP()");
 
     }
 
     public void updateloc1(View v){
         showToast("loc1");
-        architectView.callJavascript("updatePOI(-37.796613, 144.959417, 'user1');");
+        updateWaypoint(mUser.getActiveGroup().getWaypoint());
 
     }
     public void updateloc2(View v){
         showToast("loc2");
-        architectView.callJavascript("updatePOI(30, -144, 'user2');");
+        architectView.callJavascript("updateWP(30, -144, 'user2');");
 
     }
 
