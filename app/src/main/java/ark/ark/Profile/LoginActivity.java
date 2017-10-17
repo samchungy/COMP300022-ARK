@@ -3,6 +3,7 @@ package ark.ark.Profile;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -41,7 +42,7 @@ public class LoginActivity extends AppCompatActivity {
         EditText password = (EditText) findViewById(R.id.login_password);
         EditText email = (EditText) findViewById(R.id.login_email);
 
-        showToast("logging in... email: "+email.getText().toString()+", password: "+password.getText().toString());
+        //showToast("logging in... email: "+email.getText().toString()+", password: "+password.getText().toString());
 
 
         String parse = password.getText().toString();
@@ -52,8 +53,9 @@ public class LoginActivity extends AppCompatActivity {
         postUserLogin(email.getText().toString(), hashed);
         */
 
-        postUserLogin(email.getText().toString(), parse);
-
+        if(validLoginInput(email,password)) {
+            postUserLogin(email.getText().toString(), parse);
+        }
 
 
     }
@@ -196,5 +198,55 @@ public class LoginActivity extends AppCompatActivity {
 //        isDev=true;
         goToHome();
     }
+
+    //Methods to check if email is valid
+    private boolean isEmailValid(String email) {
+        return email.contains("@");
+    }
+
+    //check input fields
+    private boolean validLoginInput(EditText emailField, EditText passwordField) {
+
+        EditText mPasswordView = passwordField;
+        EditText mEmailView = emailField;
+
+        // Reset errors.
+        mEmailView.setError(null);
+        mPasswordView.setError(null);
+
+        // Store values at the time of the login attempt.
+        String email = mEmailView.getText().toString();
+        String password = mPasswordView.getText().toString();
+
+        boolean cancel = false;
+        View focusView = null;
+
+        // Check for a valid password, if the user entered one.
+        if (TextUtils.isEmpty(password)) {
+            mPasswordView.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView;
+            cancel = true;
+        }
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(email)) {
+            mEmailView.setError(getString(R.string.error_field_required));
+            focusView = mEmailView;
+            cancel = true;
+        } else if (!isEmailValid(email)) {
+            mEmailView.setError(getString(R.string.error_invalid_email));
+            focusView = mEmailView;
+            cancel = true;
+        }
+
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+        }
+
+        return !cancel;
+    }
+
 
 }
