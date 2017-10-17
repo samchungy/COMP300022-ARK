@@ -72,24 +72,6 @@
             android:visibility="gone">
 
             <Button
-                android:id="@+id/button5"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_weight="1"
-                android:drawableTop="@drawable/ic_visibility_off_black_24dp"
-                android:text="@string/map_hideinAR" />
-
-            <Button
-                android:id="@+id/button6"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_weight="1"
-                android:drawableTop="@drawable/ic_chat_black_24dp"
-                android:text="@string/map_message" />
-
-            <Button
                 android:id="@+id/button7"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"

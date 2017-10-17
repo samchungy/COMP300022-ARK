@@ -563,7 +563,9 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker) {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
+        if (mMap.getCameraPosition().zoom <= 15.0) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
+        }
 
         if (marker.getTag() instanceof MapWaypoint) {
             bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) marker.getTag(),
@@ -647,12 +649,8 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void update_from_server_waypoint(MapWaypoint wp){
         if (mWaypoint != null){
-            Log.d("Waypoint not null","test");
             mWaypoint.remove();
             mWaypoint = null;
-        }
-        else{
-            Log.d("Waypoit null","test");
         }
 
         mWaypoint = mMap.addMarker(new MarkerOptions()
@@ -829,9 +827,6 @@ public class MapNavDrawer extends AppCompatActivity
         if(mGroup.get(email) == null){
             Log.d("group null","null " + email + mGroup.toString());
         }
-        if((mGroup.get(email) != null && (mGroup.get(email).getPosition().equals(l)))){
-            Log.d("Position Same","lol");
-        }
         if((mGroup.get(email) != null && !(mGroup.get(email).getPosition().equals(l)))){
             animateMarker(mGroup.get(email),l, false);
             mGroup.get(email).setPosition(l);
@@ -940,11 +935,15 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
     public void copyText(View view){
-        TextView locdetails;
         if (bs.is_user_mode() || bs.is_place_mode()){
+            TextView locdetails;
+            TextView locname;
             locdetails = (TextView) this.findViewById(R.id.bs_locdetails);
-            ClipData clip = ClipData.newPlainText("place", locdetails.getText().toString());
+            locname = (TextView) this.findViewById(R.id.bs_locname);
+            ClipData clip = ClipData.newPlainText("place",locname.getText().toString() + ", "+
+                    locdetails.getText().toString());
             clipboard.setPrimaryClip(clip);
+            ToastUtils.showToast("Location Copied to Clipboard", getApplicationContext());
         }
 
     }
@@ -1090,7 +1089,6 @@ public class MapNavDrawer extends AppCompatActivity
         if ((curruser == null || curruser.getActiveGroup() == null)&& !curruser.isInitialising()){
             isLoaded = false;
             UserRequestsUtil.initialiseCurrentUser(this);
-            Log.d("ON Resume Called","Init Curr User");
         }
     }
 
@@ -1100,7 +1098,6 @@ public class MapNavDrawer extends AppCompatActivity
         if ((curruser == null || curruser.getActiveGroup() == null)&& !curruser.isInitialising()){
             isLoaded = false;
             UserRequestsUtil.initialiseCurrentUser(this);
-            Log.d("ON Resume Called","Init Curr User");
         }
     }
 
