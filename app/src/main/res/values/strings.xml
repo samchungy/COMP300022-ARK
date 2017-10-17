@@ -50,5 +50,9 @@
     <string name="ok">Okay</string>
     <string name="title_activity_debugging">Debugging</string>
 
+    <!--login error prompts-->
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_field_required">This field is required</string>
+
 
 </resources>
