@@ -21,6 +21,8 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -134,7 +136,16 @@ public class JoinGroupActivity extends AppCompatActivity {
         String server ="52.65.97.117";
         String path = "/group/search?";
 
-        String requestURL = "http://"+server+path+"group_name="+gName;
+        String groupName = gName;
+
+        try {
+            groupName = URLEncoder.encode(gName, "UTF-8");
+        }catch(UnsupportedEncodingException e){
+
+        }
+
+        String requestURL = "http://"+server+path+"group_name="+groupName;
+
         //ToastUtils.showToast(requestURL,getApplicationContext());
 
 

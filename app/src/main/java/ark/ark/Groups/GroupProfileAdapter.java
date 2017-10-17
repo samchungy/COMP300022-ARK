@@ -37,18 +37,6 @@ public class GroupProfileAdapter extends BaseAdapter{
     private void setUpList(){
     }
 
-    public void changeName(String groupID, Context context){
-
-
-        for (int i=0;i<dataList.size();i++){
-            if(dataList.get(i).getId().equals(groupID)){
-                ToastUtils.showToast("id found in datalist",context);
-//                if(dataList.get(i).getName()!=null) {
-//                    ToastUtils.showToast("group Name:" + dataList.get(i).getName(), context);
-//                }
-            }
-        }
-    }
 
     @Override
     public int getCount() {
@@ -78,13 +66,14 @@ public class GroupProfileAdapter extends BaseAdapter{
         TextView header = (TextView) cell.findViewById(R.id.testHeaderData);
         TextView info = (TextView) cell.findViewById(R.id.testInfoData);
 
-        if(dataList.get(position).getName()==null){
+        //Set the header to a id if group name doesn't exist
+        if(dataList.get(position).getName()==null || dataList.get(position).getName().equals("")){
             header.setText(dataList.get(position).getId());
         }else{
             header.setText(dataList.get(position).getName());
         }
 
-        info.setText(dataList.get(position).getFriends().size() + " members");
+        //info.setText(dataList.get(position).getFriends().size() + " members");
 
         return cell;
     }

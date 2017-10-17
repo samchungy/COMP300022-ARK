@@ -20,6 +20,8 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import ark.ark.Authentication.ARK_auth;
@@ -79,7 +81,15 @@ public class GroupCreationActivity extends AppCompatActivity {
     public void addGroup(View v){
         ToastUtils.showToast("adding group...",getApplicationContext());
         EditText groupNameTextField = (EditText) findViewById(R.id.gName);
-        postGroupCreation(groupNameTextField.getText().toString(),getApplicationContext());
+
+        String groupName = groupNameTextField.getText().toString();
+
+        try {
+            groupName = URLEncoder.encode(groupName, "UTF-8");
+        }catch(UnsupportedEncodingException e){
+
+        }
+        postGroupCreation(groupName,getApplicationContext());
     }
 
     public void finishactivity(){
@@ -96,6 +106,7 @@ public class GroupCreationActivity extends AppCompatActivity {
 
         String server ="52.65.97.117";
         String path = "/group/create?";
+
 
         String requestURL = "http://" + server + path +"email="+email+"&group_name="+gName;
         //ToastUtils.showToast(requestURL,context);
