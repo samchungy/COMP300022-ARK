@@ -381,22 +381,19 @@ public class MapNavDrawer extends AppCompatActivity
 
 
     private void initiateDrawer() {
-        currentUserName.setText(curruser.getNickname() + ", " + curruser.getEmail());
-        currentUserGroup.setText(curruser.getActiveGroup().getName());
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
-        final Menu menu = navigationView.getMenu();
-        numGroupMembers = 0;
-        int j = 1;
 
         if(curruser != null) {
-            currentUserName.setText(curruser.getEmail());
+            currentUserName.setText(curruser.getNickname());
             currentUserGroup.setText(curruser.getActiveGroup().getName());
         } else {
             currentUserName.setText("Not set");
             currentUserGroup.setText("Not set");
         }
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        final Menu menu = navigationView.getMenu();
+        int j = 1;
 
         if(isPopulated == true) {
             invalidateOptionsMenu();
@@ -424,13 +421,9 @@ public class MapNavDrawer extends AppCompatActivity
             */
             menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
             idToEmail.put(j, tempFriend.getEmail());
-            numGroupMembers++;
             j++;
             isPopulated = true;
         }
-
-
-
 
     }
 
@@ -784,7 +777,7 @@ public class MapNavDrawer extends AppCompatActivity
                     }
                 }
                 else{
-                    Log.d("Waypoitn deleted", "test");
+                    Log.d("Waypoint deleted", "test");
                     server_delete_waypoint();
                 }
 
