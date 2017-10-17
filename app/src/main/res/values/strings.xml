@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Find My Squad</string>
+    <string name="app_name">ARK</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -30,6 +30,7 @@
     <string name="nickname_prompt">Enter your nickname</string>
     <string name="title_activity_login">Log in</string>
 
+
     <string name="map_removewaypoint">Remove</string>
     <string name="map_editwaypoint">Edit</string>
     <string name="map_sharewaypoint">Share</string>
@@ -44,15 +45,13 @@
     <string name="serverip">52.65.97.117</string>
 
     <string name="sign_up_prompt">Don\'t have an account? &#13;&#10;Click here to register!</string>
-    <string name="group_name_prompt">Enter group name (no spaces)</string>
-    <string name="title_location_permission">Location Needed!</string>
-    <string name="text_location_permission">We need your location for this app to work!</string>
-    <string name="ok">Okay</string>
-    <string name="title_activity_debugging">Debugging</string>
+    <string name="title_activity_login_default">Sign in</string>
 
-    <!--login error prompts-->
-    <string name="error_invalid_email">This email address is invalid</string>
+    <!-- Strings related to login -->
+    <string name="error_invalid_email">Please enter a valid email address</string>
     <string name="error_field_required">This field is required</string>
+    <string name="error_password_match">The passwords must match</string>
+
 
 
 </resources>
