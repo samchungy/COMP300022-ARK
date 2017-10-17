@@ -242,4 +242,8 @@ public class BottomSheet extends MapNavDrawer {
         return activeuser;
     }
 
+    public void removeplacemode(){
+        placemode = false;
+    }
+
 }

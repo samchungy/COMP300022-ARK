@@ -12,6 +12,7 @@ public class MapWaypoint {
     private String Place_name;
     private String Place_details;
     private String Place_user;
+    private boolean active;
 
     /**
      * Creates a new waypoint
@@ -20,11 +21,12 @@ public class MapWaypoint {
      * @param name
      * @param details
      */
-    public MapWaypoint(String title, LatLng location, String name, String details) {
+    public MapWaypoint(String title, LatLng location, String name, String details, boolean active) {
         Place_title = title;
         Place_location = location;
         Place_name = name;
         Place_details = details;
+        this.active = active;
     }
 
     public String getTitle() {
@@ -42,5 +44,11 @@ public class MapWaypoint {
     public String getDetails(){
         return Place_details;
     }
+
+    public void set_active(Boolean active){
+        this.active = active;
+    }
+
+    public boolean getActive(){return active;}
 
 }

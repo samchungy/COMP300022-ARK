@@ -324,7 +324,7 @@ public class MapNavDrawer extends AppCompatActivity
         }
         Log.d("Group", mGroup.toString() + curruser.getActiveGroup().toString() + group.getFriends().toString());
 
-        if (curruser.getActiveGroup().getWaypoint() != null) {
+        if (curruser.getActiveGroup().getWaypoint().getActive() != false) {
             setWaypoint(curruser.getActiveGroup().getWaypoint());
         }
          show_fab();
@@ -565,7 +565,7 @@ public class MapNavDrawer extends AppCompatActivity
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(this, data);
                 updateWaypoint(new MapWaypoint(useremail + "'s Waypoint.", place.getLatLng(),
-                        place.getName().toString(), place.getAddress().toString()));
+                        place.getName().toString(), place.getAddress().toString(), true));
             }
         }
     }
@@ -625,6 +625,18 @@ public class MapNavDrawer extends AppCompatActivity
         bs.set_place_mode(findViewById(android.R.id.content), mw, get_location());
     }
 
+    public void server_delete_waypoint(){
+        if (mWaypoint != null){
+            mWaypoint.remove();
+            mWaypoint = null;
+        }
+
+        if (bs.is_place_mode()){
+            bs.set_hidden();
+            bs.removeplacemode();
+        }
+    }
+
     /**
      * Deletes the current waypoint
      * @param view
@@ -637,6 +649,7 @@ public class MapNavDrawer extends AppCompatActivity
         }
         hide_fab();
 
+        bs.removeplacemode();
         bs.set_hidden();
 
         Snackbar mySnackbar = Snackbar.make(findViewById(R.id.bottom_sheet_layout),
@@ -711,7 +724,13 @@ public class MapNavDrawer extends AppCompatActivity
              */
 
             if (o == curruser && data instanceof MapWaypoint) {
-                update_from_server_waypoint((MapWaypoint)data);
+                if (((MapWaypoint) data).getActive() != false){
+                    update_from_server_waypoint((MapWaypoint)data);
+                }
+                else{
+                    server_delete_waypoint();
+                }
+
             }
 
             if (o == mCurrentLocation){
@@ -738,7 +757,7 @@ public class MapNavDrawer extends AppCompatActivity
 
             }
 
-            if(bs.is_place_mode()){
+            if(bs.is_place_mode() && mWaypoint != null){
                 bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) mWaypoint.getTag(),
                         get_location());
             }
@@ -844,8 +863,6 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d("onsave called","LOL");
-        isLoaded = false;
     }
 
     @Override
@@ -1003,7 +1020,7 @@ public class MapNavDrawer extends AppCompatActivity
                 mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             }
         }
-        if (curruser == null || curruser.getActiveGroup() == null){
+        if ((curruser == null || curruser.getActiveGroup() == null)&& !curruser.isInitialising()){
             isLoaded = false;
             UserRequestsUtil.initialiseCurrentUser(this);
             Log.d("ON Resume Called","Init Curr User");
