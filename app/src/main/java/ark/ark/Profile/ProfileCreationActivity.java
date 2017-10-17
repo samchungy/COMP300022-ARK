@@ -37,11 +37,13 @@ public class ProfileCreationActivity extends AppCompatActivity {
     public void signUpButton(View view) {
 
         EditText nickname = (EditText) findViewById(R.id.create_nickname);
-        EditText password = (EditText) findViewById(R.id.login_password);
-        EditText email = (EditText) findViewById(R.id.login_email);
+        EditText password = (EditText) findViewById(R.id.signup_password);
+        EditText cPassword = (EditText) findViewById(R.id.confirmPassword);
+        EditText email = (EditText) findViewById(R.id.signup_email);
 
 
-        if(validFormSubmission(email,password,nickname)) {
+
+        if(validFormSubmission(email, password, cPassword, nickname)) {
             postUserCreation(nickname.getText().toString(), email.getText().toString(), password.getText().toString());
         }
 
@@ -159,26 +161,30 @@ public class ProfileCreationActivity extends AppCompatActivity {
     }
 
 
+
     //Methods to check if email is valid
     private boolean isEmailValid(String email) {
         return email.contains("@");
     }
 
     //Verification stuff
-    private boolean validFormSubmission(EditText emailField, EditText passwordField, EditText nickName) {
+    private boolean validFormSubmission(EditText emailField, EditText passwordField, EditText cPasswordField, EditText nickName) {
 
         EditText mPasswordView = passwordField;
+        EditText mConfirmPasswordView = cPasswordField;
         EditText mEmailView = emailField;
         EditText mNickNameView = nickName;
 
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
+        mConfirmPasswordView.setError(null);
         mNickNameView.setError(null);
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String password2 = mConfirmPasswordView.getText().toString();
         String nickname = mNickNameView.getText().toString();
 
         boolean cancel = false;
@@ -188,6 +194,12 @@ public class ProfileCreationActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
+            cancel = true;
+        }
+
+        if (!password2.equals(password)) {
+            mConfirmPasswordView.setError(getString(R.string.error_password_match));
+            focusView = mConfirmPasswordView;
             cancel = true;
         }
 
