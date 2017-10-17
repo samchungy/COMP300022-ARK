@@ -45,7 +45,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -78,6 +82,7 @@ import ark.ark.ArActivity;
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Chat.ChatActivity;
 import ark.ark.Chat.ChatLogActivity;
+import ark.ark.Chat.MessageListAdapter;
 import ark.ark.Debugging;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
@@ -88,10 +93,14 @@ import ark.ark.Groups.UserRequestsUtil;
 import ark.ark.HomeActivity;
 import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
+import ark.ark.ToastUtils;
 import ark.ark.UserLocation.LocationSingleton;
 import layout.HomeFragment;
 import ark.ark.UserLocation.LocationUpdateService;
 import com.google.maps.android.ui.IconGenerator;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Map + Nav Drawer Class
@@ -283,8 +292,44 @@ public class MapNavDrawer extends AppCompatActivity
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent myIntent2 = new Intent(MapNavDrawer.this, ChatActivity.class);
-                startActivity(myIntent2);
+
+
+                RequestQueue queue = Volley.newRequestQueue(MapNavDrawer.this);
+
+                String server ="52.65.97.117";
+                String requestURL = "http://" + server + "/group/convo?group_id=" + CurrentUser.getInstance().getActiveGroup().getId();
+
+
+                // Request a string response from the requestURL.
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, requestURL,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                // after getting response, try reading the json
+                                try {
+                                    JSONObject res = new JSONObject(response);
+                                    if (res.getString("success").equals("ok")) {
+                                        String convo_id = res.getString("conversation_id");
+
+                                        Intent mIntent = new Intent(MapNavDrawer.this, ChatLogActivity.class);
+                                        // passing variables to the new activity
+                                        mIntent.putExtra("nickname", CurrentUser.getInstance().getActiveGroup().getName());
+                                        mIntent.putExtra("conversation_id", convo_id);
+                                        // starting up the new activity
+                                        startActivity(mIntent);
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        ToastUtils.showToast("cannot connect to server", MapNavDrawer.this);
+                    }
+                });
+
+                queue.add(stringRequest);
             }
         });
 
