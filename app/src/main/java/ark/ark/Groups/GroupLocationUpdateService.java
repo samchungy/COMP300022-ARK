@@ -10,7 +10,10 @@ import android.os.Message;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ark.ark.ToastUtils;
+
 public class GroupLocationUpdateService extends Service {
+    int updatecount = 0;
     public GroupLocationUpdateService() {
     }
 
@@ -54,7 +57,12 @@ public class GroupLocationUpdateService extends Service {
         @Override
         public void handleMessage(Message msg)
         {
+            updatecount += 1;
             UserRequestsUtil.updateActiveGroupLocations(ctx);
+            UserRequestsUtil.updateActiveGroupWaypoint(ctx);
+
+            ToastUtils.showToast("update for grouploc - " + updatecount, ctx);
+
         }
     };
 }

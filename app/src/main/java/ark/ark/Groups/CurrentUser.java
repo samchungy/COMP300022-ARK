@@ -10,6 +10,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Observable;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Map.MapWaypoint;
 import ark.ark.ToastUtils;
 import ark.ark.UserLocation.LocationSingleton;
 
@@ -79,6 +81,25 @@ public class CurrentUser extends Observable{
         //setChanged();
         //notifyObservers();
     }
+
+
+    /**
+     * Changing the active group waypoints
+     * Notifies observers with waypoint
+     * @param lat
+     * @param lng
+     * @param creator
+     * @param placename
+     * @param placeaddress
+     * @param active
+     */
+    public void updateActiveGroupWaypoint(Double lat, Double lng, String creator, String placename,
+                            String placeaddress, Boolean active) {
+        activeGroup.setWaypoint(lat, lng, creator, placename, placeaddress, active);
+        setChanged();
+        notifyObservers(activeGroup.getWaypoint());
+    }
+
 
     public boolean isUpdating() {
         return isUpdating;
