@@ -163,7 +163,7 @@ public class ArActivity extends AppCompatActivity implements Observer {
 
     private void updateWaypoint(MapWaypoint wp) {
         if(wp.getActive() == true) {
-            architectView.callJavascript("updateWP(" + wp.getLocation().latitude + ", " + wp.getLocation().longitude + ", '" +  "wp" + "');");
+            architectView.callJavascript("updateWP(" + wp.getLocation().latitude + ", " + wp.getLocation().longitude + ", '" +  "waypoint" + "');");
         } else {
             architectView.callJavascript("deleteWP();");
         }
