@@ -371,7 +371,7 @@ public class MapNavDrawer extends AppCompatActivity
         else{
             Log.d("Group is null","null");
         }
-        Log.d("Group", mGroup.toString() + curruser.getActiveGroup().toString() + group.getFriends().toString());
+        Log.d("Group", mGroup.toString());
 
         if (curruser.getActiveGroup().getWaypoint().getActive() != false) {
             setWaypoint(curruser.getActiveGroup().getWaypoint());
@@ -486,7 +486,13 @@ public class MapNavDrawer extends AppCompatActivity
                         mGroup.get(idToEmail.get(id)).getPosition().latitude,
                         mGroup.get(idToEmail.get(id)).getPosition().longitude
                 );
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera, 15));
+                if (mMap.getCameraPosition().zoom <= 15.0) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera, 15));
+                }
+                else{
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera,
+                            mMap.getCameraPosition().zoom));
+                }
 
                 if (mWaypoint != null){
                     bs.set_person_mode(findViewById(android.R.id.content),
@@ -500,7 +506,7 @@ public class MapNavDrawer extends AppCompatActivity
                 }
                 FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
                 changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
-                bs.set_expanded();
+                bs.set_collapsed();
             }
         }
 
@@ -563,7 +569,13 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     public boolean onMarkerClick(Marker marker) {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
+        if (mMap.getCameraPosition().zoom <= 15.0) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
+        }
+        else{
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(),
+                    mMap.getCameraPosition().zoom));
+        }
 
         if (marker.getTag() instanceof MapWaypoint) {
             bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) marker.getTag(),
@@ -749,7 +761,6 @@ public class MapNavDrawer extends AppCompatActivity
         if (isLoaded){
             HashMap<String, Friend> friendslist = null;
             Location location = get_location();
-            MapWaypoint mw = null;
 
 
             /**
@@ -777,12 +788,18 @@ public class MapNavDrawer extends AppCompatActivity
                     update_from_server_waypoint((MapWaypoint)data);
                 }
                 else{
+                    Log.d("Waypoitn deleted", "test");
                     server_delete_waypoint();
                 }
 
+                if(bs.is_place_mode() && mWaypoint != null){
+                    bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) mWaypoint.getTag(),
+                            get_location());
+                }
             }
 
             if (o == mCurrentLocation){
+                Log.d("BOO","COO");
                 if (bs.is_place_mode()) {
                     if (location != null && mWaypoint != null){
                         bs.set_distance_waypoint(findViewById(android.R.id.content),location,
@@ -806,10 +823,6 @@ public class MapNavDrawer extends AppCompatActivity
 
             }
 
-            if(bs.is_place_mode() && mWaypoint != null){
-                bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) mWaypoint.getTag(),
-                        get_location());
-            }
         }
         else{
             Log.d("NOT initialised", "boourns");
@@ -932,11 +945,15 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
     public void copyText(View view){
-        TextView locdetails;
         if (bs.is_user_mode() || bs.is_place_mode()){
+            TextView locdetails;
+            TextView locname;
             locdetails = (TextView) this.findViewById(R.id.bs_locdetails);
-            ClipData clip = ClipData.newPlainText("place", locdetails.getText().toString());
+            locname = (TextView) this.findViewById(R.id.bs_locname);
+            ClipData clip = ClipData.newPlainText("place",locname.getText().toString() + ", "+
+                    locdetails.getText().toString());
             clipboard.setPrimaryClip(clip);
+            ToastUtils.showToast("Location Copied to Clipboard", getApplicationContext());
         }
 
     }
@@ -1082,19 +1099,16 @@ public class MapNavDrawer extends AppCompatActivity
         if ((curruser == null || curruser.getActiveGroup() == null)&& !curruser.isInitialising()){
             isLoaded = false;
             UserRequestsUtil.initialiseCurrentUser(this);
-            Log.d("ON Resume Called","Init Curr User");
         }
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        isLoaded = false;
+    protected void onStart(){
+        super.onStart();
+        if ((curruser == null || curruser.getActiveGroup() == null)&& !curruser.isInitialising()){
+            isLoaded = false;
+            UserRequestsUtil.initialiseCurrentUser(this);
+        }
     }
 
-    @Override
-    protected void onRestart(){
-        super.onRestart();
-        isLoaded = false;
-    }
 }
