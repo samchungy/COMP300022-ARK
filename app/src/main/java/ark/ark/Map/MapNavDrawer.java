@@ -349,9 +349,7 @@ public class MapNavDrawer extends AppCompatActivity
 
         hide_fab();
 
-        final TextView mTextView = (TextView) findViewById(R.id.textView2);
         useremail = curruser.getEmail();
-        mTextView.setText(useremail);
 
         mGroup = new HashMap<>();
 
@@ -392,13 +390,6 @@ public class MapNavDrawer extends AppCompatActivity
         numGroupMembers = 0;
         int j = 1;
 
-        Context context = getApplicationContext();
-        CharSequence text = "Group member list refreshed!";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-
-
         if(curruser != null) {
             currentUserName.setText(curruser.getEmail());
             currentUserGroup.setText(curruser.getActiveGroup().getName());
@@ -413,7 +404,6 @@ public class MapNavDrawer extends AppCompatActivity
             for(int key: idToEmail.keySet()) {
                 menu.removeItem(key);
             }
-            toast.show();
         }
 
         menu.add(0, 0, 0, "Debugging").setIcon(R.drawable.ic_settings_black_24dp);
@@ -544,7 +534,7 @@ public class MapNavDrawer extends AppCompatActivity
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "Travelling to your current location...", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Travelling to your current location...", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
@@ -672,6 +662,8 @@ public class MapNavDrawer extends AppCompatActivity
         curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
                 wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
 
+        ToastUtils.showToast("The Group Waypoint Was Updated.", getApplicationContext());
+
     }
 
 
@@ -696,6 +688,8 @@ public class MapNavDrawer extends AppCompatActivity
             bs.set_hidden();
             bs.removeplacemode();
         }
+
+        ToastUtils.showToast("The Group Waypoint Was Deleted.", getApplicationContext());
     }
 
     /**
@@ -785,7 +779,9 @@ public class MapNavDrawer extends AppCompatActivity
 
             if (o == curruser && data instanceof MapWaypoint) {
                 if (((MapWaypoint) data).getActive() != false){
-                    update_from_server_waypoint((MapWaypoint)data);
+                    if (mWaypoint == null || !((MapWaypoint) data).getLocation().equals(mWaypoint.getPosition())){
+                        update_from_server_waypoint((MapWaypoint)data);
+                    }
                 }
                 else{
                     Log.d("Waypoitn deleted", "test");
