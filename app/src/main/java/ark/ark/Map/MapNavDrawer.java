@@ -647,8 +647,12 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void update_from_server_waypoint(MapWaypoint wp){
         if (mWaypoint != null){
+            Log.d("Waypoint not null","test");
             mWaypoint.remove();
             mWaypoint = null;
+        }
+        else{
+            Log.d("Waypoit null","test");
         }
 
         mWaypoint = mMap.addMarker(new MarkerOptions()
@@ -749,7 +753,6 @@ public class MapNavDrawer extends AppCompatActivity
         if (isLoaded){
             HashMap<String, Friend> friendslist = null;
             Location location = get_location();
-            MapWaypoint mw = null;
 
 
             /**
@@ -777,12 +780,18 @@ public class MapNavDrawer extends AppCompatActivity
                     update_from_server_waypoint((MapWaypoint)data);
                 }
                 else{
+                    Log.d("Waypoitn deleted", "test");
                     server_delete_waypoint();
                 }
 
+                if(bs.is_place_mode() && mWaypoint != null){
+                    bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) mWaypoint.getTag(),
+                            get_location());
+                }
             }
 
             if (o == mCurrentLocation){
+                Log.d("BOO","COO");
                 if (bs.is_place_mode()) {
                     if (location != null && mWaypoint != null){
                         bs.set_distance_waypoint(findViewById(android.R.id.content),location,
@@ -806,10 +815,6 @@ public class MapNavDrawer extends AppCompatActivity
 
             }
 
-            if(bs.is_place_mode() && mWaypoint != null){
-                bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) mWaypoint.getTag(),
-                        get_location());
-            }
         }
         else{
             Log.d("NOT initialised", "boourns");
@@ -823,6 +828,9 @@ public class MapNavDrawer extends AppCompatActivity
     private void update_position(LatLng l, String email){
         if(mGroup.get(email) == null){
             Log.d("group null","null " + email + mGroup.toString());
+        }
+        if((mGroup.get(email) != null && (mGroup.get(email).getPosition().equals(l)))){
+            Log.d("Position Same","lol");
         }
         if((mGroup.get(email) != null && !(mGroup.get(email).getPosition().equals(l)))){
             animateMarker(mGroup.get(email),l, false);
@@ -1087,14 +1095,13 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        isLoaded = false;
+    protected void onStart(){
+        super.onStart();
+        if ((curruser == null || curruser.getActiveGroup() == null)&& !curruser.isInitialising()){
+            isLoaded = false;
+            UserRequestsUtil.initialiseCurrentUser(this);
+            Log.d("ON Resume Called","Init Curr User");
+        }
     }
 
-    @Override
-    protected void onRestart(){
-        super.onRestart();
-        isLoaded = false;
-    }
 }

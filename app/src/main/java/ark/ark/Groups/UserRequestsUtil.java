@@ -78,7 +78,6 @@ public class UserRequestsUtil {
                                         updateCurrentUserGroupName(g.getId(),context);
                                     }
                                     updateActiveGroupLocations(context);
-                                    updateActiveGroupWaypoint(context);
 
 
                                 } else {
@@ -165,6 +164,9 @@ public class UserRequestsUtil {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 ToastUtils.showToast("exception", context);
+                            }
+                            if (mUser.isInitialising()){
+                                updateActiveGroupWaypoint(context);
                             }
                         }
                     }, new Response.ErrorListener() {
