@@ -210,7 +210,7 @@ public class UserRequestsUtil {
                                     String placeaddress = waypoint.getString("place_address");
                                     Boolean active = waypoint.getBoolean("active");
 
-                                    mUser.getActiveGroup().setWaypoint(lat, lng, name, placename,
+                                    mUser.updateActiveGroupWaypoint(lat, lng, name, placename,
                                             placeaddress, active);
                                     //ToastUtils.showToast(email, context);
                                     //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
