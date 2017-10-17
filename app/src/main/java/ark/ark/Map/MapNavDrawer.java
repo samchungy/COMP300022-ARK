@@ -1,6 +1,8 @@
 package ark.ark.Map;
 
 import android.Manifest;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -141,6 +143,7 @@ public class MapNavDrawer extends AppCompatActivity
     protected GeoDataClient mGeoDataClient;
     protected PlaceDetectionClient mPlaceDetectionClient;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    private ClipboardManager clipboard;
 
     // Stuff for Zengster for navigation drawer
     private ImageView profilePicture;
@@ -155,7 +158,8 @@ public class MapNavDrawer extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_nav_drawer);
         isLoaded = false;
-        Log.d("CREATED","BOO");
+        clipboard = (ClipboardManager)
+                getSystemService(Context.CLIPBOARD_SERVICE);
 
         //showToast(ARK_auth.fetchSessionId(getApplicationContext()));
         if(ARK_auth.fetchSessionId(getApplicationContext()).equals("no session id")) {
@@ -908,6 +912,16 @@ public class MapNavDrawer extends AppCompatActivity
         if(isLoaded){
             initiateDrawer();
         }
+    }
+
+    public void copyText(View view){
+        TextView locdetails;
+        if (bs.is_user_mode() || bs.is_place_mode()){
+            locdetails = (TextView) this.findViewById(R.id.bs_locdetails);
+            ClipData clip = ClipData.newPlainText("place", locdetails.getText().toString());
+            clipboard.setPrimaryClip(clip);
+        }
+
     }
 
     @Override
