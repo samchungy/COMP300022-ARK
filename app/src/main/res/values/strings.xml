@@ -45,7 +45,7 @@
     <string name="serverip">52.65.97.117</string>
 
     <string name="sign_up_prompt">Don\'t have an account? &#13;&#10;Click here to register!</string>
-    <string name="group_name_prompt">Enter group name (no spaces)</string>
+    <string name="group_name_prompt">Enter group name</string>
     <string name="title_location_permission">Location Needed!</string>
     <string name="text_location_permission">We need your location for this app to work!</string>
     <string name="ok">Okay</string>
