@@ -371,7 +371,7 @@ public class MapNavDrawer extends AppCompatActivity
         else{
             Log.d("Group is null","null");
         }
-        Log.d("Group", mGroup.toString() + curruser.getActiveGroup().toString() + group.getFriends().toString());
+        Log.d("Group", mGroup.toString());
 
         if (curruser.getActiveGroup().getWaypoint().getActive() != false) {
             setWaypoint(curruser.getActiveGroup().getWaypoint());
@@ -486,7 +486,13 @@ public class MapNavDrawer extends AppCompatActivity
                         mGroup.get(idToEmail.get(id)).getPosition().latitude,
                         mGroup.get(idToEmail.get(id)).getPosition().longitude
                 );
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera, 15));
+                if (mMap.getCameraPosition().zoom <= 15.0) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera, 15));
+                }
+                else{
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(moveCamera,
+                            mMap.getCameraPosition().zoom));
+                }
 
                 if (mWaypoint != null){
                     bs.set_person_mode(findViewById(android.R.id.content),
@@ -500,7 +506,7 @@ public class MapNavDrawer extends AppCompatActivity
                 }
                 FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
                 changeFAB(fab, R.drawable.ic_person_black_24dp, R.color.cyan);
-                bs.set_expanded();
+                bs.set_collapsed();
             }
         }
 
@@ -565,6 +571,10 @@ public class MapNavDrawer extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if (mMap.getCameraPosition().zoom <= 15.0) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 15));
+        }
+        else{
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(),
+                    mMap.getCameraPosition().zoom));
         }
 
         if (marker.getTag() instanceof MapWaypoint) {

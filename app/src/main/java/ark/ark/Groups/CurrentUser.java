@@ -4,24 +4,10 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.model.LatLng;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Observable;
 
 import ark.ark.Authentication.ARK_auth;
-import ark.ark.Map.MapWaypoint;
-import ark.ark.ToastUtils;
 import ark.ark.UserLocation.LocationSingleton;
 
 /**
@@ -37,7 +23,9 @@ public class CurrentUser extends Observable{
     private Boolean isUpdating = true;
     private Boolean isInitiated = false;
     private Boolean isInitialising = false;
-    private int groupIsInitiated = 0;
+    private Boolean groupisInitiated = false;
+    private Boolean waypointisInitiated = false;
+    private int groupLocations = 0;
 
     public static CurrentUser getInstance() {
         return ourInstance;
@@ -126,13 +114,26 @@ public class CurrentUser extends Observable{
     }
 
     public void setIsInitiated(){
-        isInitialising = false;
-        isInitiated = true;
-        Log.d("Group Friends:", this.getActiveGroup().getFriends().toString());
-        LocationSingleton.getInstance().notifyObservers();
+        if (groupisInitiated && waypointisInitiated){
+            Log.d("User Initiated","DONE");
+            isInitialising = false;
+            isInitiated = true;
+            Log.d("Group Friends:", this.getActiveGroup().getFriends().toString());
+            LocationSingleton.getInstance().notifyObservers();
+        }
     }
 
     public void setIsInitialising(){
         isInitialising = true;
+    }
+
+    public void setWaypointisInitiated(){
+        waypointisInitiated = true;
+        Log.d("Waypoint inited","yes");
+    }
+
+    public void setGroupInitiated(){
+        groupisInitiated = true;
+        Log.d("Group Locations inits",activeGroup.toString());
     }
 }

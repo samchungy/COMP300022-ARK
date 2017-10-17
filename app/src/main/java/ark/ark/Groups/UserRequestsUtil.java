@@ -78,6 +78,7 @@ public class UserRequestsUtil {
                                         updateCurrentUserGroupName(g.getId(),context);
                                     }
                                     updateActiveGroupLocations(context);
+                                    updateActiveGroupWaypoint(context);
 
 
                                 } else {
@@ -109,7 +110,7 @@ public class UserRequestsUtil {
         CurrentUser mUser = CurrentUser.getInstance();
         final Double defaultlat = -37.797044;
         final Double defaultlong = 144.961212;
-
+        Log.d("UpdateGroupLoc","Called");
         if (mUser.getEmail() != null && mUser.getActiveGroup() != null) {
             RequestQueue queue = Volley.newRequestQueue(context);
             String server = "52.65.97.117";
@@ -152,7 +153,13 @@ public class UserRequestsUtil {
                                         Friend f = new Friend(email);
                                         mUser.getActiveGroup().updateFriend(f);
                                         mUser.setActiveGroupLocation(email, loc);
+
                                         //ToastUtils.showToast(email, context);
+                                    }
+
+                                    if(!mUser.isInitiated()){
+                                        mUser.setGroupInitiated();
+                                        mUser.setIsInitiated();
                                     }
                                     //ToastUtils.showToast(mUser.getActiveGroup().toString(), context);
 
@@ -164,9 +171,6 @@ public class UserRequestsUtil {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 ToastUtils.showToast("exception", context);
-                            }
-                            if (mUser.isInitialising()){
-                                updateActiveGroupWaypoint(context);
                             }
                         }
                     }, new Response.ErrorListener() {
@@ -184,6 +188,7 @@ public class UserRequestsUtil {
     }
 
     public static void updateActiveGroupWaypoint(final Context context) {
+        Log.d("UpdateWaypoint","Called");
         CurrentUser mUser = CurrentUser.getInstance();
 
         if (mUser.getEmail() != null && mUser.getActiveGroup() != null) {
@@ -230,8 +235,8 @@ public class UserRequestsUtil {
                                 ToastUtils.showToast(e.getMessage(), context);
                             }
                             if(!mUser.isInitiated()){
-                                Log.d("User Initiated","DONE");
                                 mUser.setIsInitiated();
+                                mUser.setWaypointisInitiated();
                             }
                         }
                     }, new Response.ErrorListener() {
