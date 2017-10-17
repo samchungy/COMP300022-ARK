@@ -27,27 +27,37 @@
 	    AR.radar.enabled = true;
 
         var radarCircle = new AR.Circle(0.05, {style: {fillColor: '#83ff7b'}});
+        var radarWPCircle = new AR.Circle(0.05, {style: {fillColor: '#ff7a81'}});
+
         var friendList = [];
+        var waypoint;
         var avatarList = ['assets/av1.png', 'assets/av2.png', 'assets/av3.png'];
         var currentavatar = 0;
 
         AR.logger.activateDebugMode();
 
-        function updatePOI(lat, lon, user) {
+        function updatePOI(lat, lon, user, dist) {
             if (friendList.find(x => x.user === user) == null){
                 AR.logger.info('user not found -> creating ' + user);
                 var marker_image = new AR.ImageResource(avatarList[currentavatar]);
                 var marker_loc = new AR.GeoLocation(lat, lon);
                 var marker_drawable = new AR.ImageDrawable(marker_image, 2);
-                var label = new AR.Label(user + "\n" + lat + "\n" + lon, 2, {
-                        opacity : 1
+                var label = new AR.Label(user, 2, {
+                        opacity : 1,
+                        offsetY : -2.5,
+                        scale : 0.5
+                });
+                var distance = new AR.Label(Number(dist).toFixed(1) + "m", 2, {
+                        opacity : 1,
+                        offsetY : -3.5,
+                        scale : 0.5
                 });
 
                 var marker_drawable = new AR.ImageDrawable(marker_image, 4);
 
                 var marker_object = new AR.GeoObject(marker_loc, {
                 drawables: {
-                    cam: [marker_drawable, label],
+                    cam: [marker_drawable, label, distance],
                     radar: radarCircle
                 }
                 });
@@ -60,9 +70,58 @@
                 var friend = friendList.find(x => x.user === user);
                 friend.marker.locations[0].latitude = lat;
                 friend.marker.locations[0].longitude = lon;
-                friend.marker.drawables.cam[1].text = user + "\n" + lat + "\n" + lon;
+                friend.marker.drawables.cam[1].text = user;
+                friend.marker.drawables.cam[2].text = Number(dist).toFixed(1) + "m";
                 AR.logger.info('poi is update at ' + lat + ',' + lon + 'for ' + user);
             }
+        }
+
+
+        function updateWP(lat, lon, user) {
+            if (waypoint == null){
+                
+                AR.logger.info('user not found -> creating ' + user);
+                var marker_image = new AR.ImageResource("assets/wp.png");
+                var marker_loc = new AR.GeoLocation(lat, lon);
+                var marker_drawable = new AR.ImageDrawable(marker_image, 2);
+                var label = new AR.Label(user, 2, {
+                        opacity : 1,
+                        offsetY : -2.5,
+                        scale : 0.5
+                });
+
+                var marker_drawable = new AR.ImageDrawable(marker_image, 4);
+
+                waypoint = new AR.GeoObject(marker_loc, {
+                drawables: {
+                    cam: [marker_drawable, label],
+                    radar: radarWPCircle
+                }
+                });
+                
+                AR.logger.info('wp is set at ' + lat + ',' + lon + 'for ' + user);
+
+                
+            } else {
+                waypoint.enabled = true;
+                waypoint.locations[0].latitude = lat;
+                waypoint.locations[0].longitude = lon;
+                waypoint.drawables.cam[1].text = user;
+                AR.logger.info('wp is update at ' + lat + ',' + lon + 'for ' + user);
+            }
+        }
+
+        function deleteWP() {
+            if(waypoint != null) {
+                waypoint.enabled = false;
+            }
+
+        }
+
+        function updateDist(user, dist) {
+            var friend = friendList.find(x => x.user === user);
+            friend.marker.drawables.cam[2].text = Number(dist).toFixed(3) + "m";
+
         }
 
         function locationChanged(lat, lon, alt, acc) {
@@ -83,10 +142,13 @@
                 
                 //setNewPOI(1, 1, 'user');
                 //updatePOI(1, 1, 'user');
+                updateWP(1.0, 1.0, 'wp');
                 loaded = true;
             } else {
                 //updatePOI(0, 0, 'user1');
                 //updatePOI(1, 2, 'user');
+                updateWP(1.0, 0.0, 'wp');
+                deleteWP();
             }
         }
 
