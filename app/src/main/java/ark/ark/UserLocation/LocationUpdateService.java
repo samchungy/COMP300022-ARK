@@ -51,7 +51,7 @@ public class LocationUpdateService extends Service {
         super.onCreate();
 
 
-        ToastUtils.showToast("created LocationUpdateService", this);
+//        ToastUtils.showToast("created LocationUpdateService", this);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -89,9 +89,6 @@ public class LocationUpdateService extends Service {
     @SuppressWarnings("MissingPermission")
     public void locationInitialise(){
 
-        ToastUtils.showToast("Setting initial location", getApplicationContext());
-
-
         mFusedLocationClient.getLastLocation().addOnSuccessListener( new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
@@ -107,7 +104,7 @@ public class LocationUpdateService extends Service {
 
     @SuppressWarnings("MissingPermission")
     private void startLocationUpdates() {
-        ToastUtils.showToast("location updates happening", getApplicationContext());
+//        ToastUtils.showToast("location updates happening", getApplicationContext());
         mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                 mLocationCallback,
                 null /* Looper */);
@@ -157,7 +154,7 @@ public class LocationUpdateService extends Service {
 
             queue.add(stringRequest);
         } else {
-            ToastUtils.showToast("Location doesn't exist", getApplicationContext());
+//            ToastUtils.showToast("Location doesn't exist", getApplicationContext());
         }
 
 

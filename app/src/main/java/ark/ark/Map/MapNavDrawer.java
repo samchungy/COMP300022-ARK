@@ -383,7 +383,7 @@ public class MapNavDrawer extends AppCompatActivity
     private void initiateDrawer() {
 
         if(curruser != null) {
-            currentUserName.setText(curruser.getNickname());
+            currentUserName.setText(curruser.getEmail());
             currentUserGroup.setText(curruser.getActiveGroup().getName());
         } else {
             currentUserName.setText("Not set");
@@ -675,6 +675,7 @@ public class MapNavDrawer extends AppCompatActivity
         if (mWaypoint != null){
             mWaypoint.remove();
             mWaypoint = null;
+            ToastUtils.showToast("The Group Waypoint Was Deleted.", getApplicationContext());
         }
 
         if (bs.is_place_mode()){
@@ -682,7 +683,6 @@ public class MapNavDrawer extends AppCompatActivity
             bs.removeplacemode();
         }
 
-        ToastUtils.showToast("The Group Waypoint Was Deleted.", getApplicationContext());
     }
 
     /**
@@ -777,7 +777,6 @@ public class MapNavDrawer extends AppCompatActivity
                     }
                 }
                 else{
-                    Log.d("Waypoint deleted", "test");
                     server_delete_waypoint();
                 }
 
@@ -788,7 +787,6 @@ public class MapNavDrawer extends AppCompatActivity
             }
 
             if (o == mCurrentLocation){
-                Log.d("BOO","COO");
                 if (bs.is_place_mode()) {
                     if (location != null && mWaypoint != null){
                         bs.set_distance_waypoint(findViewById(android.R.id.content),location,

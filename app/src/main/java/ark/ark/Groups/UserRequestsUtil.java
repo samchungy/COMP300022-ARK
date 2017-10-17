@@ -102,7 +102,7 @@ public class UserRequestsUtil {
 
             queue.add(stringRequest);
         } else {
-            ToastUtils.showToast("Location doesn't exist", context);
+//            ToastUtils.showToast("Location doesn't exist", context);
         }
     }
 
@@ -114,7 +114,6 @@ public class UserRequestsUtil {
         if (mUser.getEmail() != null && mUser.getActiveGroup() != null) {
             RequestQueue queue = Volley.newRequestQueue(context);
             String server = "52.65.97.117";
-
             String path = "/group/locations?";
             String requestURL = "http://" + server + path +"group_id="+ mUser.getActiveGroup().getId();
             //ToastUtils.showToast(requestURL, context);
@@ -183,7 +182,7 @@ public class UserRequestsUtil {
 
             queue.add(stringRequest);
         } else {
-            ToastUtils.showToast("Location doesn't exist", context);
+//            ToastUtils.showToast("Location doesn't exist", context);
         }
     }
 
@@ -249,7 +248,7 @@ public class UserRequestsUtil {
 
             queue.add(stringRequest);
         } else {
-            ToastUtils.showToast("Location doesn't exist", context);
+//            ToastUtils.showToast("Location doesn't exist", context);
         }
     }
 

@@ -34,7 +34,7 @@ public class GroupLocationUpdateService extends Service {
 
     private void startService()
     {
-        timer.scheduleAtFixedRate(new mainTask(), 0, 10000);
+        timer.scheduleAtFixedRate(new mainTask(), 0, 2000);
     }
 
     private class mainTask extends TimerTask
@@ -61,7 +61,7 @@ public class GroupLocationUpdateService extends Service {
             UserRequestsUtil.updateActiveGroupLocations(ctx);
             UserRequestsUtil.updateActiveGroupWaypoint(ctx);
 
-            ToastUtils.showToast("update for grouploc - " + updatecount, ctx);
+//            ToastUtils.showToast("update for grouploc - " + updatecount, ctx);
 
         }
     };

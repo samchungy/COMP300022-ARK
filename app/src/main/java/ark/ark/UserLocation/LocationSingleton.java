@@ -11,7 +11,7 @@ import java.util.Observable;
 public class LocationSingleton extends Observable {
     private static final LocationSingleton ourInstance = new LocationSingleton();
     private Location loc;
-    private boolean updateToServer = false;
+    private boolean updateToServer = true;
 
     public static LocationSingleton getInstance() {
         return ourInstance;

@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public void goToSignUp(View view){
 
-        showToast("going to Sign Up page...");
+//        showToast("going to Sign Up page...");
         Intent myIntent = new Intent(LoginActivity.this, ProfileCreationActivity.class);
         startActivity(myIntent);
         this.finish();
