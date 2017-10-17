@@ -631,6 +631,7 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void updateWaypoint(MapWaypoint wp){
         if (mWaypoint != null) {
+            Log.d("Waypoint removed", "Removed");
             mWaypoint.remove();
             mWaypoint = null;
         }
@@ -642,22 +643,24 @@ public class MapNavDrawer extends AppCompatActivity
 
     public void update_from_server_waypoint(MapWaypoint wp){
         if (mWaypoint != null){
-
             mWaypoint.remove();
             mWaypoint = null;
         }
-        setWaypoint_server(wp);
 
-    }
+        mWaypoint = mMap.addMarker(new MarkerOptions()
+                .position(wp.getLocation())
+                .title(wp.getTitle())
+        );
+        mWaypoint.setTag(wp);
 
-    public void setWaypoint_server(MapWaypoint wp){
-        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
         curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
                 wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
 
     }
 
+
     public void add_waypoint_marker(LatLng pos, String title, MapWaypoint mw) {
+        Log.d("Waypoint added","aded");
         mWaypoint = mMap.addMarker(new MarkerOptions()
                 .position(pos)
                 .title(title)
@@ -753,7 +756,6 @@ public class MapNavDrawer extends AppCompatActivity
              */
 
             if (o == curruser && data instanceof MapWaypoint) {
-                Log.d("curuserupdate", "waypoint set");
                 update_from_server_waypoint((MapWaypoint)data);
             }
 
@@ -779,6 +781,11 @@ public class MapNavDrawer extends AppCompatActivity
                                     .getLocation(), null);
                 }
 
+            }
+
+            if(bs.is_place_mode()){
+                bs.set_place_mode(findViewById(android.R.id.content), (MapWaypoint) mWaypoint.getTag(),
+                        get_location());
             }
         }
         else{
@@ -882,12 +889,7 @@ public class MapNavDrawer extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        isLoaded = false;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();  // Always call the superclass method first
+        Log.d("onsave called","LOL");
         isLoaded = false;
     }
 
@@ -1046,9 +1048,11 @@ public class MapNavDrawer extends AppCompatActivity
                 mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             }
         }
-        isLoaded = false;
-        UserRequestsUtil.initialiseCurrentUser(this);
-
+        if (curruser == null || curruser.getActiveGroup() == null){
+            isLoaded = false;
+            UserRequestsUtil.initialiseCurrentUser(this);
+            Log.d("ON Resume Called","Init Curr User");
+        }
     }
 
     @Override

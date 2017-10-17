@@ -19,6 +19,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Timer;
 
 import ark.ark.Authentication.ARK_auth;
@@ -42,6 +44,7 @@ public class UserRequestsUtil {
      */
     public static void initialiseCurrentUser(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
+        mUser.setIsInitialising();
         // logHead is the heading to add to the log for this function
         String logHead = "initialiseCurrentUser";
 
@@ -224,7 +227,10 @@ public class UserRequestsUtil {
                                 e.printStackTrace();
                                 ToastUtils.showToast(e.getMessage(), context);
                             }
-                            mUser.setIsInitiated();
+                            if(!mUser.isInitiated()){
+                                Log.d("User Initiated","DONE");
+                                mUser.setIsInitiated();
+                            }
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -249,13 +255,23 @@ public class UserRequestsUtil {
         String server = "52.65.97.117";
         String path = "/waypoint/create?";
         String requestURL;
-        if (waypoint != null){
+        if (waypoint.getActive()==true){
+            String place_name = "";
+            String place_details = "";
+            try {
+                place_name = URLEncoder.encode(waypoint.getNam(),"UTF-8");
+                place_details = URLEncoder.encode(waypoint.getDetails(),"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+
             requestURL = "http://" + server + path +"email="+ mUser.getEmail()
                     +"&lat="+waypoint.getLocation().latitude+
                     "&lng="+waypoint.getLocation().longitude+
                     "&group_id="+mUser.getActiveGroup().getId()+
-                    "&place_name="+waypoint.getNam()+
-                    "&place_address="+waypoint.getDetails()+
+                    "&place_name="+ place_name+
+                    "&place_address="+place_details+
                     "&active=true";
         }
         else{
@@ -268,6 +284,8 @@ public class UserRequestsUtil {
                     "&active=false";
         }
         //ToastUtils.showToast(requestURL, context);
+        requestURL = requestURL.replaceAll("\\s","%20");
+        Log.d("REQUESTURL:", requestURL);
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
                     new Response.Listener<String>() {

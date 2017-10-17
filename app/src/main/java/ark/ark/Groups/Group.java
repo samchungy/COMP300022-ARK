@@ -89,20 +89,18 @@ public class Group {
 
     public void setWaypoint(Double lat, Double lng, String creator, String placename,
                             String placeaddress, Boolean active){
-        if (active){
+
             String title = creator + "'s Waypoint.";
             LatLng loc = new LatLng(lat, lng);
-            waypoint = new MapWaypoint(title, loc, placename, placeaddress);
-        }
-        else{
-            deleteWaypoint();
-        }
-
+            waypoint = new MapWaypoint(title, loc, placename, placeaddress, true);
+            if (!active){
+                waypoint.set_active(active);
+            }
     }
 
     public void deleteWaypoint(){
         Log.d("Waypointdeleted", "waypointnulled");
-        waypoint = null;
+        waypoint.set_active(false);
     }
 
     public MapWaypoint getWaypoint(){ return waypoint;}
