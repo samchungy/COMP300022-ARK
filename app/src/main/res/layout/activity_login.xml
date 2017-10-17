@@ -65,6 +65,7 @@
         android:onClick="goToSignUp"
         android:text="@string/sign_up_prompt"
         android:textSize="18sp"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintLeft_toLeftOf="@+id/button"
         app:layout_constraintRight_toRightOf="@+id/button"
@@ -77,7 +78,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginRight="8dp"
         android:onClick="LoginAsGuest"
-        android:text="Login as guest"
+        android:text="Login as Dev"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
