@@ -36,6 +36,7 @@ public class CurrentUser extends Observable{
     private Group activeGroup;
     private Boolean isUpdating = true;
     private Boolean isInitiated = false;
+    private Boolean isInitialising = false;
     private int groupIsInitiated = 0;
 
     public static CurrentUser getInstance() {
@@ -118,12 +119,20 @@ public class CurrentUser extends Observable{
         }
     }
 
+    public boolean isInitialising(){ return isInitialising;}
+
     public boolean isInitiated(){
         return isInitiated;
     }
 
     public void setIsInitiated(){
+        isInitialising = false;
         isInitiated = true;
+        Log.d("Group Friends:", this.getActiveGroup().getFriends().toString());
         LocationSingleton.getInstance().notifyObservers();
+    }
+
+    public void setIsInitialising(){
+        isInitialising = true;
     }
 }
