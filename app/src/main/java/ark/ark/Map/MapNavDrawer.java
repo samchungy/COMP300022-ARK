@@ -580,7 +580,7 @@ public class MapNavDrawer extends AppCompatActivity
         curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
                 wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
         bs.set_collapsed();
     }
 
@@ -592,6 +592,23 @@ public class MapNavDrawer extends AppCompatActivity
 
         setWaypoint(wp);
         UserRequestsUtil.sendActiveWaypointToServer(this);
+
+    }
+
+    public void update_from_server_waypoint(MapWaypoint wp){
+        if (mWaypoint != null){
+
+            mWaypoint.remove();
+            mWaypoint = null;
+        }
+        setWaypoint_server(wp);
+
+    }
+
+    public void setWaypoint_server(MapWaypoint wp){
+        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
+        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
+                wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
 
     }
 
@@ -669,7 +686,12 @@ public class MapNavDrawer extends AppCompatActivity
             Location location = get_location();
             MapWaypoint mw = null;
 
-            if (o == curruser){
+
+            /**
+             * If CurrentUser updates and it sends back an email
+             * (Indicating that the location of that email has change)
+             */
+            if (o == curruser && data instanceof String){
                 String email = (String)data;
                 Location loc = curruser.getActiveGroup().getFriend(email).getLocation();
 
@@ -679,6 +701,17 @@ public class MapNavDrawer extends AppCompatActivity
                 }
 
             }
+
+
+            /**
+             * If CurrentUser updates its waypoint and sends back a waypoint
+             */
+
+            if (o == curruser && data instanceof MapWaypoint) {
+                Log.d("curuserupdate", "waypoint set");
+                update_from_server_waypoint((MapWaypoint)data);
+            }
+
             if (o == mCurrentLocation){
                 if (bs.is_place_mode()) {
                     if (location != null && mWaypoint != null){
