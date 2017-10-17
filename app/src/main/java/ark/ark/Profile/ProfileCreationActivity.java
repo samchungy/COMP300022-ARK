@@ -18,6 +18,9 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.GroupListActivity;
 import ark.ark.R;
@@ -65,7 +68,15 @@ public class ProfileCreationActivity extends AppCompatActivity {
         String path = "/users/create?";
         String description = "creatingNewUserFromARK";
 
-        String requestURL = "http://" + server + path +"email="+email+"&nick_name="+nickname+
+        String nName = nickname;
+
+        try {
+            nName = URLEncoder.encode(nickname, "UTF-8");
+        }catch(UnsupportedEncodingException e){
+
+        }
+
+        String requestURL = "http://" + server + path +"email="+email+"&nick_name="+nName+
                 "&password_salted="+password+"&description="+description;
 
         // Request a string response from the requestURL.
