@@ -18,14 +18,10 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mindrot.jbcrypt.BCrypt;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
-import ark.ark.Groups.Group;
 import ark.ark.Groups.GroupListActivity;
-import ark.ark.Groups.UserRequestsUtil;
-import ark.ark.HomeActivity;
 import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
 import ark.ark.ToastUtils;

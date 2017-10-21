@@ -29,26 +29,50 @@ public class MapWaypoint {
         this.active = active;
     }
 
+    /**
+     * Returns the title of the waypoint.
+     * @return
+     */
     public String getTitle() {
         return Place_title;
     }
 
+    /**
+     * Gets the location of the place
+     * @return LatLng
+     */
     public LatLng getLocation() {
         return Place_location;
     }
 
+    /**
+     * Gets the name of the Waypoint
+     * @return Place Name
+     */
     public String getNam() {
         return Place_name;
     }
 
+    /**
+     * Gets the details of the place stored
+     * @return Place Details
+     */
     public String getDetails(){
         return Place_details;
     }
 
+    /**
+     * Sets the Waypoint as active
+     * @param active
+     */
     public void set_active(Boolean active){
         this.active = active;
     }
 
+    /**
+     * Returns the status of the waypoint
+     * @return
+     */
     public boolean getActive(){return active;}
 
 }
