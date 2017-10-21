@@ -23,10 +23,10 @@ import java.net.URLEncoder;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.R;
+import ark.ark.ToastUtils;
 
 public class ProfileCreationActivity extends AppCompatActivity {
 
-    //String userID = "blank";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +35,10 @@ public class ProfileCreationActivity extends AppCompatActivity {
     }
 
 
-    //button test
+    /**
+     * Specifies what action should be taken when the sign up button is pressed
+     * @param view The current view
+     */
     public void signUpButton(View view) {
 
         EditText nickname = (EditText) findViewById(R.id.create_nickname);
@@ -44,13 +47,15 @@ public class ProfileCreationActivity extends AppCompatActivity {
         EditText email = (EditText) findViewById(R.id.signup_email);
 
 
-
         if(validFormSubmission(email, password, cPassword, nickname)) {
             postUserCreation(nickname.getText().toString(), email.getText().toString(), password.getText().toString());
         }
 
     }
 
+    /**
+     * Sends the user from the current Activity to the GroupListActivity
+     */
     private void goToGroup(){
         Intent myIntent = new Intent(ProfileCreationActivity.this, GroupListActivity.class);
         startActivity(myIntent);
@@ -60,6 +65,12 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
     //connecting to server
 
+    /**
+     * Sends the user's profile creation details to the server
+     * @param nickname
+     * @param email
+     * @param password
+     */
     private void postUserCreation(String nickname, final String email, final String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -87,25 +98,24 @@ public class ProfileCreationActivity extends AppCompatActivity {
                         try {
                             JSONObject res = new JSONObject(response);
                             if (res.getString("success").equals("ok")) {
-                                // iterate through the direct list to populate the convo list
 
-                                showToast("Congratulations! Your account has been created!");
+                                ToastUtils.showToast("Congratulations! Your account has been created!",getApplicationContext());
                                 postUserLogin(email,password);
 
                             } else {
-                                showToast(res.getString("msg"));
+                                ToastUtils.showToast(res.getString("msg"),getApplicationContext());
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            showToast("exception");
+                            ToastUtils.showToast("exception",getApplicationContext());
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 // error handling
-                showToast("Sorry, cannot connect to the server.");
+                ToastUtils.showToast("Sorry, cannot connect to the server.",getApplicationContext());
             }
         });
 
@@ -113,6 +123,12 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Sends the user's login information to the server
+     * Called after the user creates their profile
+     * @param email
+     * @param password
+     */
     public void postUserLogin(final String email, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -134,28 +150,29 @@ public class ProfileCreationActivity extends AppCompatActivity {
                             if (res.getString("success").equals("ok")) {
 
                                 //get data from res object
-                                showToast("Congratulations! You have logged in :)");
+                                ToastUtils.showToast("Congratulations! You have logged in :)",getApplicationContext());
                                 String sessionID = res.getString("session_id");
 
+                                //store profile data
                                 ARK_auth.storeUserEmail(email,getApplicationContext());
                                 ARK_auth.storeSessionId(sessionID,getApplicationContext());
                                 goToGroup();
 
 
                             } else {
-                                showToast(res.getString("msg"));
+                                ToastUtils.showToast(res.getString("msg"),getApplicationContext());
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            showToast("exception");
+                            ToastUtils.showToast("exception",getApplicationContext());
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 // error handling
-                showToast("Sorry, cannot connect to the server.");
+                ToastUtils.showToast("Sorry, cannot connect to the server.",getApplicationContext());
             }
         });
 
@@ -163,21 +180,26 @@ public class ProfileCreationActivity extends AppCompatActivity {
 
     }
 
+    //Method to check if email is valid
 
-    private void showToast(String message) {
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(this, message, duration);
-        toast.show();
-    }
-
-
-
-    //Methods to check if email is valid
+    /**
+     * Checks if the string is in the correct email format
+     * @param email
+     * @return
+     */
     private boolean isEmailValid(String email) {
         return email.contains("@");
     }
 
-    //Verification stuff
+
+    /**
+     * Checks if the input is in the correct format
+     * @param emailField - the field which contains the inputted email
+     * @param passwordField - the field which contains the inputted password
+     * @param cPasswordField - a field which should have the same input as the password field
+     * @param nickName - the field which contains the inputted nickname
+     * @return Returns true if all strings from input fields are in the correct format
+     */
     private boolean validFormSubmission(EditText emailField, EditText passwordField, EditText cPasswordField, EditText nickName) {
 
         EditText mPasswordView = passwordField;
@@ -200,13 +222,14 @@ public class ProfileCreationActivity extends AppCompatActivity {
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
+        // Check that the user entered a password
         if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
         }
 
+        //check that the confirm password is the same as the 1st password entered
         if (!password2.equals(password)) {
             mConfirmPasswordView.setError(getString(R.string.error_password_match));
             focusView = mConfirmPasswordView;
@@ -224,7 +247,7 @@ public class ProfileCreationActivity extends AppCompatActivity {
             cancel = true;
         }
 
-        // Check for a valid password, if the user entered one.
+        // Check that the user entered a nickname
         if (TextUtils.isEmpty(nickname)) {
             mNickNameView.setError(getString(R.string.error_field_required));
             focusView = mNickNameView;
