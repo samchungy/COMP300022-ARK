@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import ark.ark.Authentication.ARK_auth;
-import ark.ark.HomeActivity;
 import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
 import ark.ark.ToastUtils;

@@ -7,11 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
 import android.location.Location;
@@ -25,13 +22,9 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -39,12 +32,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.android.volley.Request;
@@ -82,9 +71,7 @@ import java.util.Observer;
 
 import ark.ark.ArActivity;
 import ark.ark.Authentication.ARK_auth;
-import ark.ark.Chat.ChatActivity;
 import ark.ark.Chat.ChatLogActivity;
-import ark.ark.Chat.MessageListAdapter;
 import ark.ark.Debugging;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
@@ -92,12 +79,10 @@ import ark.ark.Groups.Group;
 import ark.ark.Groups.GroupListActivity;
 import ark.ark.Groups.GroupLocationUpdateService;
 import ark.ark.Groups.UserRequestsUtil;
-import ark.ark.HomeActivity;
 import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.ToastUtils;
 import ark.ark.UserLocation.LocationSingleton;
-import layout.HomeFragment;
 import ark.ark.UserLocation.LocationUpdateService;
 import com.google.maps.android.ui.IconGenerator;
 
@@ -118,9 +103,6 @@ public class MapNavDrawer extends AppCompatActivity
         Observer,
         DrawerLayout.DrawerListener{
 
-    private static final int REQUEST_LOCATION = 2;
-    private static final MapNavDrawer ourInstance = new MapNavDrawer();
-
     //Services
     Intent mLocUpdateService;
     Intent mGroupLocUpdateService;
@@ -128,7 +110,6 @@ public class MapNavDrawer extends AppCompatActivity
     //Map Stuff
     private GoogleMap mMap;
     private UiSettings uiSettings;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Marker mWaypoint = null;
     private Geocoder geocoder;
     private MapWaypoint undobk;
@@ -151,7 +132,6 @@ public class MapNavDrawer extends AppCompatActivity
     private View drawerHeader;
     boolean isLoaded = false;
     boolean isPopulated;
-    int numGroupMembers = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +144,6 @@ public class MapNavDrawer extends AppCompatActivity
         //showToast(ARK_auth.fetchSessionId(getApplicationContext()));
         if(ARK_auth.fetchSessionId(getApplicationContext()).equals("no session id")) {
             Intent myIntent2 = new Intent(this, LoginActivity.class);
-            //Intent myIntent2 = new Intent(HomeActivity.this, ProfileCreationActivity.class);
             startActivity(myIntent2);
             this.finish();
         }
@@ -174,17 +153,16 @@ public class MapNavDrawer extends AppCompatActivity
             this.finish();
         }
 
-        //Get User
+        //Get User from Server
         curruser = CurrentUser.getInstance();
         curruser.addObserver(this);
-
         curruser.logOn(this);
         UserRequestsUtil.initialiseCurrentUser(this);
 
+        //Location Updates to Server + Group Location Updates from Server
         mLocUpdateService = new Intent(this, LocationUpdateService.class);
         mGroupLocUpdateService = new Intent(this, GroupLocationUpdateService.class);
         mCurrentLocation = LocationSingleton.getInstance();
-        MapsInitializer.initialize(getApplicationContext());
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         if (checkLocationPermission()) {
@@ -200,6 +178,8 @@ public class MapNavDrawer extends AppCompatActivity
         }
 
         // Map Initiate
+        //Initialise Map
+        MapsInitializer.initialize(getApplicationContext());
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -240,6 +220,9 @@ public class MapNavDrawer extends AppCompatActivity
         hide_fab();
     }
 
+    /**
+     * Initialise all the content which requires data from the server.
+     */
     private void onload(){
         initiateDrawer();
 
@@ -273,7 +256,7 @@ public class MapNavDrawer extends AppCompatActivity
             }
         });
 
-        // FAB
+        // FAB 1 - Set Waypoint Button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -291,7 +274,7 @@ public class MapNavDrawer extends AppCompatActivity
             }
         });
 
-        // FAB
+        // FAB - Messages Button
         FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -337,7 +320,7 @@ public class MapNavDrawer extends AppCompatActivity
             }
         });
 
-        // FAB
+        // FAB - AR Shortcut
         FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
         fab3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -349,8 +332,8 @@ public class MapNavDrawer extends AppCompatActivity
 
         hide_fab();
 
+        //Initialise Group
         useremail = curruser.getEmail();
-
         mGroup = new HashMap<>();
 
         Group group = curruser.getActiveGroup();
@@ -380,6 +363,9 @@ public class MapNavDrawer extends AppCompatActivity
     }
 
 
+    /**
+     * Sets up the nav drawer
+     */
     private void initiateDrawer() {
 
         if(curruser != null) {
@@ -406,19 +392,6 @@ public class MapNavDrawer extends AppCompatActivity
         menu.add(0, 0, 0, "Debugging").setIcon(R.drawable.ic_settings_black_24dp);
 
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
-
-            /*
-            TextDrawable tempIcon = TextDrawable.builder().buildRound(
-                    tempFriend.getEmail().substring(0, 1).toUpperCase(), Color.rgb(48, 63, 159));
-
-            LinearLayout accessXML =
-                    (LinearLayout) ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-                            .inflate(R.layout.custom_user_icon, null);
-            LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
-            View customUserIconXML = inflater.inflate(R.layout.custom_user_icon, null);
-            ImageView tempImgView = (ImageView) customUserIconXML.findViewById(R.id.letterPic);
-            tempImgView.setImageDrawable(tempIcon);
-            */
             menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
             idToEmail.put(j, tempFriend.getEmail());
             j++;
@@ -426,6 +399,386 @@ public class MapNavDrawer extends AppCompatActivity
         }
 
     }
+
+
+    /**
+     * Enables the My Location layer if the fine location permission has been granted.
+     */
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+        } else if (mMap != null) {
+            // Access to the location has been granted to the app.
+            mMap.setMyLocationEnabled(true);
+        }
+    }
+
+    /**
+     * Uses Google Places API to select a waypoint.
+     * @param view
+     */
+    public void selectPlace(View view) {
+        int PLACE_PICKER_REQUEST = 1;
+
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+
+        try {
+            PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+            // Start the Intent by requesting a result, identified by a request code.
+            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+
+        } catch (GooglePlayServicesRepairableException e) {
+            //TODO
+        } catch (GooglePlayServicesNotAvailableException e) {
+            //TODO
+        }
+    }
+
+    /**
+     * Sets a waypoint for the group
+     * @param wp Waypoint
+     */
+    public void setWaypoint(MapWaypoint wp) {
+
+        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
+        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
+                wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
+        bs.set_collapsed();
+    }
+
+    /**
+     * Update Waypoint for the group
+     * @param wp Waypoint
+     */
+    public void updateWaypoint(MapWaypoint wp){
+        if (mWaypoint != null) {
+            Log.d("Waypoint removed", "Removed");
+            mWaypoint.remove();
+            mWaypoint = null;
+        }
+
+        setWaypoint(wp);
+        UserRequestsUtil.sendActiveWaypointToServer(this);
+
+    }
+
+    /**
+     * Updates the current waypoint using the one stored in the server.
+     * @param wp Waypoint
+     */
+    public void update_from_server_waypoint(MapWaypoint wp){
+        if (mWaypoint != null){
+            mWaypoint.remove();
+            mWaypoint = null;
+        }
+
+        mWaypoint = mMap.addMarker(new MarkerOptions()
+                .position(wp.getLocation())
+                .title(wp.getTitle())
+        );
+        mWaypoint.setTag(wp);
+
+        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
+                wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
+
+        ToastUtils.showToast("The Group Waypoint Was Updated.", getApplicationContext());
+
+    }
+
+
+    /**
+     * Adds a waypoint when no waypoint exists.
+     * @param pos LatLng
+     * @param title Waypoint Title
+     * @param mw Waypoint
+     */
+    public void add_waypoint_marker(LatLng pos, String title, MapWaypoint mw) {
+        mWaypoint = mMap.addMarker(new MarkerOptions()
+                .position(pos)
+                .title(title)
+        );
+        mWaypoint.setTag(mw);
+
+        bs.set_place_mode(findViewById(android.R.id.content), mw, get_location());
+    }
+
+    /**
+     * Deletes the current waypoint when the server waypoint is deleted
+     */
+    public void server_delete_waypoint(){
+        if (mWaypoint != null){
+            mWaypoint.remove();
+            mWaypoint = null;
+            ToastUtils.showToast("The Group Waypoint Was Deleted.", getApplicationContext());
+        }
+
+        if (bs.is_place_mode()){
+            bs.set_hidden();
+            bs.removeplacemode();
+        }
+
+    }
+
+    /**
+     * Deletes the current waypoint
+     * @param view
+     */
+    public void deleteWaypoint(View view) {
+        if (mWaypoint != null) {
+            undobk = (MapWaypoint) mWaypoint.getTag();
+            mWaypoint.remove();
+            mWaypoint = null;
+        }
+        hide_fab();
+
+        bs.removeplacemode();
+        bs.set_hidden();
+
+        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.bottom_sheet_layout),
+                R.string.waypointremoved, Snackbar.LENGTH_LONG);
+        mySnackbar.setAction(R.string.undo_string, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                add_waypoint_marker(undobk.getLocation(), undobk.getTitle(), undobk);
+
+            }
+        }).addCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar mySnackbar, int event) {
+                show_fab();
+                remove_waypoint_server();
+            }
+        });
+        mySnackbar.show();
+    }
+
+    /**
+     * Deletes the waypoint from server
+     */
+    public void remove_waypoint_server(){
+        curruser.getActiveGroup().deleteWaypoint();
+        UserRequestsUtil.sendActiveWaypointToServer(this);
+    }
+
+    /**
+     * Sets the markers for people on the Google Map
+     * @param lat LatLng
+     * @param name Name of the Person
+     */
+    public void set_person_marker(LatLng lat, String name) {
+        IconGenerator iconFactory = new IconGenerator(this);
+        Marker mPerson;
+        Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
+        mPerson = mMap.addMarker(new MarkerOptions()
+                .position(lat)
+                .title(name +  "'s Location.")
+                .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon((""+name.charAt(0)).
+                        toUpperCase())))
+        );
+        mPerson.setTag(name);
+        mGroup.put(name,mPerson);
+    }
+
+    /**
+     * Changes the first FAB Icon/Colour
+     * @param fab FloatingActionButton
+     * @param icon Icon from Resources
+     * @param colour Colour of the icon
+     */
+    public void changeFAB(FloatingActionButton fab, int icon, int colour) {
+        fab.setImageResource(icon);
+    }
+
+    /**
+     * Updates the position of a person when their location updates at the server
+     * @param l The Lagitude and Longtitude
+     * @param email The email of the user being updated
+     */
+    private void update_position(LatLng l, String email){
+        if(mGroup.get(email) == null){
+            Log.d("group null","null " + email + mGroup.toString());
+        }
+        if((mGroup.get(email) != null && !(mGroup.get(email).getPosition().equals(l)))){
+            animateMarker(mGroup.get(email),l, false);
+            mGroup.get(email).setPosition(l);
+            if (bs.is_user_mode() && email.equals(bs.get_active_user())){
+                if (mWaypoint != null){
+                    bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
+                            (MapWaypoint) mWaypoint.getTag(),(String) mGroup.get(email).getTag());
+                }
+                else{
+                    bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
+                            null, (String) mGroup.get(email).getTag());
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Gets the current location of you.
+     * @return Location (Your Location)
+     */
+    private Location get_location() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        }
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            mylocation = location;
+                        }
+                    }
+                });
+        return mylocation;
+    }
+
+    /**
+     * Hides the floating action buttons
+     */
+    public void hide_fab(){
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        fab.setVisibility(View.GONE);
+        fab2.setVisibility(View.GONE);
+        fab3.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the Floating action buttons
+     */
+    public void show_fab(){
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
+        fab.setVisibility(View.VISIBLE);
+        fab2.setVisibility(View.VISIBLE);
+        fab3.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Opens the nav drawer
+     * @param view
+     */
+    public void open_drawer(View view){
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.openDrawer(Gravity.LEFT);
+    }
+
+    /**
+     * Checks for Location Permissions
+     * @return true or false
+     */
+    public boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.title_location_permission)
+                        .setMessage(R.string.text_location_permission)
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(MapNavDrawer.this,
+                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                            }
+                        })
+                        .create()
+                        .show();
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Copys the Bottom Sheet Text
+     * @param view
+     */
+    public void copyText(View view){
+        if (bs.is_user_mode() || bs.is_place_mode()){
+            TextView locdetails;
+            TextView locname;
+            locdetails = (TextView) this.findViewById(R.id.bs_locdetails);
+            locname = (TextView) this.findViewById(R.id.bs_locname);
+            ClipData clip = ClipData.newPlainText("place",locname.getText().toString() + ", "+
+                    locdetails.getText().toString());
+            clipboard.setPrimaryClip(clip);
+            ToastUtils.showToast("Location Copied to Clipboard", getApplicationContext());
+        }
+
+    }
+
+    /**
+     * Smooth Animation of Marker taken from: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/MarkerDemoActivity.java
+     * @param marker
+     * @param toPosition
+     * @param hideMarker
+     */
+    public void animateMarker(final Marker marker, final LatLng toPosition,
+                              final boolean hideMarker) {
+
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        Projection proj = mMap.getProjection();
+        Point startPoint = proj.toScreenLocation(marker.getPosition());
+        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+        final long duration = 500;
+
+        final Interpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+                double lng = t * toPosition.longitude + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * toPosition.latitude + (1 - t)
+                        * startLatLng.latitude;
+                marker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                } else {
+                    if (hideMarker) {
+                        marker.setVisible(false);
+                    } else {
+                        marker.setVisible(true);
+                    }
+                }
+            }
+        });
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -447,13 +800,6 @@ public class MapNavDrawer extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        /*
-        Context context = getApplicationContext();
-        CharSequence text = "HashMap search successful.";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        */
         Intent intent = null;
 
         if(id == 0) {
@@ -512,19 +858,6 @@ public class MapNavDrawer extends AppCompatActivity
 
     }
 
-    /**
-     * Enables the My Location layer if the fine location permission has been granted.
-     */
-    private void enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-        } else if (mMap != null) {
-            // Access to the location has been granted to the app.
-            mMap.setMyLocationEnabled(true);
-        }
-    }
-
     @Override
     public boolean onMyLocationButtonClick() {
 //        Toast.makeText(this, "Travelling to your current location...", Toast.LENGTH_SHORT).show();
@@ -581,26 +914,6 @@ public class MapNavDrawer extends AppCompatActivity
         return true;
     }
 
-    /**
-     * Uses Google Places API to select a waypoint.
-     * @param view
-     */
-    public void selectPlace(View view) {
-        int PLACE_PICKER_REQUEST = 1;
-
-        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-
-        try {
-            PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
-            // Start the Intent by requesting a result, identified by a request code.
-            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
-
-        } catch (GooglePlayServicesRepairableException e) {
-            //TODO
-        } catch (GooglePlayServicesNotAvailableException e) {
-            //TODO
-        }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -614,133 +927,6 @@ public class MapNavDrawer extends AppCompatActivity
         }
     }
 
-    /**
-     * Sets a waypoint for the group
-     * @param wp Waypoint
-     */
-    public void setWaypoint(MapWaypoint wp) {
-
-        add_waypoint_marker(wp.getLocation(), wp.getTitle(), wp);
-        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
-                wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
-
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(wp.getLocation()));
-        bs.set_collapsed();
-    }
-
-    public void updateWaypoint(MapWaypoint wp){
-        if (mWaypoint != null) {
-            Log.d("Waypoint removed", "Removed");
-            mWaypoint.remove();
-            mWaypoint = null;
-        }
-
-        setWaypoint(wp);
-        UserRequestsUtil.sendActiveWaypointToServer(this);
-
-    }
-
-    public void update_from_server_waypoint(MapWaypoint wp){
-        if (mWaypoint != null){
-            mWaypoint.remove();
-            mWaypoint = null;
-        }
-
-        mWaypoint = mMap.addMarker(new MarkerOptions()
-                .position(wp.getLocation())
-                .title(wp.getTitle())
-        );
-        mWaypoint.setTag(wp);
-
-        curruser.getActiveGroup().setWaypoint(wp.getLocation().latitude,
-                wp.getLocation().longitude, useremail, wp.getNam(), wp.getDetails(), true);
-
-        ToastUtils.showToast("The Group Waypoint Was Updated.", getApplicationContext());
-
-    }
-
-
-    public void add_waypoint_marker(LatLng pos, String title, MapWaypoint mw) {
-        Log.d("Waypoint added","aded");
-        mWaypoint = mMap.addMarker(new MarkerOptions()
-                .position(pos)
-                .title(title)
-        );
-        mWaypoint.setTag(mw);
-
-        bs.set_place_mode(findViewById(android.R.id.content), mw, get_location());
-    }
-
-    public void server_delete_waypoint(){
-        if (mWaypoint != null){
-            mWaypoint.remove();
-            mWaypoint = null;
-            ToastUtils.showToast("The Group Waypoint Was Deleted.", getApplicationContext());
-        }
-
-        if (bs.is_place_mode()){
-            bs.set_hidden();
-            bs.removeplacemode();
-        }
-
-    }
-
-    /**
-     * Deletes the current waypoint
-     * @param view
-     */
-    public void deleteWaypoint(View view) {
-        if (mWaypoint != null) {
-            undobk = (MapWaypoint) mWaypoint.getTag();
-            mWaypoint.remove();
-            mWaypoint = null;
-        }
-        hide_fab();
-
-        bs.removeplacemode();
-        bs.set_hidden();
-
-        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.bottom_sheet_layout),
-                R.string.waypointremoved, Snackbar.LENGTH_LONG);
-        mySnackbar.setAction(R.string.undo_string, new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                add_waypoint_marker(undobk.getLocation(), undobk.getTitle(), undobk);
-
-            }
-        }).addCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar mySnackbar, int event) {
-                show_fab();
-                remove_waypoint_server();
-            }
-        });
-        mySnackbar.show();
-    }
-
-    public void remove_waypoint_server(){
-        curruser.getActiveGroup().deleteWaypoint();
-        UserRequestsUtil.sendActiveWaypointToServer(this);
-    }
-
-
-    public void set_person_marker(LatLng lat, String name) {
-        IconGenerator iconFactory = new IconGenerator(this);
-        Marker mPerson;
-        Drawable d = getResources().getDrawable(R.drawable.ic_person_black_24dp);
-        mPerson = mMap.addMarker(new MarkerOptions()
-                .position(lat)
-                .title(name +  "'s Location.")
-                .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon((""+name.charAt(0)).
-                        toUpperCase())))
-        );
-        mPerson.setTag(name);
-        mGroup.put(name,mPerson);
-    }
-
-    public void changeFAB(FloatingActionButton fab, int icon, int colour) {
-        fab.setImageResource(icon);
-    }
 
     @Override
     public void update(Observable o, Object data) {
@@ -820,94 +1006,6 @@ public class MapNavDrawer extends AppCompatActivity
 
     }
 
-    private void update_position(LatLng l, String email){
-        if(mGroup.get(email) == null){
-            Log.d("group null","null " + email + mGroup.toString());
-        }
-        if((mGroup.get(email) != null && !(mGroup.get(email).getPosition().equals(l)))){
-            animateMarker(mGroup.get(email),l, false);
-            mGroup.get(email).setPosition(l);
-            if (bs.is_user_mode() && email.equals(bs.get_active_user())){
-                if (mWaypoint != null){
-                    bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
-                            (MapWaypoint) mWaypoint.getTag(),(String) mGroup.get(email).getTag());
-                }
-                else{
-                    bs.set_person_mode(findViewById(android.R.id.content), mGroup.get(email).getPosition(), get_location(),
-                            null, (String) mGroup.get(email).getTag());
-                }
-            }
-        }
-    }
-
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap = null;
-
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
-
-    private Location get_location() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        }
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            mylocation = location;
-                        }
-                    }
-                });
-        return mylocation;
-    }
-
-    public void hide_fab(){
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
-        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
-        fab.setVisibility(View.GONE);
-        fab2.setVisibility(View.GONE);
-        fab3.setVisibility(View.GONE);
-    }
-
-    public void show_fab(){
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
-        FloatingActionButton fab3 = (FloatingActionButton) findViewById(R.id.fab3);
-        fab.setVisibility(View.VISIBLE);
-        fab2.setVisibility(View.VISIBLE);
-        fab3.setVisibility(View.VISIBLE);
-    }
-
-    public static MapNavDrawer getInstance(){
-        return ourInstance;
-    }
-
-    public void open_drawer(View view){
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.openDrawer(Gravity.LEFT);
-    }
-
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -931,108 +1029,11 @@ public class MapNavDrawer extends AppCompatActivity
         }
     }
 
-    public void copyText(View view){
-        if (bs.is_user_mode() || bs.is_place_mode()){
-            TextView locdetails;
-            TextView locname;
-            locdetails = (TextView) this.findViewById(R.id.bs_locdetails);
-            locname = (TextView) this.findViewById(R.id.bs_locname);
-            ClipData clip = ClipData.newPlainText("place",locname.getText().toString() + ", "+
-                    locdetails.getText().toString());
-            clipboard.setPrimaryClip(clip);
-            ToastUtils.showToast("Location Copied to Clipboard", getApplicationContext());
-        }
-
-    }
-
     @Override
     public void onDrawerStateChanged(int i) {
 
     }
 
-    /**
-     * Smooth Animation of Marker taken from: https://github.com/googlemaps/android-samples/blob/master/ApiDemos/app/src/main/java/com/example/mapdemo/MarkerDemoActivity.java
-     * @param marker
-     * @param toPosition
-     * @param hideMarker
-     */
-    public void animateMarker(final Marker marker, final LatLng toPosition,
-        final boolean hideMarker) {
-
-            final Handler handler = new Handler();
-            final long start = SystemClock.uptimeMillis();
-            Projection proj = mMap.getProjection();
-            Point startPoint = proj.toScreenLocation(marker.getPosition());
-            final LatLng startLatLng = proj.fromScreenLocation(startPoint);
-            final long duration = 500;
-
-            final Interpolator interpolator = new LinearInterpolator();
-
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    long elapsed = SystemClock.uptimeMillis() - start;
-                    float t = interpolator.getInterpolation((float) elapsed
-                            / duration);
-                    double lng = t * toPosition.longitude + (1 - t)
-                            * startLatLng.longitude;
-                    double lat = t * toPosition.latitude + (1 - t)
-                            * startLatLng.latitude;
-                    marker.setPosition(new LatLng(lat, lng));
-
-                    if (t < 1.0) {
-                        // Post again 16ms later.
-                        handler.postDelayed(this, 16);
-                    } else {
-                        if (hideMarker) {
-                            marker.setVisible(false);
-                        } else {
-                            marker.setVisible(true);
-                        }
-                    }
-                }
-            });
-        }
-
-    public boolean checkLocationPermission() {
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                    // Show an explanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.title_location_permission)
-                            .setMessage(R.string.text_location_permission)
-                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    //Prompt the user once explanation has been shown
-                                    ActivityCompat.requestPermissions(MapNavDrawer.this,
-                                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                            MY_PERMISSIONS_REQUEST_LOCATION);
-                                }
-                            })
-                            .create()
-                            .show();
-
-
-                } else {
-                    // No explanation needed, we can request the permission.
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                            MY_PERMISSIONS_REQUEST_LOCATION);
-                }
-                return false;
-            } else {
-                return true;
-            }
-    }
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {

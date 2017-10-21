@@ -33,7 +33,7 @@ public class BottomSheet extends MapNavDrawer {
     private String activeuser;
 
     /**
-     *
+     * Initiate bottom sheet.
      * @param bs Bottom Sheet View
      */
     public BottomSheet(View bs, Geocoder geocoder){
@@ -235,16 +235,31 @@ public class BottomSheet extends MapNavDrawer {
 
     }
 
+    /**
+     * Is the bottom sheet currently displaying a location
+     * @return true or false
+     */
     public boolean is_place_mode(){
         return placemode;
     }
 
+    /**
+     * Is the bottom sheet currently displaying a users' info
+     * @return true or false
+     */
     public boolean is_user_mode(){ return usermode;}
 
+    /**
+     * Returns the user whose info is being shown
+     * @return email
+     */
     public String get_active_user(){
         return activeuser;
     }
 
+    /**
+     * Stops the bottom sheet from showing the place info. (Called when delete waypoibnt is called)
+     */
     public void removeplacemode(){
         placemode = false;
     }
