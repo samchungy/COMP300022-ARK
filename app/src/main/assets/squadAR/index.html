@@ -61,7 +61,7 @@
                 
                 AR.logger.info('poi is set at ' + lat + ',' + lon + 'for ' + user);
                 friendList.push( { 'user': user, 'marker': marker_object } );
-                currentavatar = (currentavatar + 1) % 4;
+                currentavatar = (currentavatar + 1) % 3;
                 
             } else {
                 var friend = friendList.find(x => x.user === user);

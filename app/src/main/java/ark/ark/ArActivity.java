@@ -103,14 +103,14 @@ public class ArActivity extends AppCompatActivity implements Observer {
                 mUpdateCount += 1;
 
             }
-            showToast("current location changed");
+//            showToast("current location changed");
         } else if (o == CurrentUser.getInstance() && data instanceof String) {
             String email = (String)data;
             CurrentUser user = (CurrentUser)o;
             Location loc = user.getActiveGroup().getFriend(email).getLocation();
             updatePOI(loc.getLatitude(), loc.getLongitude(), email, mCurrentLocation.getInstance().getLocation().distanceTo(loc));
         } else if (o == CurrentUser.getInstance() && data instanceof MapWaypoint) {
-            showToast("Waypoint updated");
+//            showToast("Waypoint updated");
             updateWaypoint(CurrentUser.getInstance().getActiveGroup().getWaypoint());
         }
 
