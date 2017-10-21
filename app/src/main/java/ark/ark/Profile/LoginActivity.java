@@ -20,7 +20,6 @@ import org.json.JSONObject;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
-import ark.ark.Groups.GroupListActivity;
 import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
 import ark.ark.ToastUtils;

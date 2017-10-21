@@ -22,7 +22,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import ark.ark.Authentication.ARK_auth;
-import ark.ark.Groups.GroupListActivity;
 import ark.ark.R;
 
 public class ProfileCreationActivity extends AppCompatActivity {
