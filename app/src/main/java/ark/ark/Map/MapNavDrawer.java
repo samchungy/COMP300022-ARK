@@ -192,7 +192,7 @@ public class MapNavDrawer extends AppCompatActivity
         curruser.addObserver(this);
 
 
-        // Assorted drawer code
+        // Assorted drawer code. Get current username and group to show in header.
         drawerHeader = navigationView.getHeaderView(0);
         currentUserName = (TextView) drawerHeader.findViewById(R.id.userEmail);
         currentUserGroup = (TextView) drawerHeader.findViewById(R.id.activeGroup);
@@ -368,6 +368,7 @@ public class MapNavDrawer extends AppCompatActivity
      */
     private void initiateDrawer() {
 
+        // In the rare event a current user does not exist, this prevents the app from crashing.
         if(curruser != null) {
             currentUserName.setText(curruser.getEmail());
             currentUserGroup.setText(curruser.getActiveGroup().getName());
@@ -381,6 +382,7 @@ public class MapNavDrawer extends AppCompatActivity
         final Menu menu = navigationView.getMenu();
         int j = 1;
 
+        // Refresh the nav drawer every time it is closed.
         if(isPopulated == true) {
             invalidateOptionsMenu();
             menu.removeItem(0);
@@ -389,8 +391,11 @@ public class MapNavDrawer extends AppCompatActivity
             }
         }
 
+        // Links to the debugging class which is a large part of what we used to test the
+        // app's functionality.
         menu.add(0, 0, 0, "Debugging").setIcon(R.drawable.ic_settings_black_24dp);
 
+        // Iterate through the current user's group members and add them to the nav drawer.
         for(Friend tempFriend: CurrentUser.getInstance().getActiveGroup().getFriends().values()) {
             menu.add(0, j, 0, tempFriend.getEmail()).setIcon(R.drawable.ic_person_black_24dp);
             idToEmail.put(j, tempFriend.getEmail());
@@ -802,13 +807,14 @@ public class MapNavDrawer extends AppCompatActivity
 
         Intent intent = null;
 
+        // Go to debugging activity.
         if(id == 0) {
             intent = new Intent(this, Debugging.class);
             startActivity(intent);
             return true;
         }
 
-        //noinspection SimplifiableIfStatement
+        // Animate smoothly and center over the group member selected in the nav drawer.
         for(int friendID: idToEmail.keySet()) {
             if (id == friendID) {
                 LatLng moveCamera = new LatLng(
