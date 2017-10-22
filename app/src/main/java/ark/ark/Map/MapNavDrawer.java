@@ -76,7 +76,7 @@ import ark.ark.Debugging;
 import ark.ark.Groups.CurrentUser;
 import ark.ark.Groups.Friend;
 import ark.ark.Groups.Group;
-import ark.ark.Groups.GroupListActivity;
+import ark.ark.Profile.GroupListActivity;
 import ark.ark.Groups.GroupLocationUpdateService;
 import ark.ark.Groups.UserRequestsUtil;
 import ark.ark.Profile.LoginActivity;
