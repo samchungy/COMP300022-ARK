@@ -6,13 +6,13 @@
 Find My Squad is a mobile application that helps users to find and keep track of people in a group using a map and an AR (Augmented Reality) View. Group members can also chat with each other and set waypoints on the map as places of interest to meet up.
 
 The application consists of the following sections:
-- Authentication Folder: Contains Login Files
-- Chat Folder: Contains Chat Files
-- Groups Folder: Contains Information about the Current User, Groups & Friends
-- Map Folder: Contains all the relevant Map Files and classes.
-- Profile Folder: Contains Login, Signup and Group Joining Files
-- User Location: Contains Location Files
-- AR Activity: Wikitude Javascript Plugin
+- [Authentication Folder](https://github.com/COMP30022/ARK/tree/master/app/src/main/java/ark/ark/Authentication): Contains Login Files
+- [Chat Folder](https://github.com/COMP30022/ARK/tree/master/app/src/main/java/ark/ark/Chat): Contains Chat Fragments, Chat Log ACtivity files
+- [Groups Folder](https://github.com/COMP30022/ARK/tree/master/app/src/main/java/ark/ark/Groups): Contains Information about the Current User, Groups & Friends
+- [Map Folder](https://github.com/COMP30022/ARK/tree/master/app/src/main/java/ark/ark/Map): Contains all the relevant Map Files and classes.
+- [Profile Folder](https://github.com/COMP30022/ARK/tree/master/app/src/main/java/ark/ark/Profile): Contains Login, Signup and Group Joining Files
+- [User Location](https://github.com/COMP30022/ARK/tree/master/app/src/main/java/ark/ark/UserLocation): Contains Location Services & User Location related files.
+- [AR Activity](https://github.com/COMP30022/ARK/blob/master/app/src/main/java/ark/ark/ArActivity.java): Wikitude Javascript Plugin
 
 ## Installation and Usage
 
@@ -29,10 +29,15 @@ The application consists of the following sections:
 8. Tap on any of your members to zoom in smoothly to their location. 
 9. Use the floating action buttons at the bottom-right of the screen to access chat and the Augmented Reality view. 
 
+## Testing
+Tests can be found in the [app/src/test/java/ark/ark](https://github.com/COMP30022/ARK/tree/master/app/src/test/java/ark/ark) folder.
+
 ## Built With
 
 - [Wikitude](https://www.wikitude.com) - an all-in-one augmented reality SDK with geolocation functionality. 
-- Amazon Web Services - for all backend server operations and processing.
+- [Amazon Web Services](https://aws.amazon.com/) - for all backend server operations and processing.
+- [Google Maps Android API](https://developers.google.com/maps/documentation/android-api/)
+- [Google Maps Places API](https://developers.google.com/places/android-api/)
 
 ## Authors
 
