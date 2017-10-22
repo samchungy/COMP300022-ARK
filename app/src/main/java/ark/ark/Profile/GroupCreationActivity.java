@@ -36,12 +36,16 @@ public class GroupCreationActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Creates a group when the button is pressed
+     * @param v The current view
+     */
     public void addGroup(View v){
-        ToastUtils.showToast("adding group...",getApplicationContext());
         EditText groupNameTextField = (EditText) findViewById(R.id.gName);
 
         String groupName = groupNameTextField.getText().toString();
 
+        //Checks for unsupported strings such as " "
         try {
             groupName = URLEncoder.encode(groupName, "UTF-8");
         }catch(UnsupportedEncodingException e){
@@ -50,12 +54,20 @@ public class GroupCreationActivity extends AppCompatActivity {
         postGroupCreation(groupName,getApplicationContext());
     }
 
+    /**
+     * Closes the current activity and goes to home (MapNavDrawer)
+     */
     public void finishactivity(){
         Intent myIntent = new Intent(GroupCreationActivity.this, MapNavDrawer.class);
         startActivity(myIntent);
         this.finish();
     }
 
+    /**
+     * Sends the group creation request to the server
+     * @param groupName Specified by the user
+     * @param context The application context
+     */
     public void postGroupCreation(String groupName, final Context context){
         String email = CurrentUser.getInstance().getEmail();
         String gName = groupName;

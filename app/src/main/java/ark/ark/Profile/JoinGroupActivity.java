@@ -36,8 +36,6 @@ public class JoinGroupActivity extends AppCompatActivity {
     ListView listView ;
     private GroupProfileAdapter ListAdapter;
     private ArrayList<Group> dataList;
-    private HashMap<String, Group> dataMap;
-    private static int nData = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +43,10 @@ public class JoinGroupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_join_group);
     }
 
-
+    /**
+     * Searches for an existing group with the same nickname and lists them
+     * @param v - the current view
+     */
     public void searchGroup(View v){
         listView = (ListView) findViewById(R.id.list);
         dataList = new ArrayList<Group>();
@@ -73,12 +74,22 @@ public class JoinGroupActivity extends AppCompatActivity {
 
 
     }
+
+    /**
+     * Finish the current activity and go to home (MapNavDrawer)
+     */
     private void finish_activities(){
         Intent myIntent = new Intent(JoinGroupActivity.this, MapNavDrawer.class);
         startActivity(myIntent);
         this.finish();
     }
 
+    /**
+     * Sends a POST request to the server to add the user to the group
+     * @param userEmail - the user to be added to the group
+     * @param gID - the groupID of the group the user is to be added to
+     * @param context - the application context
+     */
     public void postAddUserToGroup(String userEmail, final String gID, final Context context) {
         String email = userEmail;
 
@@ -127,8 +138,10 @@ public class JoinGroupActivity extends AppCompatActivity {
     }
 
 
-
-
+    /**
+     * Sends a GET request to the server which fetches all the groups with a given group name
+     * @param gName - the group name
+     */
     private void getSearchGroup(String gName) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -160,7 +173,6 @@ public class JoinGroupActivity extends AppCompatActivity {
                                 // iterate through the list of groups
                                 ToastUtils.showToast(res.getJSONArray("groups").length()+" group(s) found",getApplicationContext());
 
-                                nData = 0;
 
                                 for (int i=0;i<res.getJSONArray("groups").length();i++) {
 

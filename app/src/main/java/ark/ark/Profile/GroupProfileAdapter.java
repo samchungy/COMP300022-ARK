@@ -16,6 +16,7 @@ import ark.ark.ToastUtils;
 
 /**
  * Created by Jane on 6/10/2017.
+ * Sends the data to the list view and populates the list of Groups
  */
 
 public class GroupProfileAdapter extends BaseAdapter{
@@ -29,13 +30,8 @@ public class GroupProfileAdapter extends BaseAdapter{
     // constructor
     public GroupProfileAdapter(Context context, ArrayList<Group> list) {
         this.dataList = list;
-//        populateList();
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mContext = context;
-    }
-
-
-    private void setUpList(){
     }
 
 
@@ -58,6 +54,13 @@ public class GroupProfileAdapter extends BaseAdapter{
         this.dataList.add(data);
     }
 
+    /**
+     * Inserts the data into the appropriate fields
+     * @param position - the position of the object in the list
+     * @param convertView
+     * @param parent
+     * @return
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         //use the following layout to populate data

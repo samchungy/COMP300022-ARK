@@ -25,10 +25,6 @@ public class GroupListActivity extends AppCompatActivity {
         // Get ListView object from xml
 //        listView = (ListView) findViewById(R.id.list);
 //        dataList = new ArrayList<Group>(CurrentUser.getInstance().getAllGroups().values());
-//        ListAdapter = new GroupProfileAdapter(this, dataList);
-//        listView.setAdapter(ListAdapter);
-//
-//
 //        // ListView Item Click Listener
 //        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 //
@@ -43,34 +39,31 @@ public class GroupListActivity extends AppCompatActivity {
 
     }
 
-//    public void addFriend(View v){
-//
-//
-//        EditText emailTextField = (EditText) findViewById(R.id.friend_email);
-//        String email = emailTextField.getText().toString();
-//        Group data = new Group(email);
-//
-//        ListAdapter.addToList(data);
-//        ToastUtils.showToast("count: " + ListAdapter.getCount(),getApplicationContext());
-//
-//        listView.setAdapter(ListAdapter);
-//        emailTextField.setText("");
-//
-//    }
 
+    /**
+     * Sends the user to the Group Creation Activity
+     * @param v - the current view
+     */
     public void goToAddGroup(View v){
         Intent myIntent = new Intent(GroupListActivity.this, GroupCreationActivity.class);
         startActivity(myIntent);
         this.finish();
     }
 
+    /**
+     * Sends the user to the Join Group Activity
+     * @param v - the current view
+     */
     public void goToJoinGroup(View v){
         Intent myIntent = new Intent(GroupListActivity.this, JoinGroupActivity.class);
         startActivity(myIntent);
         this.finish();
     }
 
-
+    /**
+     * Gets the current user's groups
+     * @return the current user's groups
+     */
     public int getGroups(){
         return CurrentUser.getInstance().getAllGroups().size();
     }
