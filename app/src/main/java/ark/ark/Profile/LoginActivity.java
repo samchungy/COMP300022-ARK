@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 import android.content.Intent;
 
 import com.android.volley.Request;
@@ -21,7 +20,6 @@ import org.json.JSONObject;
 
 import ark.ark.Authentication.ARK_auth;
 import ark.ark.Groups.CurrentUser;
-import ark.ark.Groups.GroupListActivity;
 import ark.ark.Map.MapNavDrawer;
 import ark.ark.R;
 import ark.ark.ToastUtils;
@@ -34,12 +32,14 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
     }
 
+    /**
+     * Specifies what action should be taken when the login button is pressed
+     * @param view The current view
+     * */
+
     public void loginButton(View view){
         EditText password = (EditText) findViewById(R.id.login_password);
         EditText email = (EditText) findViewById(R.id.login_email);
-
-        //showToast("logging in... email: "+email.getText().toString()+", password: "+password.getText().toString());
-
 
         String parse = password.getText().toString();
         /*
@@ -49,6 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         postUserLogin(email.getText().toString(), hashed);
         */
 
+        //check that the input fields contain valid strings
         if(validLoginInput(email,password)) {
             postUserLogin(email.getText().toString(), parse);
         }
@@ -56,6 +57,10 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Sends the user to ProfileCreationActivity
+     * @param view The current view
+     */
     public void goToSignUp(View view){
 
 //        showToast("going to Sign Up page...");
@@ -65,6 +70,9 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Sends the user to the main activity (MapNavDrawer)
+     */
     private void goToHome(){
         Intent myIntent = new Intent(LoginActivity.this, MapNavDrawer.class);
         startActivity(myIntent);
@@ -72,7 +80,11 @@ public class LoginActivity extends AppCompatActivity {
         this.finish();
     }
 
-
+    /**
+     * Sends the user's login details to the server
+     * @param email - the email inputted by the user
+     * @param password - the password inputted by the user
+     */
     public void postUserLogin(final String email, String password) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -80,8 +92,6 @@ public class LoginActivity extends AppCompatActivity {
         String path = "/users/login?";
 
         String requestURL = "http://" + server + path +"email="+email+"&password_salted="+password;
-
-        //showToast(requestURL);
 
         // Request a string response from the requestURL.
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestURL,
@@ -94,27 +104,28 @@ public class LoginActivity extends AppCompatActivity {
                             if (res.getString("success").equals("ok")) {
 
                                 //get data from res object
-                                showToast("Congratulations! You have logged in :)");
+                                ToastUtils.showToast("Congratulations! You have logged in :)",getApplicationContext());
                                 String sessionID = res.getString("session_id");
 
+                                //store the login information
                                 ARK_auth.storeUserEmail(email,getApplicationContext());
                                 ARK_auth.storeSessionId(sessionID,getApplicationContext());
                                 updateGroups(getApplicationContext());
 
                             } else {
-                                showToast(res.getString("msg"));
+                                ToastUtils.showToast(res.getString("msg"),getApplicationContext());
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            showToast("exception");
+                            ToastUtils.showToast("exception",getApplicationContext());
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 // error handling
-                showToast("Sorry, cannot connect to the server.");
+                ToastUtils.showToast("Sorry, cannot connect to the server.",getApplicationContext());
             }
         });
 
@@ -122,6 +133,10 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Updates the user's groups after login
+     * @param context The application context
+     */
     public void updateGroups(final Context context) {
         CurrentUser mUser = CurrentUser.getInstance();
 
@@ -180,13 +195,12 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-
-    private void showToast(String message) {
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(this, message, duration);
-        toast.show();
-    }
-
+    /**
+     * Only for developers - for the purpose of testing features when the server is unavailable
+     * Allows a developer to bypass login when the server is down
+     * Logs in the developer as "user1"
+     * @param v The current view
+     */
     public void LoginAsGuest(View v){
         ARK_auth.storeSessionId("guest",getApplicationContext());
         ARK_auth.storeUserEmail("user1@user1.com",getApplicationContext());
@@ -195,12 +209,24 @@ public class LoginActivity extends AppCompatActivity {
         goToHome();
     }
 
-    //Methods to check if email is valid
+    //Methods to check if input is valid
+
+    /**
+     * Checks if the input is a valid email address
+     * @param email A string which may or may not be a valid email address
+     * @return True if the input is a valid email address
+     */
     private boolean isEmailValid(String email) {
         return email.contains("@");
     }
 
-    //check input fields
+    /**
+     * Checks if the input from the login screen is in the correct format
+     * This method is adapted from the standard login activity in Android Studio
+     * @param emailField - the field in which users enter their email
+     * @param passwordField - the field in which users enter their password
+     * @return True if email and password are in the correct format
+     */
     private boolean validLoginInput(EditText emailField, EditText passwordField) {
 
         EditText mPasswordView = passwordField;
@@ -217,14 +243,14 @@ public class LoginActivity extends AppCompatActivity {
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
+        // Check for a valid password, if the user entered one. Set an error if invalid.
         if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
         }
 
-        // Check for a valid email address.
+        // Check for a valid email address. Set an error if invalid.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
@@ -241,7 +267,7 @@ public class LoginActivity extends AppCompatActivity {
             focusView.requestFocus();
         }
 
-        return !cancel;
+        return (!cancel);
     }
 
 

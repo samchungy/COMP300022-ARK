@@ -1,14 +1,11 @@
-package ark.ark.Groups;
+package ark.ark.Profile;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -22,68 +19,33 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 
 import ark.ark.Authentication.ARK_auth;
+import ark.ark.Groups.CurrentUser;
 import ark.ark.Map.MapNavDrawer;
-import ark.ark.Profile.LoginActivity;
 import ark.ark.R;
 import ark.ark.ToastUtils;
 
 public class GroupCreationActivity extends AppCompatActivity {
 
-//    ListView listView ;
-//    private FriendListAdapter ListAdapter;
-//    private ArrayList<FriendListAdapter.LFriend> dataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_creation);
-//
-//        // Get ListView object from xml
-//        listView = (ListView) findViewById(R.id.list);
-//        dataList = new ArrayList<>();
-//        ListAdapter = new FriendListAdapter(this, dataList);
-//        listView.setAdapter(ListAdapter);
-//
-//
-//        // ListView Item Click Listener
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view,
-//                                    int position, long id) {
-//
-//                ToastUtils.showToast("position: "+position, getApplicationContext());
-//            }
-//        });
-//
-//        ToastUtils.showToast("count: " + ListAdapter.getCount(),getApplicationContext());
 
     }
-//
-//    public void addFriend(View v){
-//
-//
-//        EditText emailTextField = (EditText) findViewById(R.id.friend_email);
-//        String email = emailTextField.getText().toString();
-//        FriendListAdapter.LFriend data = new FriendListAdapter.LFriend(email);
-//
-//        ListAdapter.addToList(data);
-//        ToastUtils.showToast("count: " + ListAdapter.getCount(),getApplicationContext());
-//
-//        listView.setAdapter(ListAdapter);
-//        emailTextField.setText("");
-//
-//    }
 
+    /**
+     * Creates a group when the button is pressed
+     * @param v The current view
+     */
     public void addGroup(View v){
-        ToastUtils.showToast("adding group...",getApplicationContext());
         EditText groupNameTextField = (EditText) findViewById(R.id.gName);
 
         String groupName = groupNameTextField.getText().toString();
 
+        //Checks for unsupported strings such as " "
         try {
             groupName = URLEncoder.encode(groupName, "UTF-8");
         }catch(UnsupportedEncodingException e){
@@ -92,12 +54,20 @@ public class GroupCreationActivity extends AppCompatActivity {
         postGroupCreation(groupName,getApplicationContext());
     }
 
+    /**
+     * Closes the current activity and goes to home (MapNavDrawer)
+     */
     public void finishactivity(){
         Intent myIntent = new Intent(GroupCreationActivity.this, MapNavDrawer.class);
         startActivity(myIntent);
         this.finish();
     }
 
+    /**
+     * Sends the group creation request to the server
+     * @param groupName Specified by the user
+     * @param context The application context
+     */
     public void postGroupCreation(String groupName, final Context context){
         String email = CurrentUser.getInstance().getEmail();
         String gName = groupName;

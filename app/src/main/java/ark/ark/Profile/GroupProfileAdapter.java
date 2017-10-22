@@ -1,4 +1,4 @@
-package ark.ark.Groups;
+package ark.ark.Profile;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,14 +8,18 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import ark.ark.Groups.Group;
 import ark.ark.R;
+import ark.ark.ToastUtils;
 
 /**
  * Created by Jane on 6/10/2017.
+ * Sends the data to the list view and populates the list of Groups
  */
 
-public class GroupListAdapter extends BaseAdapter{
+public class GroupProfileAdapter extends BaseAdapter{
 
     private Context mContext;
 
@@ -24,16 +28,12 @@ public class GroupListAdapter extends BaseAdapter{
     private LayoutInflater inflater;
 
     // constructor
-    public GroupListAdapter(Context context, ArrayList<Group> list) {
+    public GroupProfileAdapter(Context context, ArrayList<Group> list) {
         this.dataList = list;
-//        populateList();
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mContext = context;
     }
 
-
-    private void setUpList(){
-    }
 
     @Override
     public int getCount() {
@@ -54,6 +54,13 @@ public class GroupListAdapter extends BaseAdapter{
         this.dataList.add(data);
     }
 
+    /**
+     * Inserts the data into the appropriate fields
+     * @param position - the position of the object in the list
+     * @param convertView
+     * @param parent
+     * @return
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         //use the following layout to populate data
@@ -63,8 +70,14 @@ public class GroupListAdapter extends BaseAdapter{
         TextView header = (TextView) cell.findViewById(R.id.testHeaderData);
         TextView info = (TextView) cell.findViewById(R.id.testInfoData);
 
-        header.setText(dataList.get(position).getId());
-        info.setText(dataList.get(position).getFriends().size() + " members");
+        //Set the header to a id if group name doesn't exist
+        if(dataList.get(position).getName()==null || dataList.get(position).getName().equals("")){
+            header.setText(dataList.get(position).getId());
+        }else{
+            header.setText(dataList.get(position).getName());
+        }
+
+        //info.setText(dataList.get(position).getFriends().size() + " members");
 
         return cell;
     }
