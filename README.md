@@ -1,6 +1,6 @@
 # COMP30022 IT-Project: Find My Squad
 
-![Find My Squad](https://raw.githubusercontent.com/COMP30022/ARK/472058cc76ac451d46c848a27c18bd1dba4931b3/app/src/main/assets/finalsplash.png?token=ARLrRhnDVPDGjz5U9-WvG5t37SyHgqA2ks5Z6x5vwA%3D%3D)
+![Find My Squad](https://raw.githubusercontent.com/COMP30022/ARK/master/app/src/main/assets/finalsplash.png?token=ARLrRjhsb1T9xbVbMGkZeHRMYSXIL-Mpks5Z9d6UwA%3D%3D)
 
 
 Find My Squad is a mobile application that helps users to find and keep track of people in a group using a map and an AR (Augmented Reality) View. Group members can also chat with each other and set waypoints on the map as places of interest to meet up.
